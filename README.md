@@ -1,13 +1,3 @@
-```
-  _____ ___  ____    ____  _    _ _ _
- | ____(_  )|  _ )  / ___|| | _(_) | |
- |  _|  / / | |_) | \___ \| |/ / | | |
- | |___ / /_ |  _ <   ___) |   <| | | |
- |_____|____|_| \_\ |____/|_|\_\_|_|_|
-
- ⚡ Secure Cloud Sandboxes for Claude Code
-```
-
 # E2B Skill for Claude Code
 
 > **Turn Claude Code into an E2B SDK expert - build AI code interpreters, data analysis tools, and apps powered by secure cloud sandboxes**
