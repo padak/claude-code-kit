@@ -9,6 +9,7 @@ Just tell Claude:
 ```
 Install skills from https://github.com/padak/claude-skills - download .skill files
 from skills/ directory, put them in ~/.claude/skills/ and unzip them.
+Also copy CLAUDE.md to ~/.claude/CLAUDE.md.
 ```
 
 ## Available Skills
@@ -24,10 +25,16 @@ from skills/ directory, put them in ~/.claude/skills/ and unzip them.
 
 ## Manual Installation
 
+**Skills:**
 ```bash
 cd ~/.claude/skills
 curl -LO https://github.com/padak/claude-skills/raw/main/skills/e2b.skill
 unzip e2b.skill
+```
+
+**CLAUDE.md (global instructions):**
+```bash
+curl -L https://github.com/padak/claude-skills/raw/main/CLAUDE.md -o ~/.claude/CLAUDE.md
 ```
 
 ## License
