@@ -20,6 +20,7 @@ from skills/ directory, put them in ~/.claude/skills/ and unzip them.
 | **polymarket** | Build trading bots on Polymarket prediction markets (py-clob-client SDK) |
 | **second-opinion** | Get second opinion from OpenAI via Codex CLI |
 | **skill-creator** | Guide for creating Claude Code skills |
+| **swarm** | Orchestrated multi-agent implementation (Tech Lead + Developer pattern) |
 
 ## Manual Installation
 
