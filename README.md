@@ -60,8 +60,8 @@ Also: auto-activates `.venv` if present, `gtimeout` alias for macOS.
 
 ```bash
 # Fork on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/claude-skills.git
-cd claude-skills
+git clone https://github.com/YOUR_USERNAME/claude-code-kit.git
+cd claude-code-kit
 
 # Copy what you need to your global config:
 cp .claude/settings.json ~/.claude/settings.json
@@ -75,7 +75,7 @@ cat .zshrc >> ~/.zshrc && source ~/.zshrc
 ### Option B: Just tell Claude
 
 ```
-Clone https://github.com/padak/claude-skills and copy .claude/settings.json
+Clone https://github.com/padak/claude-code-kit and copy .claude/settings.json
 to ~/.claude/settings.json, CLAUDE.md to ~/.claude/CLAUDE.md, and all skills
 from .claude/skills/ to ~/.claude/skills/
 ```
