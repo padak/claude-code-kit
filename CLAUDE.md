@@ -8,18 +8,44 @@
 
 ## Research
 
-- **Use Perplexity MCP** when something is unclear or unfamiliar
-- Before implementing unknown technology/API - research first
-- When encountering errors or unexpected behavior - research
+- **Use Perplexity MCP** before implementing any external API, library, or technology you haven't used in this project before
+- When encountering errors or unexpected behavior - research first
 - When deciding between approaches - research to find best practices
 
 ## General
 
 - Do NOT use emoji in text output
-- When working on multiple independent tasks (e.g., writing multiple tests, fixing multiple files, implementing multiple features), use parallel sub-agents (Task tool) - spawn one agent per task for maximum speed
-- Always have a plan (use TodoWrite) and mark tasks as completed when done
-- Keep repo clean - don't generate unnecessary documentation files
-- Write tests for anything that makes sense to test
+- **ALWAYS use parallel sub-agents** (Task tool) when working on multiple independent tasks (writing tests, fixing files, implementing features). This is NOT optional - spawn one agent per task for maximum speed.
+- For tasks with 3+ steps, **create a plan first** (use TodoWrite) and mark tasks as completed when done
+- **Document in code comments**, not separate files. Create documentation files (README, docs/) only when explicitly requested
+- **Write tests for all new code** - business logic, API endpoints, utilities. Skip only: config files, type definitions, trivial one-liners
+
+- When exploring a feature or diagnosing a bug, always complete the full investigation and provide a summary of findings before stopping. Do not leave investigations half-done. If the task is large, break it into phases and complete at least phase 1 with actionable output.
+
+## Implementation Integrity - No Mocks, No Skipping
+
+- **NEVER create mock implementations** when real implementation is required
+- **NEVER skip or stub out** functionality that is specified in the task or plan
+- If something is in the plan/task, it MUST be fully implemented - no placeholders, no "TODO: implement later", no fake data
+- If implementation is blocked, **ask the user** instead of silently mocking
+- This applies to: API integrations, database operations, business logic, UI components - everything
+
+```python
+# BAD - mocking instead of implementing
+def fetch_user_data(user_id):
+    return {"id": user_id, "name": "Mock User"}  # NEVER DO THIS
+
+# BAD - skipping with TODO
+def process_payment(amount):
+    # TODO: implement payment processing
+    pass  # NEVER DO THIS
+
+# GOOD - implement fully or ask for clarification
+def fetch_user_data(user_id):
+    response = httpx.get(f"{API_URL}/users/{user_id}")
+    response.raise_for_status()
+    return response.json()
+```
 
 ## Configuration - Zero Hardcoded Values
 
@@ -80,8 +106,35 @@ When creating git commits:
 - Keep commit messages clean and concise
 
 When creating pull requests:
-- Do NOT include "Generated with Claude Code" footer in PR description
+- Do NOT include "🤖 Generated with Claude Code" footer in PR description
 - Keep PR descriptions clean and focused on the changes
+
+## Server Logging for Backtesting
+
+- **All server applications MUST log** requests, responses, and key events for backtesting
+- Logs go to `logs/` directory (gitignored, never committed)
+- Use structured logging (JSON format preferred) for easy parsing
+- Include: timestamps, request/response payloads, user actions, errors, performance metrics
+
+```python
+# Example logging setup
+import logging
+from pathlib import Path
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+
+logging.basicConfig(
+    filename=LOG_DIR / "app.log",
+    format='{"time": "%(asctime)s", "level": "%(levelname)s", "message": "%(message)s"}',
+    level=logging.INFO
+)
+```
+
+## Browser Automation
+
+- **Use Claude Chrome (MCP)** for all browser automation
+- Use Playwright only when Claude Chrome is unavailable or something doesn't work in it
 
 ## Python Projects
 
