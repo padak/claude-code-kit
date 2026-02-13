@@ -68,6 +68,7 @@
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(codex:*)",
+      "Bash(gemini:*)",
 
       "Bash(make:*)",
       "Bash(curl:*)",
