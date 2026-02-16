@@ -90,18 +90,18 @@ cat /tmp/claude/result.json
 
 #### Simple Question
 ```bash
-claude -p "Your question here" --output-format text > /tmp/claude/answer.txt
+claude -p "Your question here" --model claude-opus-4-6 --output-format text > /tmp/claude/answer.txt
 cat /tmp/claude/answer.txt
 ```
 
 #### JSON Output
 ```bash
 claude -p "Analyze [topic]. Respond in JSON with: assessment (string), strengths (array), concerns (array), recommendation (string)" \
-  --output-format json > /tmp/claude/result.json
+  --model claude-opus-4-6 --output-format json > /tmp/claude/result.json
 cat /tmp/claude/result.json
 ```
 
-#### With Specific Model
+#### With Cheaper Model (Simple Tasks)
 ```bash
 claude -p "Your question here" --model claude-sonnet-4-5-20250929 --output-format text > /tmp/claude/answer.txt
 cat /tmp/claude/answer.txt
@@ -133,7 +133,7 @@ cat /tmp/claude/arch.txt
 ```bash
 claude -p "Review this architecture decision: [description].
   Assess: scalability, maintainability, security risks, alternatives." \
-  --output-format text > /tmp/claude/arch.txt
+  --model claude-opus-4-6 --output-format text > /tmp/claude/arch.txt
 cat /tmp/claude/arch.txt
 ```
 
@@ -168,7 +168,7 @@ claude -p "Security review of [file/code]:
   - Authentication/authorization
   - Data exposure risks
   Provide specific vulnerabilities and fixes." \
-  --output-format text > /tmp/claude/security.txt
+  --model claude-opus-4-6 --output-format text > /tmp/claude/security.txt
 cat /tmp/claude/security.txt
 ```
 
@@ -194,7 +194,7 @@ cat /tmp/claude/review.txt
 ```bash
 claude -p "Review [file] for: bugs, performance issues, maintainability.
   Provide line-level recommendations." \
-  --output-format text > /tmp/claude/review.txt
+  --model claude-opus-4-6 --output-format text > /tmp/claude/review.txt
 cat /tmp/claude/review.txt
 ```
 
@@ -225,8 +225,8 @@ cat /tmp/claude/review.txt
 
 | Option | Purpose |
 |--------|---------|
-| `--model claude-opus-4-6` | Most capable model |
-| `--model claude-sonnet-4-5-20250929` | Balanced speed and quality (default) |
+| `--model claude-opus-4-6` | Most capable model (recommended) |
+| `--model claude-sonnet-4-5-20250929` | Balanced speed and quality |
 | `--model claude-haiku-4-5-20251001` | Fastest, cheapest for simple tasks |
 | `--output-format text` | Plain text output (recommended) |
 | `--output-format json` | JSON message object output |
@@ -242,7 +242,7 @@ cat /tmp/claude/review.txt
 | Fast code review | `o4-mini` | `gemini-3-flash-preview` or auto | `claude-haiku-4-5-20251001` |
 | Security audit (deep) | `gpt-5.3-codex` | Auto-routing (recommended) | `claude-opus-4-6` |
 | Structured output (schema) | `gpt-5.3-codex` + schema | N/A (no schema support) | N/A (no schema support) |
-| Balanced quality/speed | `gpt-5.3-codex` | Auto-routing | `claude-sonnet-4-5-20250929` |
+| Balanced quality/speed | `gpt-5.3-codex` | Auto-routing | `claude-opus-4-6` |
 | Multi-provider consensus | All three! Run all and compare | All three! Run all and compare | All three! Run all and compare |
 
 ## Presenting Results
@@ -291,7 +291,7 @@ gemini -p "Should we use Redis or PostgreSQL for session storage in e-commerce a
 
 # 3. Ask Claude Code
 claude -p "Should we use Redis or PostgreSQL for session storage in e-commerce app?" \
-  --output-format text > /tmp/claude/claude_opinion.txt
+  --model claude-opus-4-6 --output-format text > /tmp/claude/claude_opinion.txt
 
 # 4. Compare outputs
 echo "=== Codex (OpenAI) ===" && cat /tmp/claude/codex_opinion.txt
