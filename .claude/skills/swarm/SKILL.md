@@ -1,40 +1,131 @@
 ---
 name: swarm
-description: Orchestrated multi-agent implementation using Tech Lead + Developer pattern. Use when implementing phased plans from docs/PLAN.md. Triggers: /swarm, "implement the plan", "run phased implementation", "execute PLAN.md phases". Spawns Developer agents for each phase, reviews PRs, handles retries and escalation.
+description: Orchestrates multi-agent implementation using Tech Lead + DevAgent pattern. Parses phased plans, builds dependency graphs, spawns DevAgents per phase with automatic parallelization via git worktrees when safe. Reviews PRs rigorously, handles retries with escalation. Use when the user has a phased implementation plan and wants to execute it with parallel agents.
+argument-hint: "[init | <plan-file>]"
 ---
 
-# Swarm - Orchestrated Multi-Agent Implementation
+# Swarm - Multi-Agent Implementation
 
-Execute a phased implementation plan using a Tech Lead + Developer agent pattern.
+Execute a phased implementation plan using Tech Lead (orchestrator) + Developer (implementor) agents. Independent phases run in parallel via git worktrees, dependent phases run sequentially.
+
+**Base branch** is the current branch when `/swarm` is invoked. All phase branches are created from it, all merges go back to it.
+The base branch name is stored in the plan's status file (`<plan-file>.swarm_status.json`) and read by `swarm.py` on resume.
+
+**Project root** is the directory containing `main/` and `worktrees/`. All Tech Lead commands assume cwd is the project root. Use absolute paths when passing working directories to DevAgents.
 
 ## Arguments
 
-- `/swarm` - Use default plan file `docs/PLAN.md`
-- `/swarm <plan-file>` - Use specified plan file
+- `/swarm init` - Bootstrap worktree and build support for this project
+- `/swarm` - Execute default plan `docs/PLAN.md`
+- `/swarm <plan-file>` - Execute specified plan file
 
-## Workflow
-
-```
-For each phase in plan:
-  1. Create branch from current main
-  2. Spawn Developer agent to implement
-  3. Developer creates PR when done
-  4. Tech Lead (this agent) reviews PR
-  5. If APPROVED: merge and continue
-  6. If CHANGES_REQUESTED: Developer fixes (max 3 attempts)
-  7. If max attempts exceeded: ESCALATE to human
+**swarm.py shorthand**: All `swarm.py` commands in this document expand to:
+```bash
+python3 ~/.claude/skills/swarm/scripts/swarm.py
 ```
 
-## Step 1: Parse Plan
+## Step 0: Prerequisites
 
-Read the plan file and extract phases. Each phase has this structure:
+### `/swarm init`
+
+Follow the full initialization workflow in [references/prerequisites.md](references/prerequisites.md). It covers: CLAUDE.md validation, directory restructuring, Makefile and .worktree-setup.sh creation with stack-specific examples, and verification cycle.
+
+**STOP if any step fails. Do not proceed until init completes successfully.**
+
+### `/swarm` or `/swarm <plan-file>`
+
+```bash
+python3 ~/.claude/skills/swarm/scripts/swarm.py prereq <plan-file>
+```
+
+**If it fails with missing Makefile or directory structure: STOP and tell the user to run `/swarm init` first.**
+
+## Key Concepts
+
+**Execution group**: Phases at the same dependency level that can run in parallel. `swarm.py parse` computes these from the dependency graph. A group with one phase is **solo**; 2+ phases is **parallel**.
+
+**Group label**: A letter identifier (A, B, C...) assigned to each execution group by `swarm.py parse`. Used in branch names like `integration/A` and status tracking.
+
+**Solo phase**: PR is merged directly to base on approval → MERGED → DONE.
+
+**Parallel phase**: PR stays open on remote for integration merge in Step 6. On approval → PR_APPROVED. Code reaches base only after all group phases pass integration review.
+
+**Roles**: Tech Lead creates/removes all worktrees and branches. DevAgent only implements code and creates PRs.
+
+**DevAgent**: The Developer agent spawned by Tech Lead to implement a phase. Referred to as "DevAgent" throughout this document and related guides.
+
+**Dependency graph**: Phases declare explicit dependencies via `DEPENDS` attribute; implicit dependencies are auto-detected from overlapping files. See [references/dependency-graph.md](references/dependency-graph.md). For guidance on writing plans and maximizing parallelism, see [references/plan-writing-guide.md](references/plan-writing-guide.md).
+
+**Worktrees and Makefile**: Each phase runs in its own git worktree. The Makefile provides `setup`, `build`, `test`, `worktree`, and `worktree-remove` targets. See [references/worktree-guide.md](references/worktree-guide.md).
+
+## Status Diagram
+
+```
+PENDING ───── Tech Lead dispatches ──→ DISPATCHED
+DISPATCHED ── DevAgent starts ───────→ DEVELOPING
+DEVELOPING ── DevAgent creates PR ───→ FOR_REVIEW
+FOR_REVIEW ── Tech Lead approves ────→ MERGED        (solo: merged to base)
+FOR_REVIEW ── Tech Lead approves ────→ PR_APPROVED   (parallel: PR stays open)
+FOR_REVIEW ── Tech Lead rejects ─────→ REJECTED      (GitHub issues created)
+MERGED ───────────────────────────────→ DONE
+PR_APPROVED ─ Integration passes ────→ DONE
+REJECTED ──── DevAgent fixes ────────→ FIXING
+FIXING ────── DevAgent creates new PR ─→ FOR_REVIEW
+REJECTED ──── Max attempts reached ──→ ESCALATED
+```
+
+Synthetic integration fix phases (Step 6.4) follow the same flow with ID prefix `I-` and `"synthetic": true` flag.
+
+**Who sets what:**
+
+| Status | Set by | When |
+|--------|--------|------|
+| DISPATCHED | Tech Lead | Worktree created, agent spawned |
+| DEVELOPING | DevAgent | Started implementing |
+| FOR_REVIEW | DevAgent | PR created |
+| MERGED | Tech Lead | Solo: PR merged, worktree removed. Immediately followed by DONE. |
+| PR_APPROVED | Tech Lead | Parallel: PR approved, worktree removed, PR stays open |
+| REJECTED | Tech Lead | PR closed, GitHub issues created |
+| FIXING | DevAgent | Started fixing issues |
+| DONE | Tech Lead | Solo: after MERGED. Parallel: after integration merged (Step 6) |
+| ESCALATED | Tech Lead | Max review attempts exceeded |
+
+## Workflow Overview
+
+```
+0. Verify prerequisites (Step 0)
+1. Parse plan → build dependency graph (Step 1)
+2. Identify phases with all dependencies DONE
+3. Tech Lead: create worktree + branch for each ready phase (Step 2)
+4. Spawn DevAgents — parallel when multiple phases ready (Step 3)
+5. Tech Lead: review each PR (Step 4 + Step 5)
+   - APPROVED solo → merge → DONE
+   - APPROVED parallel → PR_APPROVED (PR stays open)
+   - REJECTED → create issues, spawn fix DevAgent
+   - Max attempts → ESCALATED
+6. All phases in parallel group PR_APPROVED → integration review (Step 6)
+   Return to step 3 — newly unblocked phases are now ready
+7. All phases DONE (or ESCALATED) → summarize to user (Step 7)
+```
+
+## Step 1: Parse Plan and Build Dependency Graph
+
+```bash
+python3 ~/.claude/skills/swarm/scripts/swarm.py parse <plan-file>
+```
+
+The `parse` command also records the current branch as `base_branch` in the status file.
+
+If the command fails, stop and report errors to the user.
+
+Expected phase structure:
 
 ```markdown
-<!-- PHASE:N -->
-## Phase N: Name
+<!-- PHASE:1 -->
+## Phase 1: Name
 
 ### Branch
-`phase-N-name`
+`phase-1-name`
 
 ### Scope
 ...
@@ -44,275 +135,350 @@ Read the plan file and extract phases. Each phase has this structure:
 
 ### Acceptance Criteria
 - [ ] Criterion 1
-- [ ] Criterion 2
 
 ### Tests Required
 ...
-<!-- /PHASE:N -->
+<!-- /PHASE:1 -->
+
+<!-- PHASE:2 DEPENDS:1 -->
+## Phase 2: Name
+...
+<!-- /PHASE:2 -->
 ```
 
-## Step 2: For Each Phase
+The `parse` command validates tags, required sections, and dependency cycles. It outputs the execution graph as JSON. On first run, creates a status file (`<plan-file>.swarm_status.json`). On subsequent runs, reads existing status for resume.
+
+For a complete example plan, see [references/example-plan.md](references/example-plan.md).
+
+### Status Tracking
 
 ```bash
-git checkout main && git pull
-git checkout -b <branch-name>
+swarm.py update <plan-file> --phase <N...> --status <STATUS> [--pr "<#N...>"] [--attempts <N>]
+swarm.py next <plan-file>             # phases ready to start
+swarm.py check-group <plan-file>      # JSON: parallel groups where all phases PR_APPROVED
+swarm.py status <plan-file>           # current state of all phases
 ```
 
-## Step 3: Spawn Developer Agent
+## Step 2: Create Worktrees and Dispatch
+
+For each phase returned by `swarm.py next`:
+
+```bash
+cd main
+make worktree BRANCH=<branch-name>
+swarm.py update <plan-file> --phase <N> --status DISPATCHED
+```
+
+Create worktrees for all ready phases before spawning agents (Step 3).
+
+## Step 3: Spawn DevAgents
+
+Spawn a `general-purpose` subagent for each DISPATCHED phase. For multiple ready phases, spawn in parallel.
 
 ```
 Task(
   subagent_type: "general-purpose",
-  description: "Implement Phase N",
+  description: "Implement Phase N: <name>",
   prompt: """
-You are a Developer agent implementing Phase N.
+  You are a DevAgent. First cd to your working directory, then read your instructions:
+  cat ~/.claude/skills/swarm-developer-guide/SKILL.md
 
-## Task
-Read the plan file, find Phase N (between <!-- PHASE:N --> markers), implement EVERYTHING in Scope.
-
-## CRITICAL: Your Work Will Be Rigorously Reviewed
-
-The Tech Lead will verify:
-1. **Every file** in "Files to Create/Modify" exists and has real implementation
-2. **Every acceptance criterion** is fully implemented (not stubbed)
-3. **Every test** in "Tests Required" exists and passes
-4. **Integration points** - router registered, config in .env.example, migration matches ORM
-
-DO NOT:
-- Create stub implementations (empty functions, pass, TODO comments)
-- Skip any file from the list
-- Write trivial tests that don't verify real behavior
-- Leave acceptance criteria partially implemented
-- Forget to register routers or add config vars
-
-## Rules
-1. Follow CLAUDE.md configuration standards (no hardcoded values, fail fast)
-2. Create ALL files listed in "Files to Create/Modify" - every single one
-3. Write ALL tests specified in "Tests Required" - run them to verify they pass
-4. For each acceptance criterion, identify WHERE in your code it's satisfied
-5. Commit with clear messages referencing the phase
-
-## Branch
-You are on branch: <branch-name>
-
-## Before Creating PR - Self-Review Checklist
-
-Before creating the PR, verify yourself:
-- [ ] All files from "Files to Create/Modify" exist
-- [ ] No TODO/FIXME/placeholder comments in new code
-- [ ] All acceptance criteria have corresponding implementation
-- [ ] All tests pass: `python -m pytest <module>/tests/ -v`
-- [ ] Router registered in main.py (if new module)
-- [ ] Config vars in .env.example (if new config)
-
-## When Done
-Create PR with acceptance criteria as checklist:
-
-gh pr create --title "Phase N: <name>" --body "$(cat <<'EOF'
-## Implementation Summary
-<brief description>
-
-## Acceptance Criteria
-- [ ] Criterion 1 - implemented in `file.py:function()`
-- [ ] Criterion 2 - implemented in `file.py:function()`
-...
-
-## Tests
-- `pytest <module>/tests/ -v` - X tests pass
-
-## Files Changed
-<list of files created/modified>
-EOF
-)"
-
-Report back with PR number.
-"""
+  Phase: N
+  Branch: <branch-name>
+  Plan file: <full-path-to-plan-file>
+  Base branch: <base-branch>
+  Working directory: <project-root>/worktrees/<branch-name>
+  """
 )
 ```
 
-## Step 4: Review the PR (RIGOROUS)
+**Note:** The `general-purpose` subagent inherits permission settings from the parent session. Ensure your Claude Code permissions allow autonomous file and bash operations to avoid blocking parallel DevAgents.
 
-**IMPORTANT:** Previous swarm runs had phases that were incomplete or sloppy. This review MUST be thorough. Do NOT approve until ALL checks pass.
+## Step 4: Review the PR
 
-### 4.1 File Inventory Check
+**Do NOT approve until ALL checks pass.** Incomplete phases are the most common swarm failure.
 
-Read the phase's "Files to Create/Modify" list. For EACH file:
-```bash
-# Check file exists
-ls -la <file-path>
+### 4.1 File Inventory
+Read every file listed in "Files to Create/Modify". FAIL if:
+- Any file is missing
+- Any file contains unfinished code (empty bodies, TODO/FIXME, mocks, placeholders)
 
-# Read and verify content is substantial (not stub/placeholder)
-Read <file-path>
-```
+### 4.2 Acceptance Criteria
+For EACH criterion, build an evidence table:
 
-**FAIL if:**
-- Any listed file is missing
-- Any file contains TODO/FIXME/placeholder comments
-- Any file is a stub (empty class, pass-only functions)
-- Any file has `# Implementation needed` or similar
+| Criterion | Evidence (file:line or test) | Verified |
+|-----------|------------------------------|----------|
+| Criterion 1 | src/auth.ts:42 | test passes |
+| Criterion 2 | migration has UNIQUE constraint | verified |
 
-### 4.2 Acceptance Criteria Verification
+FAIL if any criterion has no evidence or is only partially implemented.
 
-For EACH criterion in "Acceptance Criteria" section:
-
-1. **Read the criterion literally** - what exactly does it require?
-2. **Find evidence** - which file/function implements it?
-3. **Verify behavior** - run specific test or manual check
-
-```markdown
-| Criterion | Evidence | Verified |
-|-----------|----------|----------|
-| "Can create quota for user" | quotas/service.py:create_quota() | ✓ test passes |
-| "Unique constraint prevents duplicates" | migration has UNIQUE KEY | ✓ |
-| "Only managers can set quotas" | router.py uses require_role("manager") | ✓ |
-```
-
-**FAIL if:**
-- Any criterion has no corresponding implementation
-- Any criterion is partially implemented
-- Any criterion relies on code that doesn't exist yet
-
-### 4.3 Test Coverage Check
-
-```bash
-# Run the phase's tests specifically
-cd apps/crm-api && python -m pytest <module>/tests/ -v
-
-# Check all tests pass
-# Check test count matches "Tests Required" list
-```
-
-**FAIL if:**
+### 4.3 Tests
+Run `make test` in the worktree. FAIL if:
 - Any test fails
-- Test count is significantly lower than specified in plan
-- Tests are trivial (e.g., `assert True`)
+- Test count is significantly lower than "Tests Required"
+- Tests are trivial (don't verify real behavior)
 
-### 4.4 Integration Points Check
+### 4.4 Integration Points
+Check CLAUDE.md section **"Project Structure"** for conventions (routing, config, migrations).
+Verify new code is properly wired into the existing project. FAIL if any integration is missing.
 
-For new modules, verify:
+### 4.5 Code Quality
+Check CLAUDE.md sections **"Code Quality Standards"** and **"Config Management"**.
+FAIL if code violates project conventions.
 
-```bash
-# Router registered in main.py?
-grep -n "<router>" apps/crm-api/app/main.py
+### 4.6 Verdict
 
-# Config vars in .env.example?
-grep -n "<new_config_var>" apps/crm-api/.env.example
-
-# ORM model matches migration?
-# Compare column names, types, nullability
-```
-
-**FAIL if:**
-- Router not registered (endpoints unreachable)
-- Config vars missing from .env.example
-- Migration and ORM model have mismatches
-
-### 4.5 Code Quality Check
-
-1. **No hardcoded values** - all thresholds from config
-2. **No silent defaults** - missing required config = startup failure
-3. **UUID not INT** - all IDs are VARCHAR(36)
-4. **Follows existing patterns** - check similar modules for consistency
-
-### 4.6 Final Verdict
-
-Only after ALL above checks pass:
-
+**APPROVED** — all checks pass:
 ```markdown
 ## PR Review: Phase N
-
-### File Inventory: ✓ PASS
-- [x] All 8 files created
-- [x] No stubs or placeholders
-
-### Acceptance Criteria: ✓ PASS
-| Criterion | Status |
-|-----------|--------|
-| Criterion 1 | ✓ Verified in service.py:45 |
-| Criterion 2 | ✓ Test test_unique_constraint passes |
-| ... | ... |
-
-### Tests: ✓ PASS
-- 8/8 tests pass
-- Matches "Tests Required" list
-
-### Integration: ✓ PASS
-- Router registered in main.py:67
-- Config vars in .env.example
-
-### Code Quality: ✓ PASS
-
+### File Inventory: PASS (N/N files, no stubs)
+### Acceptance Criteria: PASS
+| Criterion | Evidence | Verified |
+|-----------|----------|----------|
+### Tests: PASS (N/N pass)
+### Integration: PASS
+### Code Quality: PASS
 **VERDICT: APPROVED**
 ```
 
-If ANY check fails:
-
+**REJECTED** — any check fails:
 ```markdown
 ## PR Review: Phase N
-
 ### FAILED CHECKS:
-
-1. **Acceptance Criteria #3 not implemented**
-   - "Quota attainment calculates correctly from closed-won opportunities"
-   - No implementation found in service.py
-   - Required: Add get_quota_attainment() method
-
-2. **Missing test**
-   - "Tests Required" lists "Fiscal period calculation" but no such test exists
-
-**VERDICT: CHANGES_REQUESTED**
+1. **[Check name]**: specific issue, what is missing, what to fix
+**VERDICT: REJECTED**
 ```
 
-## Step 5: Decision
+## Step 5: Act on Review Verdict
 
-**APPROVED:**
+MAX_REVIEW_ATTEMPTS = 3 (two correction rounds + original; beyond this — escalate to human)
+
+**Solo vs parallel**: Check the phase's `group` field in the status file (via `swarm.py status`). If `group` is `null`, the phase is solo. If `group` is a letter (A, B, ...), the phase is parallel.
+
+### APPROVED — Solo Phase
 ```bash
-gh pr merge <pr-number> --squash --delete-branch
+cd main
+gh pr merge <pr-number> --merge --delete-branch
+make worktree-remove BRANCH=<branch-name>
+swarm.py update <plan-file> --phase <N> --status MERGED --pr "<#N>"
+swarm.py update <plan-file> --phase <N> --status DONE
 ```
-Continue to next phase.
+Return to Step 2 — newly unblocked phases are now ready.
 
-**CHANGES_REQUESTED:**
+### APPROVED — Parallel Group Phase
+```bash
+cd main
+make worktree-remove BRANCH=<branch-name>
+swarm.py update <plan-file> --phase <N> --status PR_APPROVED --pr "<#N>"
+```
+**Do NOT merge the PR.** It stays open for integration in Step 6.
+
+Check if the group is ready:
+```bash
+swarm.py check-group <plan-file>
+```
+All PR_APPROVED → proceed to Step 6. Otherwise continue reviewing other PRs.
+
+### REJECTED (attempt < MAX_REVIEW_ATTEMPTS)
+
+**Tech Lead: close PR, create issues, prepare fix worktree:**
+```bash
+gh pr close <pr-number>
+gh issue create --title "Phase N: <failed check summary>" --body "<detailed finding>" --label "swarm-fix"
+make worktree-remove BRANCH=<branch-name>
+make worktree BRANCH=fix-<branch-name>
+cd ../worktrees/fix-<branch-name> && git fetch origin && git merge origin/<branch-name>
+swarm.py update <plan-file> --phase <N> --status REJECTED
+```
+
+**Tech Lead: spawn DevAgent to fix:**
 ```
 Task(
+  subagent_type: "general-purpose",
+  description: "Fix Phase N review feedback (attempt M/3)",
   prompt: """
-Your PR for Phase N needs changes.
+  You are a DevAgent. First cd to your working directory, then read your instructions:
+  cat ~/.claude/skills/swarm-developer-guide/SKILL.md
 
-## Feedback
-<specific feedback>
+  Phase: N (fix)
+  Branch: fix-<branch-name>
+  Plan file: <full-path-to-plan-file>
+  Base branch: <base-branch>
+  Working directory: <project-root>/worktrees/fix-<branch-name>
 
-## Required Changes
-1. ...
+  GitHub Issues to Resolve:
+  - #<issue-1>: <title>
+  - #<issue-2>: <title>
 
-Fix on same branch and push. Attempt: <N>/3
-"""
+  This is attempt M of 3 (MAX_REVIEW_ATTEMPTS).
+  """
 )
 ```
+Then re-review from Step 4.
 
-**Attempt >= 3:**
+### ESCALATED (attempt >= MAX_REVIEW_ATTEMPTS)
+```bash
+swarm.py update <plan-file> --phase <N> --status ESCALATED --pr "<#N>"
+```
 ```
 ESCALATE: Phase N requires human intervention.
 PR: <url>
-Issues: <summary>
+Issues: <summary of unresolved findings>
 ```
-Stop and notify user.
+Stop processing this phase and all phases that depend on it.
 
-## Step 6: Progress Tracking
+## Step 6: Integration Review (Parallel Groups)
 
-After each phase:
+When `swarm.py check-group` reports a complete parallel group (all phases PR_APPROVED):
 
+### 6.1 Create Integration Branch
+```bash
+cd main
+git fetch origin
+git checkout -b integration/<group> <base-branch>
+git merge origin/<phase-1-branch>
+git merge origin/<phase-2-branch>
 ```
-## Swarm Progress
+If merge conflicts → escalate to human immediately.
 
-| Phase | Status | PR | Attempts |
-|-------|--------|-----|----------|
-| 1     | DONE   | #12 | 1        |
-| 2     | IN_PROGRESS | #13 | 1   |
-| 3     | PENDING | -  | -        |
+### 6.2 Build and Test
+```bash
+make build && make test
 ```
+If build or tests fail → proceed to 6.4.
+
+### 6.3 Code Review on Integration Branch
+
+For EACH phase in the group, verify on the integration branch:
+1. **File Inventory** — all files exist with real implementation
+2. **Acceptance Criteria** — build evidence table (see Step 4.2)
+3. **Integration Points** — no conflicts in shared files, no duplicate registrations, cross-phase imports resolve
+4. **Cross-phase consistency** — shared types compatible, no conflicting config changes
+
+Stricter than individual review — phases developed independently may have subtle conflicts.
+
+If any check fails → proceed to 6.4.
+
+### All Good — Merge Integration Branch
+
+```bash
+git push -u origin integration/<group>
+gh pr create --title "Integration: <group description>" --base <base-branch> --head integration/<group> --body "$(cat <<'PREOF'
+## Summary
+Integrates parallel phases: N1, N2, ...
+
+## Phases Included
+- Phase N1: <name> (PR #<pr-1>)
+- Phase N2: <name> (PR #<pr-2>)
+
+## Verification
+- make build: PASS
+- make test: PASS
+- Cross-phase integration: verified
+PREOF
+)"
+gh pr merge <integration-pr> --merge --delete-branch
+```
+Close individual phase PRs:
+```bash
+gh pr close <pr-1> --comment "Merged via integration/<group>"
+gh pr close <pr-2> --comment "Merged via integration/<group>"
+```
+Update status:
+```bash
+swarm.py update <plan-file> --phase <N1> <N2> --status DONE --pr "<#integration-pr>"
+git checkout <base-branch>
+```
+Return to Step 2.
+
+### 6.4 Issues Found — Synthetic Integration Fix Phase
+
+Original phases stay **PR_APPROVED**. Tech Lead creates a synthetic fix phase.
+
+```bash
+cd main
+git checkout <base-branch>
+git branch -D integration/<group>
+gh issue create --title "Integration <group>: <issue summary>" --body "<detailed finding>" --label "swarm-integration-fix"
+swarm.py add-phase <plan-file> --id I-<group> --depends <N1> <N2> --branch fix-integration-<group> --synthetic
+make worktree BRANCH=fix-integration-<group>
+cd ../worktrees/fix-integration-<group>
+git merge origin/<phase-1-branch>
+git merge origin/<phase-2-branch>
+swarm.py update <plan-file> --phase I-<group> --status DISPATCHED
+```
+
+**Spawn DevAgent to fix integration issues:**
+```
+Task(
+  subagent_type: "general-purpose",
+  description: "Fix integration issues for group <group>",
+  prompt: """
+  You are a DevAgent. First cd to your working directory, then read your instructions:
+  cat ~/.claude/skills/swarm-developer-guide/SKILL.md
+
+  Phase: I-<group> (integration fix)
+  Branch: fix-integration-<group>
+  Plan file: <full-path-to-plan-file>
+  Base branch: <base-branch>
+  Working directory: <project-root>/worktrees/fix-integration-<group>
+  Note: This worktree already contains all phase branches merged.
+
+  GitHub Issues to Resolve:
+  - #<issue-1>: <title>
+  - #<issue-2>: <title>
+  """
+)
+```
+
+**After fix PR is reviewed and APPROVED:**
+```bash
+gh pr merge <fix-pr> --merge --delete-branch
+make worktree-remove BRANCH=fix-integration-<group>
+gh pr close <pr-1> --comment "Merged via integration fix #<fix-pr>"
+gh pr close <pr-2> --comment "Merged via integration fix #<fix-pr>"
+swarm.py update <plan-file> --phase I-<group> --status MERGED
+swarm.py update <plan-file> --phase I-<group> --status DONE
+swarm.py update <plan-file> --phase <N1> <N2> --status DONE --pr "<#fix-pr>"
+```
+Return to Step 2. If REJECTED: same retry flow as Step 5.
+
+## Progress Tracking
+
+```bash
+swarm.py status <plan-file>           # current state of all phases
+swarm.py next <plan-file>             # phases ready to start
+swarm.py check-group <plan-file>      # parallel groups ready for integration
+swarm.py add-phase <plan-file> ...    # create synthetic integration fix phase
+```
+
+On resume after crash, `swarm.py status` shows where to continue.
 
 ## Error Handling
 
-- **Git conflict:** Escalate immediately
-- **CI failure:** Count as failed review attempt
-- **Agent timeout:** Retry once, then escalate
-- **Network error:** Retry with backoff
+| Scenario | Action |
+|----------|--------|
+| Git merge conflict | Escalate to human immediately |
+| CI failure | Count as failed review attempt |
+| Agent timeout | Retry once, then escalate |
+| Network error | Retry 3 times with 5s/15s/30s backoff, then escalate |
+| Worktree lock conflict | Retry 3 times with 5s/15s/30s backoff, then escalate |
+| `make build`/`make test` fails in worktree | DevAgent fixes before PR |
+| `make build`/`make test` fails on integration | Synthetic fix phase (Step 6.4) |
+| Dependency cycle detected | `swarm.py parse` fails at Step 1, stop |
+| Orphaned worktree (agent crashed) | `make worktree-remove`, set REJECTED |
+
+## Step 7: Summary
+
+When all phases are DONE (or ESCALATED):
+
+```bash
+swarm.py status <plan-file>
+```
+
+Report to the user:
+- Total phases: N completed, M escalated
+- PRs merged: list with links
+- Escalated phases: list with open issues and last PR links
+- Duration: from first dispatch to last DONE
