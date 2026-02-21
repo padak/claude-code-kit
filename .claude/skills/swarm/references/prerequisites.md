@@ -67,12 +67,22 @@ Required targets:
 - `test` — run the test suite
 - `worktree BRANCH=<name>` — create a git worktree and set it up
 - `worktree-remove BRANCH=<name>` — remove a worktree and its branch
+- `sync-workspace` — sync VS Code multi-root workspace file (called automatically by `worktree` and `worktree-remove`)
 
 ### 5. Create .worktree-setup.sh
 
 Create `.worktree-setup.sh` in `main/`. This script runs inside each new worktree to install dependencies and configure the environment. See stack examples below.
 
-### 6. Verify Full Cycle
+### 6. Create Initial Workspace File
+
+```bash
+cd main
+make sync-workspace
+```
+
+This creates `<project-name>.code-workspace` at the project root with `main/` as the only folder. Worktrees are added automatically when created via `make worktree`.
+
+### 7. Verify Full Cycle
 
 Run the complete worktree lifecycle to confirm everything works:
 
@@ -87,14 +97,14 @@ make worktree-remove BRANCH=test-verify-setup
 
 If verification fails, fix and re-test. Do NOT commit until it passes.
 
-### 7. Commit
+### 8. Commit
 
 ```bash
 git add Makefile .worktree-setup.sh
 git commit -m "chore: add worktree and build support for swarm"
 ```
 
-### 8. Inform user
+### 9. Inform user
 Inform user about success and provide them with a link to [references/user-guide.md](references/user-guide.md), where they can learn more about swarm.
 
 ## CLAUDE.md Minimum Sections
@@ -143,7 +153,7 @@ Example of the minimum required content:
 
 **Makefile:**
 ```makefile
-.PHONY: setup build test worktree worktree-remove
+.PHONY: setup build test worktree worktree-remove sync-workspace
 
 setup:
 	bash .worktree-setup.sh
@@ -154,15 +164,33 @@ build:
 test:
 	.venv/bin/python3 -m pytest tests/ -v
 
+sync-workspace:
+	@python3 -c "\
+	import json, os, sys; \
+	root = os.path.abspath('..'); \
+	ws_name = os.path.basename(root) + '.code-workspace'; \
+	ws_path = os.path.join(root, ws_name); \
+	folders = [{'path': 'main', 'name': 'main'}]; \
+	wt_dir = os.path.join(root, 'worktrees'); \
+	[folders.append({'path': f'worktrees/{d}', 'name': d}) for d in sorted(os.listdir(wt_dir)) if os.path.isfile(os.path.join(wt_dir, d, '.git'))] if os.path.isdir(wt_dir) else None; \
+	data = {}; \
+	exec('try:\n with open(ws_path) as f: data=json.load(f)\nexcept FileNotFoundError: pass\nexcept json.JSONDecodeError as e: sys.exit(f\"Invalid JSON in {ws_path}: {e}\")'); \
+	data['folders'] = folders; \
+	data.setdefault('settings', {'search.exclude': {'**/.git': True, '**/.venv': True, '**/node_modules': True, '**/__pycache__': True}}); \
+	open(ws_path, 'w').write(json.dumps(data, indent=2) + '\n'); \
+	print(f'Synced {ws_name}: {len(folders)} folders')"
+
 worktree:
 	@test -n "$(BRANCH)" || (echo "Usage: make worktree BRANCH=<name>" && exit 1)
 	git worktree add ../worktrees/$(BRANCH) -b $(BRANCH)
 	cd ../worktrees/$(BRANCH) && bash .worktree-setup.sh
+	@$(MAKE) sync-workspace
 
 worktree-remove:
 	@test -n "$(BRANCH)" || (echo "Usage: make worktree-remove BRANCH=<name>" && exit 1)
 	git worktree remove ../worktrees/$(BRANCH)
 	git branch -D $(BRANCH)
+	@$(MAKE) sync-workspace
 ```
 
 **.worktree-setup.sh:**
@@ -179,7 +207,7 @@ pip install -r requirements.txt
 
 **Makefile:**
 ```makefile
-.PHONY: setup build test worktree worktree-remove
+.PHONY: setup build test worktree worktree-remove sync-workspace
 
 setup:
 	bash .worktree-setup.sh
@@ -190,15 +218,33 @@ build:
 test:
 	npm test
 
+sync-workspace:
+	@python3 -c "\
+	import json, os, sys; \
+	root = os.path.abspath('..'); \
+	ws_name = os.path.basename(root) + '.code-workspace'; \
+	ws_path = os.path.join(root, ws_name); \
+	folders = [{'path': 'main', 'name': 'main'}]; \
+	wt_dir = os.path.join(root, 'worktrees'); \
+	[folders.append({'path': f'worktrees/{d}', 'name': d}) for d in sorted(os.listdir(wt_dir)) if os.path.isfile(os.path.join(wt_dir, d, '.git'))] if os.path.isdir(wt_dir) else None; \
+	data = {}; \
+	exec('try:\n with open(ws_path) as f: data=json.load(f)\nexcept FileNotFoundError: pass\nexcept json.JSONDecodeError as e: sys.exit(f\"Invalid JSON in {ws_path}: {e}\")'); \
+	data['folders'] = folders; \
+	data.setdefault('settings', {'search.exclude': {'**/.git': True, '**/.venv': True, '**/node_modules': True, '**/__pycache__': True}}); \
+	open(ws_path, 'w').write(json.dumps(data, indent=2) + '\n'); \
+	print(f'Synced {ws_name}: {len(folders)} folders')"
+
 worktree:
 	@test -n "$(BRANCH)" || (echo "Usage: make worktree BRANCH=<name>" && exit 1)
 	git worktree add ../worktrees/$(BRANCH) -b $(BRANCH)
 	cd ../worktrees/$(BRANCH) && bash .worktree-setup.sh
+	@$(MAKE) sync-workspace
 
 worktree-remove:
 	@test -n "$(BRANCH)" || (echo "Usage: make worktree-remove BRANCH=<name>" && exit 1)
 	git worktree remove ../worktrees/$(BRANCH)
 	git branch -D $(BRANCH)
+	@$(MAKE) sync-workspace
 ```
 
 **.worktree-setup.sh:**
@@ -215,7 +261,7 @@ npm run generate 2>/dev/null || true
 
 **Makefile:**
 ```makefile
-.PHONY: setup build test worktree worktree-remove
+.PHONY: setup build test worktree worktree-remove sync-workspace
 
 setup:
 	bash .worktree-setup.sh
@@ -226,15 +272,33 @@ build:
 test:
 	go test ./... -v
 
+sync-workspace:
+	@python3 -c "\
+	import json, os, sys; \
+	root = os.path.abspath('..'); \
+	ws_name = os.path.basename(root) + '.code-workspace'; \
+	ws_path = os.path.join(root, ws_name); \
+	folders = [{'path': 'main', 'name': 'main'}]; \
+	wt_dir = os.path.join(root, 'worktrees'); \
+	[folders.append({'path': f'worktrees/{d}', 'name': d}) for d in sorted(os.listdir(wt_dir)) if os.path.isfile(os.path.join(wt_dir, d, '.git'))] if os.path.isdir(wt_dir) else None; \
+	data = {}; \
+	exec('try:\n with open(ws_path) as f: data=json.load(f)\nexcept FileNotFoundError: pass\nexcept json.JSONDecodeError as e: sys.exit(f\"Invalid JSON in {ws_path}: {e}\")'); \
+	data['folders'] = folders; \
+	data.setdefault('settings', {'search.exclude': {'**/.git': True, '**/.venv': True, '**/node_modules': True, '**/__pycache__': True}}); \
+	open(ws_path, 'w').write(json.dumps(data, indent=2) + '\n'); \
+	print(f'Synced {ws_name}: {len(folders)} folders')"
+
 worktree:
 	@test -n "$(BRANCH)" || (echo "Usage: make worktree BRANCH=<name>" && exit 1)
 	git worktree add ../worktrees/$(BRANCH) -b $(BRANCH)
 	cd ../worktrees/$(BRANCH) && bash .worktree-setup.sh
+	@$(MAKE) sync-workspace
 
 worktree-remove:
 	@test -n "$(BRANCH)" || (echo "Usage: make worktree-remove BRANCH=<name>" && exit 1)
 	git worktree remove ../worktrees/$(BRANCH)
 	git branch -D $(BRANCH)
+	@$(MAKE) sync-workspace
 ```
 
 **.worktree-setup.sh:**

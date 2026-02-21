@@ -13,6 +13,7 @@ After `/swarm init`, the project is organized as:
 
 ```
 myapp/
+├── myapp.code-workspace  # VS Code multi-root workspace (auto-synced)
 ├── main/              # git repo (base branch checkout)
 │   ├── Makefile
 │   ├── .worktree-setup.sh
@@ -109,6 +110,33 @@ cd main
 make worktree-remove BRANCH=phase-1-auth
 ```
 This removes the worktree directory and deletes the branch.
+
+## Workspace File
+
+The `.code-workspace` file at the project root provides VS Code multi-root workspace support. It allows you to see `main/` and all active worktrees in a single VS Code window.
+
+### Automatic Sync
+
+The workspace file is synced automatically by `make sync-workspace`, which is called from both `worktree` and `worktree-remove` targets. You don't need to manage it manually.
+
+The sync logic:
+- Scans `worktrees/*/` — a subdirectory is a worktree only if it contains a `.git` file
+- `main/` is always listed first, then worktrees sorted alphabetically
+- Preserves existing settings in the workspace file (only `folders` are overwritten)
+- Creates a new workspace file if one doesn't exist
+- Fails with a clear error if the workspace file contains invalid JSON
+
+### Opening the Workspace
+
+```bash
+code myapp.code-workspace
+```
+
+This opens VS Code with all active worktrees visible in the sidebar. When worktrees are added or removed, VS Code will detect the workspace file change and offer to reload.
+
+### Initial Creation
+
+The workspace file is created during `/swarm init` when `make sync-workspace` runs for the first time. Initially it contains only `main/`.
 
 ## Troubleshooting
 

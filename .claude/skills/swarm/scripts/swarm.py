@@ -23,18 +23,35 @@ from pathlib import Path
 
 # Phase statuses in lifecycle order
 VALID_STATUSES = {
-    "PENDING", "DISPATCHED", "DEVELOPING", "FOR_REVIEW",
-    "REJECTED", "FIXING", "MERGED", "PR_APPROVED", "DONE", "ESCALATED",
+    "PENDING",
+    "DISPATCHED",
+    "DEVELOPING",
+    "FOR_REVIEW",
+    "REJECTED",
+    "FIXING",
+    "MERGED",
+    "PR_APPROVED",
+    "DONE",
+    "ESCALATED",
 }
 
-REQUIRED_SECTIONS = {"Branch", "Scope", "Files to Create/Modify", "Acceptance Criteria", "Tests Required"}
+REQUIRED_SECTIONS = {
+    "Branch",
+    "Scope",
+    "Files to Create/Modify",
+    "Acceptance Criteria",
+    "Tests Required",
+}
 
 REQUIRED_MAKEFILE_TARGETS = {"setup", "build", "test", "worktree", "worktree-remove"}
 
 # Sections expected in CLAUDE.md for swarm to work effectively.
 # Each entry: (heading pattern regex, human-readable label)
 REQUIRED_CLAUDE_MD_SECTIONS = [
-    (r"(?i)##?\s*(tech\s*)?stack|##?\s*tools|##?\s*frameworks", "Stack (tools, frameworks, versions)"),
+    (
+        r"(?i)##?\s*(tech\s*)?stack|##?\s*tools|##?\s*frameworks",
+        "Stack (tools, frameworks, versions)",
+    ),
     (r"(?i)##?\s*test", "Testing conventions"),
     (r"(?i)##?\s*(code\s*quality|lint|format)", "Code quality standards"),
     (r"(?i)##?\s*project\s*structure", "Project structure"),
@@ -46,6 +63,31 @@ def error(msg: str) -> None:
     """Print error to stderr and exit."""
     print(f"ERROR: {msg}", file=sys.stderr)
     sys.exit(1)
+
+
+def validate_branch_name(branch: str, context: str = "") -> None:
+    """Validate branch name for git compatibility and flat worktree layout.
+
+    Two-stage validation:
+    1. git check-ref-format --branch — catches all Git-specific problems
+    2. Extra check on / and \\ — Git allows them but they break flat worktree layout
+    """
+    if not branch:
+        error(f"Empty branch name{f' (from {context})' if context else ''}")
+    result = subprocess.run(
+        ["git", "check-ref-format", "--branch", branch],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    if result.returncode != 0:
+        error(
+            f"Invalid branch name '{branch}'{f' (from {context})' if context else ''}: {result.stderr.strip()}"
+        )
+    if "/" in branch or "\\" in branch:
+        error(
+            f"Branch name '{branch}'{f' (from {context})' if context else ''} contains slashes. Use hyphens instead."
+        )
 
 
 def status_file_path(plan_file: Path) -> Path:
@@ -96,11 +138,12 @@ def parse_phases(content: str) -> list[dict]:
         if close_match.start() < m.end():
             error(f"Closing tag for Phase {phase_id} appears before opening tag")
 
-        phase_content = content[m.end():close_match.start()]
+        phase_content = content[m.end() : close_match.start()]
 
         # Extract branch name
         branch_match = re.search(r"###\s*Branch\s*\n\s*`([^`]+)`", phase_content)
         branch = branch_match.group(1) if branch_match else f"phase-{phase_id}"
+        validate_branch_name(branch, context=f"Phase {phase_id}")
 
         # Extract name from heading
         name_match = re.search(r"##\s*Phase\s*\d+:\s*(.+)", phase_content)
@@ -135,13 +178,15 @@ def parse_phases(content: str) -> list[dict]:
         if missing:
             error(f"Phase {phase_id} missing required sections: {', '.join(missing)}")
 
-        phases.append({
-            "id": phase_id,
-            "name": name,
-            "branch": branch,
-            "depends": depends,
-            "files": files,
-        })
+        phases.append(
+            {
+                "id": phase_id,
+                "name": name,
+                "branch": branch,
+                "depends": depends,
+                "files": files,
+            }
+        )
 
     return phases
 
@@ -170,7 +215,9 @@ def check_dependency_refs(phases: list[dict]) -> None:
     for phase in phases:
         for dep in phase["depends"]:
             if dep not in phase_ids:
-                error(f"Phase {phase['id']} depends on Phase {dep} which does not exist")
+                error(
+                    f"Phase {phase['id']} depends on Phase {dep} which does not exist"
+                )
 
 
 def detect_cycles(phases: list[dict]) -> None:
@@ -228,7 +275,9 @@ def build_execution_groups(phases: list[dict]) -> list[list[int]]:
     return groups
 
 
-def assign_groups(phases: list[dict], execution_groups: list[list[int]]) -> dict[int, str | None]:
+def assign_groups(
+    phases: list[dict], execution_groups: list[list[int]]
+) -> dict[int, str | None]:
     """Assign group labels to phases. Solo phases get None, parallel phases get A, B, C...
 
     Supports up to 26 parallel groups (A-Z). Raises error if exceeded.
@@ -300,7 +349,9 @@ def check_claude_md(plan_file: Path) -> list[str]:
             break
 
     if not claude_md:
-        issues.append("CLAUDE.md not found. Create one with project standards before running swarm.")
+        issues.append(
+            "CLAUDE.md not found. Create one with project standards before running swarm."
+        )
         return issues
 
     content = claude_md.read_text()
@@ -320,7 +371,9 @@ def check_git_worktree() -> list[str]:
 
     result = subprocess.run(
         ["git", "worktree", "list"],
-        capture_output=True, text=True, timeout=10,
+        capture_output=True,
+        text=True,
+        timeout=10,
     )
     if result.returncode != 0:
         issues.append(f"git worktree not available: {result.stderr.strip()}")
@@ -332,15 +385,21 @@ def check_gh_cli() -> list[str]:
     """Check that GitHub CLI (gh) is installed and authenticated. Returns list of issues."""
     issues = []
     if not shutil.which("gh"):
-        issues.append("gh (GitHub CLI) not found in PATH. Install: https://cli.github.com/")
+        issues.append(
+            "gh (GitHub CLI) not found in PATH. Install: https://cli.github.com/"
+        )
         return issues
 
     result = subprocess.run(
         ["gh", "auth", "status"],
-        capture_output=True, text=True, timeout=10,
+        capture_output=True,
+        text=True,
+        timeout=10,
     )
     if result.returncode != 0:
-        issues.append(f"gh not authenticated: {result.stderr.strip()}. Run `gh auth login`.")
+        issues.append(
+            f"gh not authenticated: {result.stderr.strip()}. Run `gh auth login`."
+        )
 
     return issues
 
@@ -381,7 +440,9 @@ def check_directory_structure(plan_file: Path) -> list[str]:
 
     main_dir = project_root / "main"
     if not (main_dir / ".git").exists():
-        issues.append(f"'{main_dir}' exists but is not a git repository (no .git found)")
+        issues.append(
+            f"'{main_dir}' exists but is not a git repository (no .git found)"
+        )
 
     worktrees_dir = project_root / "worktrees"
     if not worktrees_dir.is_dir():
@@ -414,13 +475,14 @@ def check_clean_worktree(plan_file: Path) -> list[str]:
 
     result = subprocess.run(
         ["git", "status", "--porcelain"],
-        capture_output=True, text=True, timeout=10,
+        capture_output=True,
+        text=True,
+        timeout=10,
         cwd=main_dir,
     )
     if result.returncode == 0 and result.stdout.strip():
         issues.append(
-            f"Uncommitted changes in {main_dir}. "
-            "Commit or stash before running swarm."
+            f"Uncommitted changes in {main_dir}. Commit or stash before running swarm."
         )
 
     return issues
@@ -446,11 +508,15 @@ def check_remote_origin(plan_file: Path) -> list[str]:
 
     result = subprocess.run(
         ["git", "remote", "get-url", "origin"],
-        capture_output=True, text=True, timeout=10,
+        capture_output=True,
+        text=True,
+        timeout=10,
         cwd=main_dir,
     )
     if result.returncode != 0:
-        issues.append("No remote 'origin' configured. Swarm needs a remote to push branches and create PRs.")
+        issues.append(
+            "No remote 'origin' configured. Swarm needs a remote to push branches and create PRs."
+        )
 
     return issues
 
@@ -479,11 +545,15 @@ def check_toolchain(plan_file: Path) -> list[str]:
 
     result = subprocess.run(
         ["make", "build"],
-        capture_output=True, text=True, timeout=120,
+        capture_output=True,
+        text=True,
+        timeout=120,
         cwd=main_dir,
     )
     if result.returncode != 0:
-        stderr_tail = result.stderr.strip().splitlines()[-5:] if result.stderr.strip() else []
+        stderr_tail = (
+            result.stderr.strip().splitlines()[-5:] if result.stderr.strip() else []
+        )
         detail = "\n".join(stderr_tail)
         issues.append(f"`make build` failed in {main_dir}:\n{detail}")
 
@@ -583,7 +653,9 @@ def cmd_prereq(args: argparse.Namespace) -> None:
     # 5. Toolchain (run last — slowest check, skip if earlier checks failed)
     has_blockers = any(issues for _, issues in all_issues)
     if has_blockers:
-        all_issues.append(("Toolchain (make build)", ["Skipped — fix above issues first"]))
+        all_issues.append(
+            ("Toolchain (make build)", ["Skipped — fix above issues first"])
+        )
     else:
         all_issues.append(("Toolchain (make build)", check_toolchain(plan_file)))
 
@@ -599,7 +671,9 @@ def cmd_prereq(args: argparse.Namespace) -> None:
             print(f"OK    {category}")
 
     if has_errors:
-        print("\nPrerequisite check FAILED. Fix the issues above before running /swarm.")
+        print(
+            "\nPrerequisite check FAILED. Fix the issues above before running /swarm."
+        )
         sys.exit(1)
     else:
         print("\nAll prerequisites OK.")
@@ -631,7 +705,11 @@ def cmd_parse(args: argparse.Namespace) -> None:
 
     # Record base branch (must run inside a git repo)
     main_dir = None
-    for candidate in [plan_file.parent, plan_file.parent.parent, plan_file.parent.parent.parent]:
+    for candidate in [
+        plan_file.parent,
+        plan_file.parent.parent,
+        plan_file.parent.parent.parent,
+    ]:
         if (candidate / "main").is_dir():
             main_dir = candidate / "main"
             break
@@ -640,7 +718,9 @@ def cmd_parse(args: argparse.Namespace) -> None:
 
     base_branch = subprocess.run(
         ["git", "branch", "--show-current"],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
         cwd=main_dir,
     ).stdout.strip()
 
@@ -676,7 +756,9 @@ def cmd_update(args: argparse.Namespace) -> None:
     status_data = require_status(plan_file)
 
     if args.status not in VALID_STATUSES:
-        error(f"Invalid status '{args.status}'. Valid: {', '.join(sorted(VALID_STATUSES))}")
+        error(
+            f"Invalid status '{args.status}'. Valid: {', '.join(sorted(VALID_STATUSES))}"
+        )
 
     phases = args.phase
     prs = args.pr if args.pr else [None] * len(phases)
@@ -767,15 +849,19 @@ def cmd_check_group(args: argparse.Namespace) -> None:
     for pid, info in status_data.get("phases", {}).items():
         group = info.get("group")
         if group:
-            groups[group].append({"id": pid, "status": info["status"], "pr": info.get("pr")})
+            groups[group].append(
+                {"id": pid, "status": info["status"], "pr": info.get("pr")}
+            )
 
     ready_groups = []
     for group_label, members in sorted(groups.items()):
         if all(m["status"] == "PR_APPROVED" for m in members):
-            ready_groups.append({
-                "group": group_label,
-                "phases": [{"id": m["id"], "pr": m["pr"]} for m in members],
-            })
+            ready_groups.append(
+                {
+                    "group": group_label,
+                    "phases": [{"id": m["id"], "pr": m["pr"]} for m in members],
+                }
+            )
 
     if args.json:
         print(json.dumps({"groups": ready_groups}, indent=2))
@@ -797,6 +883,9 @@ def cmd_add_phase(args: argparse.Namespace) -> None:
     phase_id = args.id
     if phase_id in status_data.get("phases", {}):
         error(f"Phase '{phase_id}' already exists in status file")
+
+    # Validate branch name
+    validate_branch_name(args.branch, context=f"synthetic phase '{args.id}'")
 
     # Validate that dependency phases exist
     for dep in args.depends:
@@ -829,19 +918,25 @@ def main() -> None:
     p_prereq.add_argument("plan_file", help="Path to plan file")
 
     # parse
-    p_parse = subparsers.add_parser("parse", help="Validate plan and output execution graph")
+    p_parse = subparsers.add_parser(
+        "parse", help="Validate plan and output execution graph"
+    )
     p_parse.add_argument("plan_file", help="Path to plan file")
 
     # update
     p_update = subparsers.add_parser("update", help="Update phase status")
     p_update.add_argument("plan_file", help="Path to plan file")
-    p_update.add_argument("--phase", type=str, nargs="+", required=True, help="Phase ID(s)")
+    p_update.add_argument(
+        "--phase", type=str, nargs="+", required=True, help="Phase ID(s)"
+    )
     p_update.add_argument("--status", required=True, help="New status")
     p_update.add_argument("--pr", nargs="+", help="PR number(s)")
     p_update.add_argument("--attempts", type=int, help="Attempt count")
 
     # status
-    p_status = subparsers.add_parser("status", help="Display current state of all phases")
+    p_status = subparsers.add_parser(
+        "status", help="Display current state of all phases"
+    )
     p_status.add_argument("plan_file", help="Path to plan file")
 
     # next
@@ -850,17 +945,28 @@ def main() -> None:
     p_next.add_argument("--json", action="store_true", help="Output as JSON only")
 
     # check-group
-    p_group = subparsers.add_parser("check-group", help="Show parallel groups ready for integration")
+    p_group = subparsers.add_parser(
+        "check-group", help="Show parallel groups ready for integration"
+    )
     p_group.add_argument("plan_file", help="Path to plan file")
     p_group.add_argument("--json", action="store_true", help="Output as JSON only")
 
     # add-phase
-    p_add = subparsers.add_parser("add-phase", help="Add synthetic phase for integration fixes")
+    p_add = subparsers.add_parser(
+        "add-phase", help="Add synthetic phase for integration fixes"
+    )
     p_add.add_argument("plan_file", help="Path to plan file")
     p_add.add_argument("--id", required=True, help="Phase ID (e.g. I-A)")
-    p_add.add_argument("--depends", nargs="+", required=True, help="Phase IDs this depends on")
+    p_add.add_argument(
+        "--depends", nargs="+", required=True, help="Phase IDs this depends on"
+    )
     p_add.add_argument("--branch", required=True, help="Branch name for this phase")
-    p_add.add_argument("--synthetic", action="store_true", default=True, help="Mark as synthetic (default)")
+    p_add.add_argument(
+        "--synthetic",
+        action="store_true",
+        default=True,
+        help="Mark as synthetic (default)",
+    )
 
     args = parser.parse_args()
 

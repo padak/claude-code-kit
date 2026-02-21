@@ -45,7 +45,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/swarm.py prereq <plan-file>
 
 **Execution group**: Phases at the same dependency level that can run in parallel. `swarm.py parse` computes these from the dependency graph. A group with one phase is **solo**; 2+ phases is **parallel**.
 
-**Group label**: A letter identifier (A, B, C...) assigned to each execution group by `swarm.py parse`. Used in branch names like `integration/A` and status tracking.
+**Group label**: A letter identifier (A, B, C...) assigned to each execution group by `swarm.py parse`. Used in branch names like `integration-A` and status tracking.
 
 **Solo phase**: PR is merged directly to base on approval → MERGED → DONE.
 
@@ -58,6 +58,8 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/swarm.py prereq <plan-file>
 **Dependency graph**: Phases declare explicit dependencies via `DEPENDS` attribute; implicit dependencies are auto-detected from overlapping files. See [references/dependency-graph.md](references/dependency-graph.md). For guidance on writing plans and maximizing parallelism, see [references/plan-writing-guide.md](references/plan-writing-guide.md).
 
 **Worktrees and Makefile**: Each phase runs in its own git worktree. The Makefile provides `setup`, `build`, `test`, `worktree`, and `worktree-remove` targets. See [references/worktree-guide.md](references/worktree-guide.md).
+
+**Workspace file**: VS Code multi-root workspace (`<project-name>.code-workspace`) at the project root. Synced automatically by `make sync-workspace` (called from `worktree` and `worktree-remove` targets).
 
 ## Status Diagram
 
@@ -331,7 +333,7 @@ When `swarm.py check-group` reports a complete parallel group (all phases PR_APP
 ```bash
 cd main
 git fetch origin
-git checkout -b integration/<group> <base-branch>
+git checkout -b integration-<group> <base-branch>
 git merge origin/<phase-1-branch>
 git merge origin/<phase-2-branch>
 ```
@@ -358,8 +360,8 @@ If any check fails → proceed to 6.4.
 ### All Good — Merge Integration Branch
 
 ```bash
-git push -u origin integration/<group>
-gh pr create --title "Integration: <group description>" --base <base-branch> --head integration/<group> --body "$(cat <<'PREOF'
+git push -u origin integration-<group>
+gh pr create --title "Integration: <group description>" --base <base-branch> --head integration-<group> --body "$(cat <<'PREOF'
 ## Summary
 Integrates parallel phases: N1, N2, ...
 
@@ -377,8 +379,8 @@ gh pr merge <integration-pr> --merge --delete-branch
 ```
 Close individual phase PRs:
 ```bash
-gh pr close <pr-1> --comment "Merged via integration/<group>"
-gh pr close <pr-2> --comment "Merged via integration/<group>"
+gh pr close <pr-1> --comment "Merged via integration-<group>"
+gh pr close <pr-2> --comment "Merged via integration-<group>"
 ```
 Update status:
 ```bash
@@ -394,7 +396,7 @@ Original phases stay **PR_APPROVED**. Tech Lead creates a synthetic fix phase.
 ```bash
 cd main
 git checkout <base-branch>
-git branch -D integration/<group>
+git branch -D integration-<group>
 gh issue create --title "Integration <group>: <issue summary>" --body "<detailed finding>" --label "swarm-integration-fix"
 swarm.py add-phase <plan-file> --id I-<group> --depends <N1> <N2> --branch fix-integration-<group> --synthetic
 make worktree BRANCH=fix-integration-<group>
