@@ -8,7 +8,7 @@ Swarm takes a phased implementation plan and executes it using parallel AI agent
 
 1. **Tech Lead** (orchestrator) parses the plan, builds a dependency graph, creates git worktrees, and spawns DevAgents
 2. **DevAgents** (workers) implement code in isolated branches, run tests, and create PRs
-3. **Tech Lead** reviews each PR rigorously — merges on approval, creates issues and spawns fix agents on rejection
+3. **Tech Lead** reviews each PR with mandatory evidence tables and gated verification — merges on approval, creates issues and spawns fix agents on rejection
 4. Independent phases run **in parallel** via git worktrees — no conflicts, significant time savings
 
 ## Requirements

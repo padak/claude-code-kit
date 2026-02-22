@@ -1,7 +1,7 @@
 ---
 name: swarm
-description: Orchestrates multi-agent implementation using Tech Lead + DevAgent pattern. Parses phased plans, builds dependency graphs, spawns DevAgents per phase with automatic parallelization via git worktrees when safe. Reviews PRs rigorously, handles retries with escalation. Use when the user has a phased implementation plan and wants to execute it with parallel agents.
-version: 1.1.0
+description: Orchestrates multi-agent implementation using Tech Lead + DevAgent pattern. Parses phased plans, builds dependency graphs, spawns DevAgents per phase with automatic parallelization via git worktrees when safe. Reviews PRs with mandatory evidence tables, handles retries with escalation. Use when the user has a phased implementation plan and wants to execute it with parallel agents.
+version: 1.3.0
 argument-hint: "[init | <plan-file>]"
 ---
 
@@ -51,7 +51,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/swarm.py prereq <plan-file>
 
 **Parallel phase**: PR stays open on remote for integration merge in Step 6. On approval → PR_APPROVED. Code reaches base only after all group phases pass integration review.
 
-**Roles**: Tech Lead creates/removes all worktrees and branches. DevAgent only implements code and creates PRs.
+**Roles**: You are the Tech Lead. You orchestrate, review, and manage — you MUST NOT implement code yourself. All implementation is delegated to DevAgents. Tech Lead creates/removes worktrees and branches, spawns DevAgents, reviews PRs, merges or rejects. DevAgent only implements code and creates PRs.
 
 **DevAgent**: The Developer agent spawned by Tech Lead to implement a phase. Referred to as "DevAgent" throughout this document and related guides.
 
@@ -101,14 +101,15 @@ Synthetic integration fix phases (Step 6.4) follow the same flow with ID prefix 
 2. Identify phases with all dependencies DONE
 3. Tech Lead: create worktree + branch for each ready phase (Step 2)
 4. Spawn DevAgents — parallel when multiple phases ready (Step 3)
-5. Tech Lead: review each PR (Step 4 + Step 5)
+5. Post-spawn verification: status, PR existence, correct base (Step 3.5)
+6. Tech Lead: review each PR with mandatory evidence table (Step 4 + Step 5)
    - APPROVED solo → merge → DONE
    - APPROVED parallel → PR_APPROVED (PR stays open)
-   - REJECTED → create issues, spawn fix DevAgent
+   - REJECTED → create + verify issues, spawn fix DevAgent
    - Max attempts → ESCALATED
-6. All phases in parallel group PR_APPROVED → integration review (Step 6)
+7. All phases in parallel group PR_APPROVED → integration review (Step 6)
    Return to step 3 — newly unblocked phases are now ready
-7. All phases DONE (or ESCALATED) → summarize to user (Step 7)
+8. All phases DONE (or ESCALATED) → summarize to user (Step 7)
 ```
 
 ## Step 1: Parse Plan and Build Dependency Graph
@@ -194,59 +195,149 @@ Task(
 
 The `dev-agent` runs on Sonnet with preloaded instructions from the swarm-developer-guide skill, maxTurns=50, and bypassPermissions mode.
 
+## Step 3.5: Post-Spawn Verification Gate
+
+Before reviewing a phase, you MUST verify the DevAgent completed its work. Run these three checks in order. Only proceed to Step 4 after all three pass.
+
+### Check 1: Status Verification
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/scripts/swarm.py status <plan-file>
+```
+The phase MUST be in FOR_REVIEW status. If it is still DEVELOPING or DISPATCHED, the DevAgent did not complete its work. In that case:
+- Set status to REJECTED
+- Create an issue: `gh issue create --title "Phase N: DevAgent failed to complete" --body "Phase remained in DEVELOPING/DISPATCHED status. DevAgent did not finish implementation." --label "swarm-fix"`
+- Proceed to REJECTED flow in Step 5
+
+### Check 2: PR Existence
+```bash
+gh pr list --head <branch-name> --json number,url,state
+```
+This MUST return at least one open PR. If no PR exists:
+- Set status to REJECTED
+- Create an issue: `gh issue create --title "Phase N: DevAgent failed to create PR" --body "No PR found for branch <branch-name>. DevAgent did not create a pull request." --label "swarm-fix"`
+- Proceed to REJECTED flow in Step 5
+
+### Check 3: Correct Base Branch
+```bash
+gh pr view <pr-number> --json baseRefName
+```
+The `baseRefName` MUST match the expected base branch. If it does not:
+- Close the incorrect PR: `gh pr close <pr-number> --comment "Wrong base branch. Expected <base-branch>, got <actual>."`
+- Set status to REJECTED
+- Create an issue: `gh issue create --title "Phase N: PR has wrong base branch" --body "PR #<N> targets <actual> instead of <base-branch>." --label "swarm-fix"`
+- Proceed to REJECTED flow in Step 5
+
+**Only proceed to Step 4 after all three checks pass.**
+
 ## Step 4: Review the PR
 
 **Do NOT approve until ALL checks pass.** Incomplete phases are the most common swarm failure.
 
+**First: Re-read the phase from the plan file.** Open the plan file using the Read tool and extract the phase between `<!-- PHASE:N -->` and `<!-- /PHASE:N -->` markers. Extract the exact list of:
+- Files to Create/Modify
+- Acceptance Criteria
+- Tests Required
+
+**Review ONLY against the plan, not against the PR description.** The plan is the source of truth. The PR description may be incomplete or inaccurate.
+
 ### 4.1 File Inventory
-Read every file listed in "Files to Create/Modify". FAIL if:
-- Any file is missing
-- Any file contains unfinished code (empty bodies, TODO/FIXME, mocks, placeholders)
 
-### 4.2 Acceptance Criteria
-For EACH criterion, build an evidence table:
+For EVERY file listed in "Files to Create/Modify" in the plan:
+- Read the file in the worktree using the Read tool. Do NOT rely on PR diff alone — diff does not show files that the DevAgent forgot to create.
+- Cross-reference with: `gh pr diff <pr-number> --name-only`
+- Verify the file contains real, complete implementation
 
-| Criterion | Evidence (file:line or test) | Verified |
-|-----------|------------------------------|----------|
-| Criterion 1 | src/auth.ts:42 | test passes |
-| Criterion 2 | migration has UNIQUE constraint | verified |
+FAIL if:
+- Any file from the plan is missing in the worktree
+- Any file is empty or contains only stubs
+- Any file contains TODO/FIXME/placeholder/mock code
+- Any file exists in the plan but not in the PR diff (DevAgent forgot to commit it)
 
-FAIL if any criterion has no evidence or is only partially implemented.
+### 4.2 Acceptance Criteria — Mandatory Evidence Table
+
+For EACH criterion from the plan, you MUST find concrete evidence. You MUST produce the evidence table below. It is not optional. DO NOT use any other format. DO NOT skip the evidence table.
+
+| Criterion | File:Line | Test | Status |
+|-----------|-----------|------|--------|
+| Criterion 1 from plan | src/auth.ts:42 | test_auth_login | PASS |
+| Criterion 2 from plan | src/db.ts:15 | test_db_constraint | PASS |
+| Criterion 3 from plan | MISSING | MISSING | FAIL |
+
+For each criterion:
+- Open the relevant file and identify the exact line where it is implemented
+- Identify the test that verifies it
+- If you cannot find file:line evidence for ANY criterion: mark as FAIL
+
+FAIL if any criterion has Status = FAIL, MISSING evidence, or is only partially implemented.
 
 ### 4.3 Tests
-Run `make test` in the worktree. FAIL if:
-- Any test fails
-- Test count is significantly lower than "Tests Required"
-- Tests are trivial (don't verify real behavior)
+
+Run `make test` in the worktree. Capture the output.
+
+- Count: pass / fail / skip
+- Compare test count against "Tests Required" in the plan
+- FAIL if any test fails
+- FAIL if test count is significantly lower than planned
+- FAIL if tests are trivial (don't verify real behavior — e.g. `assert True`, `expect(1).toBe(1)`)
+- FAIL if any tests are skipped
 
 ### 4.4 Integration Points
+
 Check CLAUDE.md section **"Project Structure"** for conventions (routing, config, migrations).
 Verify new code is properly wired into the existing project. FAIL if any integration is missing.
 
 ### 4.5 Code Quality
+
 Check CLAUDE.md sections **"Code Quality Standards"** and **"Config Management"**.
-FAIL if code violates project conventions.
+
+Run prohibited patterns check in the worktree:
+```bash
+rg -n "TODO|FIXME|HACK|placeholder|not implemented|implement later" --type-not md <worktree-path>
+```
+FAIL if any matches are found in new code. FAIL if code violates project conventions.
 
 ### 4.6 Verdict
 
-**APPROVED** — all checks pass:
+You MUST include the full evidence in your verdict. DO NOT approve with just "looks good" — the evidence table is proof of review.
+
+**APPROVED** — ALL checks pass. Verdict MUST contain:
 ```markdown
 ## PR Review: Phase N
-### File Inventory: PASS (N/N files, no stubs)
+
+### File Inventory: PASS
+Files verified (Read tool): <list each file checked>
+Files in PR diff: <list from gh pr diff --name-only>
+Missing files: NONE
+
 ### Acceptance Criteria: PASS
-| Criterion | Evidence | Verified |
-|-----------|----------|----------|
-### Tests: PASS (N/N pass)
+| Criterion | File:Line | Test | Status |
+|-----------|-----------|------|--------|
+| <each criterion from plan> | <file:line> | <test name> | PASS |
+
+### Tests: PASS
+Output: N pass, 0 fail, 0 skip
+Plan required: M tests
+
 ### Integration: PASS
 ### Code Quality: PASS
+Prohibited patterns: 0 matches
+
 **VERDICT: APPROVED**
 ```
 
-**REJECTED** — any check fails:
+**REJECTED** — any check fails. Verdict MUST contain specific failed checks:
 ```markdown
 ## PR Review: Phase N
+
 ### FAILED CHECKS:
-1. **[Check name]**: specific issue, what is missing, what to fix
+1. **[Check name]**: specific issue — what is missing, what file, what criterion
+2. **[Check name]**: specific issue
+
+### Evidence Table (partial):
+| Criterion | File:Line | Test | Status |
+|-----------|-----------|------|--------|
+| <criterion> | <evidence or MISSING> | <test or MISSING> | PASS/FAIL |
+
 **VERDICT: REJECTED**
 ```
 
@@ -282,10 +373,20 @@ All PR_APPROVED → proceed to Step 6. Otherwise continue reviewing other PRs.
 
 ### REJECTED (attempt < MAX_REVIEW_ATTEMPTS)
 
-**Tech Lead: close PR, create issues, prepare fix worktree:**
+**Tech Lead: close PR, create issues, verify issues, prepare fix worktree:**
 ```bash
 gh pr close <pr-number>
 gh issue create --title "Phase N: <failed check summary>" --body "<detailed finding>" --label "swarm-fix"
+```
+
+**Verify issue was created** — the fix agent NEEDS these issues to know what to fix:
+```bash
+gh issue view <issue-number> --json number,title,url
+```
+If issue verification fails, retry `gh issue create`. DO NOT proceed without verified issues.
+
+Create one issue per failed check. Then prepare the fix worktree:
+```bash
 make worktree-remove BRANCH=<branch-name>
 make worktree BRANCH=fix-<branch-name>
 cd ../worktrees/fix-<branch-name> && git fetch origin && git merge origin/<branch-name>
@@ -312,7 +413,7 @@ Task(
   """
 )
 ```
-Then re-review from Step 4.
+Then re-review from Step 3.5 (post-spawn verification) before proceeding to Step 4.
 
 ### ESCALATED (attempt >= MAX_REVIEW_ATTEMPTS)
 ```bash
