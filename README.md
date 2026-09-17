@@ -41,16 +41,17 @@ Each skill is its own plugin, so nothing arrives that you did not ask for. Brows
 
 ## Configuration
 
-Plugins cannot install user-level configuration, so `.claude/settings.json` and `CLAUDE.md` are copied by hand:
+Plugins cannot install user-level configuration, so `.claude/settings.json`, `CLAUDE.md` and `.claude/rules/` are copied by hand:
 
 ```bash
 git clone https://github.com/padak/claude-code-kit.git
 cd claude-code-kit
 cp .claude/settings.json ~/.claude/settings.json
 cp CLAUDE.md ~/.claude/CLAUDE.md
+mkdir -p ~/.claude/rules && cp .claude/rules/*.md ~/.claude/rules/
 ```
 
-Read both before overwriting yours — they are opinionated.
+Read them before overwriting yours — they are opinionated.
 
 ### Why this `settings.json`
 
@@ -67,14 +68,20 @@ Two hooks:
 
 ### Why this `CLAUDE.md`
 
-Most of it exists to close off shortcuts that are locally convenient and globally expensive:
+`CLAUDE.md` is loaded into every session, so it holds only what applies everywhere and stays under 50 lines. Language-specific rules live in `.claude/rules/` with a `paths:` front matter, so the Python rules load only when Claude touches a `.py` file and cost nothing otherwise.
 
+What the global file does:
+
+- **Sets the audience.** I am a product manager. Claude reports outcomes and user impact — what is now, what changes, what it means — not implementation detail, and shows code only when a decision needs it. Output is short because I read results, not process.
+- **KISS.** The simplest thing that solves the problem; no speculative architecture. If complexity looks necessary, Claude has to argue for it first.
+- **Splits thinking from doing.** The main session (Fable) plans, decides and reviews; execution goes to Sonnet/Opus sub-agents, in parallel when tasks are independent, never for work that is faster inline.
 - **No mocks, no stubs, no `TODO: implement later`.** If something is in the plan it gets built, or Claude asks. Left unstated, a blocked step quietly becomes a fake one that passes tests and fails in production.
-- **No hardcoded values, no silent defaults.** Config lives in config files; a missing required variable fails loudly at startup instead of falling back to an invented value. A wrong default is much harder to debug than a crash.
-- **Parallel subagents for independent work** — mandatory, not a suggestion, because the default instinct is to do things one at a time.
+- **No hardcoded values, no silent defaults.** Application config lives in config files; a missing required variable fails loudly at startup instead of falling back to an invented value. A wrong default is much harder to debug than a crash.
 - **Research before implementing unfamiliar tech**, via Perplexity MCP, with explicit cost tiers so the cheap tool is the default and the expensive one is deliberate.
 - **Czech in conversation, English in files.** Separating the language you think in from the language the artifact ships in keeps the codebase readable to everyone else.
-- **Clean commits** — no `Co-Authored-By`, no generated-with footers.
+- **Clean, safe commits** — no `Co-Authored-By`, no generated-with footers, no secrets in any tracked file.
+
+`.claude/rules/python.md` adds the Python conventions: `uv` for environments and dependencies, `httpx`, `pathlib`, `pytest`, `python-dotenv`, specific exceptions.
 
 ### `.zshrc`
 
