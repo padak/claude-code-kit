@@ -6,7 +6,6 @@
       "WebFetch",
       "WebSearch",
       "Skill",
-
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(grep:*)",
@@ -33,7 +32,6 @@
       "Bash(lsof:*)",
       "Bash(mkdir -p /tmp:*)",
       "Bash(timeout:*)",
-
       "Bash(git status:*)",
       "Bash(git log:*)",
       "Bash(git diff:*)",
@@ -54,7 +52,6 @@
       "Bash(git reset:*)",
       "Bash(git init:*)",
       "Bash(git ls-tree:*)",
-
       "Bash(python:*)",
       "Bash(python3:*)",
       "Bash(pip show:*)",
@@ -63,14 +60,12 @@
       "Bash(.venv/bin/python:*)",
       "Bash(source .venv/bin/activate)",
       "Bash(pytest:*)",
-
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(codex:*)",
       "Bash(gemini:*)",
       "Bash(agy:*)",
-
       "Bash(make:*)",
       "Bash(curl:*)",
       "Bash(scp:*)",
@@ -80,7 +75,6 @@
       "Bash(terraform:*)",
       "Bash(aws:*)",
       "Bash(openssl:*)",
-
       "WebFetch(domain:github.com)",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_snapshot",
@@ -226,12 +220,20 @@
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true,
-    "explanatory-output-style@claude-code-plugins": true,
+    "document-skills@anthropic-agent-skills": false,
+    "explanatory-output-style@claude-code-plugins": false,
+    "developer@keboola-claude-kit": false,
+    "component-developer@keboola-claude-kit": true,
+    "dataapp-developer@keboola-claude-kit": false,
     "agent-sdk-dev@claude-code-plugins": true,
+    "example-skills@anthropic-agent-skills": false,
     "commit-commands@claude-code-plugins": true,
     "feature-dev@claude-code-plugins": true,
-    "developer@keboola-claude-kit": true,
-    "component-developer@keboola-claude-kit": true,
-    "dataapp-developer@keboola-claude-kit": true
+    "kbagent@keboola-agent-cli": true,
+    "keboola-crm@keboola-crm-marketplace": false,
+    "cloudflare@cloudflare": false,
+    "superpowers@claude-plugins-official": false,
+    "scout@scout-plugin": false,
+    "artifact-hub@kbc-artifact-hub": true
   }
 }
