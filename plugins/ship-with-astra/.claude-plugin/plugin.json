@@ -1,0 +1,18 @@
+{
+  "name": "ship-with-astra",
+  "version": "1.0.0",
+  "description": "End-to-end delivery of a change with GPT Astra (Codex CLI) as the second pair of eyes: short design brief, Astra design consultation, sub-agent build, PR, Astra PR review, then auto-fix and auto-merge until the PR is merged.",
+  "author": {
+    "name": "Petr Simecek",
+    "email": "petr@keboola.com"
+  },
+  "homepage": "https://github.com/padak/claude-code-kit",
+  "repository": "https://github.com/padak/claude-code-kit",
+  "keywords": [
+    "workflow",
+    "code-review",
+    "codex",
+    "github",
+    "auto-merge"
+  ]
+}
