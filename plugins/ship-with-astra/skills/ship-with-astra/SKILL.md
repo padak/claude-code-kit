@@ -65,6 +65,12 @@ codex exec review --base main -m gpt-6-astra -c model_reasoning_effort="high" \
 - Elsewhere: `gh pr merge <N> --merge --auto`.
 - Done means MERGED: if the session continues, follow CI and review comments until
   the PR is MERGED; otherwise list exactly what is pending.
+- After EVERY push to the PR (fix, review answer, conflict merge) read the live state
+  (`ccd_pr get_status` or `gh pr view --json autoMergeRequest`). A merge-queue
+  ejection (e.g. `merge_conflict`) or a push silently drops auto-merge; re-arm it
+  immediately. Never report AUTO-MERGE ENABLED from memory, only from that read.
+  A PR left un-armed after a conflict fix sits outside the queue while other
+  migrations land, and every one of them costs another conflict and CI run.
 
 ## Report
 
