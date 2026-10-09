@@ -84,6 +84,19 @@
       ]
     },
     {
+      "name": "ship-with-astra",
+      "source": "./plugins/ship-with-astra",
+      "description": "End-to-end delivery of a change with GPT Astra (Codex CLI) as the second pair of eyes: short design brief, Astra design consultation, sub-agent build, PR, Astra PR review, then auto-fix and auto-merge until the PR is merged.",
+      "version": "1.0.0",
+      "keywords": [
+        "workflow",
+        "code-review",
+        "codex",
+        "github",
+        "auto-merge"
+      ]
+    },
+    {
       "name": "swarm",
       "source": "./plugins/swarm",
       "description": "Orchestrated multi-agent implementation using a Tech Lead plus Developer pattern. Spawns Developer agents in isolated git worktrees per phase, reviews PRs, handles retries and escalation.",
