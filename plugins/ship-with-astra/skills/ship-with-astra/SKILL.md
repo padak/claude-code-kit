@@ -27,6 +27,10 @@ codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
 
 - Incorporate or explicitly rebut every finding. A second round
   (`codex exec resume --last ...`) only when a disagreement matters; stop after 2-3.
+- Write the final design to `$S/design.md`: the numbered decisions plus a numbered
+  "Risks to handle" list with EVERY risk and edge case Astra raised, each with how
+  it is handled (which decision, which test) or why it is rejected. Nothing Astra
+  raised is dropped silently: a risk that reaches the builder only half is how bugs ship.
 - Give the user a short summary: the final design, what Astra changed, what you
   rejected and why. Proceed without waiting unless a decision is genuinely theirs
   (scope change, new cloud dependency, product behaviour change).
@@ -34,8 +38,13 @@ codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
 ## 3. Build
 
 - Delegate to a builder sub-agent (`agnes-builder` in the Agnes repo, otherwise
-  `general-purpose`) with the final design. Tell it explicitly:
+  `general-purpose`) with the full `design.md`, risk list included. Tell it explicitly:
   - TDD: write the failing test first; a bug fix starts with a test that fails without it.
+  - Each of these failure scenarios that applies to the change gets its own test
+    (name the applicable ones in the brief, skip the rest):
+    partial success then retry; a retry after a commit whose response was lost;
+    a swallowed error in a helper that "never raises"; concurrent requests;
+    a switch or config toggled mid-operation; access revoked mid-operation.
   - Do NOT run tests locally (CPU); lint/type checks only. CI runs the tests.
   - No `Co-Authored-By` trailer, no AI attribution anywhere.
   - Repo rules (Agnes: no code comments, changelog fragment, PG-only Alembic migration,
@@ -43,22 +52,42 @@ codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
 - Read the diff yourself as a hostile reviewer (races, retries after partial success,
   limits, timeouts, auth edge cases, secrets in messages) and fix what you find.
 
-## 4. Pull request
+## 4. Review against the design
+
+A diff read and a generic review miss what the design promised but the code does
+not do. Before the PR, spawn a fresh reviewer that did not write the design
+(`agnes-reviewer-adversarial` in the Agnes repo, otherwise `general-purpose`).
+Give it `design.md`, Astra's design-review findings (`r1.md`, later rounds too)
+and the branch. It returns a checklist:
+
+- Every decision and every risk marked implemented / not / partial, with file:line evidence.
+- Every claimed defect proven: a script that fails, or a concrete input -> wrong output.
+  Unproven claims are not findings.
+
+Fix every confirmed finding with a regression test before opening the PR.
+
+## 5. Pull request
 
 - Push and open a ready (non-draft) PR. Body: what changed for users, why, how it
   was verified, what is deliberately not included. No AI footer.
 
-## 5. Astra review of the PR
+## 6. Astra review of the PR
+
+Pass the risk list, not a bare `codex exec review` (which cannot take a prompt
+together with `--base`). Write `$S/pr-review.md`: "Review `git diff origin/main...HEAD`
+for bugs. For each risk below, say whether the diff handles it, with file:line;
+then list other defects, each with a concrete failing input." followed by the
+"Risks to handle" list from `design.md`.
 
 ```bash
-codex exec review --base main -m gpt-6-astra -c model_reasoning_effort="high" \
-  --ephemeral -o "$S/review.md" < /dev/null
+codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
+  --skip-git-repo-check --ephemeral -o "$S/review.md" "$(cat "$S/pr-review.md")" < /dev/null
 ```
 
 - Fix every valid finding with a regression test; rebut the rest in a PR comment
   only if the user asked for comments, otherwise note it in the report.
 
-## 6. Arm the PR
+## 7. Arm the PR
 
 - Desktop app: `ccd_pr` `get_status` (bind the PR if needed), then `set_monitor`
   with auto-fix + address comments, and `set_auto_merge`.
