@@ -11,7 +11,7 @@ Fixed references (agnes.keboola.dev, CLI `agnes`):
 
 | What | Value |
 |---|---|
-| Content system | `ef74c6ed49c241f490b6fb95ad65f84e@3` (Product proposal; private Store item) |
+| Content system | `ef74c6ed49c241f490b6fb95ad65f84e@4` (Product proposal; private Store item) |
 | Design system | `ds_C-_CIyerl8dQ1ZzkXFE9zwrn@2` (slug `product-proposal`) |
 | Page template | `assets/template.html` (components, language toggle, TOC, decision forms) |
 | Markdown skeleton | `assets/template.md` (`<!-- cs:<id> -->` markers, `<!-- lang:cs -->` / `<!-- lang:en -->` blocks) |
@@ -19,7 +19,7 @@ Fixed references (agnes.keboola.dev, CLI `agnes`):
 | Design system rebuild | `python3 assets/build_design_system.py` (keeps bundle and template CSS in sync) |
 | Linear | team TEAG, `https://linear.app/keboola/issue/TEAG-<n>` |
 
-Read `agnes content-system show ef74c6ed49c241f490b6fb95ad65f84e@3` before writing: it holds the section order, word limits, voice and banned phrases. Read `assets/template.html` before building the page.
+Read `agnes content-system show ef74c6ed49c241f490b6fb95ad65f84e@4` before writing: it holds the section order, word limits, voice and banned phrases. Read `assets/template.html` before building the page.
 
 ## Workflow
 
@@ -54,7 +54,7 @@ Read `agnes content-system show ef74c6ed49c241f490b6fb95ad65f84e@3` before writi
 - Self-review against the content system checklist: every Agnes claim has a path or link, every competitor claim a source, verified/inferred/unverified labels where needed, no filler, both languages say the same.
 
 ### 6. Publish
-- New: `agnes artifact create --html page.html --markdown-source draft.md --title "<title>" --visibility instance --audience everyone --design-system ds_C-_CIyerl8dQ1ZzkXFE9zwrn@2 --content-system ef74c6ed49c241f490b6fb95ad65f84e@3 --summary "<1-2 sentences>" --keywords teag-<n>,<topic words>`.
+- New: `agnes artifact create --html page.html --markdown-source draft.md --title "<title>" --visibility instance --audience everyone --design-system ds_C-_CIyerl8dQ1ZzkXFE9zwrn@2 --content-system ef74c6ed49c241f490b6fb95ad65f84e@4 --summary "<1-2 sentences>" --keywords teag-<n>,<topic words>`.
 - The page header shows a hardcoded version label (`vN` in the metadata line of `draft.md`): before every build set it to the version this publish will create (current head + 1), or the page shows a stale version.
 - Update: `agnes artifact update <id> --base-version <head> --html ... --markdown-source ... --note "<what changed>" --summary ... --keywords ...` (summary and keywords every time).
 - Settings: `agnes artifact settings <id> --form-responses` (comments stay visible to everyone; everyone with access may answer).

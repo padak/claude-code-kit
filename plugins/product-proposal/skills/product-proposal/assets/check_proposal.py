@@ -13,7 +13,7 @@ import re
 import subprocess
 import tempfile
 
-REF = "ef74c6ed49c241f490b6fb95ad65f84e@3"
+REF = "ef74c6ed49c241f490b6fb95ad65f84e@4"
 LANGS = ("cs", "en")
 LANG_RE = re.compile(r"^<!--\s*(?:lang:(cs|en)|/lang)\s*-->\s*$")
 

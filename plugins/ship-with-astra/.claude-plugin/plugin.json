@@ -1,6 +1,6 @@
 {
   "name": "ship-with-astra",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "End-to-end delivery of a change with GPT Astra (Codex CLI) as the second pair of eyes: short design brief, Astra design consultation, sub-agent build, PR, Astra PR review, then auto-fix and auto-merge until the PR is merged.",
   "author": {
     "name": "Petr Simecek",
