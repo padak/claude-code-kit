@@ -37,15 +37,26 @@ codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
 
 ## 3. Build
 
-- Delegate to a builder sub-agent (`agnes-builder` in the Agnes repo, otherwise
-  `general-purpose`) with the full `design.md`, risk list included. Tell it explicitly:
+- Slice the work so each PR has one concern and can be reviewed in one pass
+  (rule of thumb: one data area, one surface family). A PR with many tables,
+  concurrency and several surfaces at once is too big: split it before building.
+- Delegate each slice to a builder sub-agent (`agnes-builder` in the Agnes repo,
+  otherwise `general-purpose`) with the full `design.md`, risk list included. Tell it explicitly:
   - TDD: write the failing test first; a bug fix starts with a test that fails without it.
   - Each of these failure scenarios that applies to the change gets its own test
     (name the applicable ones in the brief, skip the rest):
     partial success then retry; a retry after a commit whose response was lost;
     a swallowed error in a helper that "never raises"; concurrent requests;
     a switch or config toggled mid-operation; access revoked mid-operation.
-  - Do NOT run tests locally (CPU); lint/type checks only. CI runs the tests.
+  - The invariants checklist, self-checked before handing back:
+    one global lock order for every operation that locks the same rows;
+    a state change and its side-table writes in one transaction;
+    caller identity only from the authenticated principal, never from an argument
+    the caller controls; explicit empty differs from omitted; every new path
+    behaves with its switch off and on every supported backend; values that cannot
+    be stored (NaN, binary) are rejected before hashing or saving.
+  - Push the branch but do NOT open the PR. The PR is opened only after steps 4-6 are clean.
+  - Do NOT run tests locally (CPU); lint/type checks only, touched tests remotely if available.
   - No `Co-Authored-By` trailer, no AI attribution anywhere.
   - Repo rules (Agnes: no code comments, changelog fragment, PG-only Alembic migration,
     runtime config, user docs page updated when user-visible).
@@ -55,7 +66,7 @@ codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
 ## 4. Review against the design
 
 A diff read and a generic review miss what the design promised but the code does
-not do. Before the PR, spawn a fresh reviewer that did not write the design
+not do. Spawn a fresh reviewer that did not write the design
 (`agnes-reviewer-adversarial` in the Agnes repo, otherwise `general-purpose`).
 Give it `design.md`, Astra's design-review findings (`r1.md`, later rounds too)
 and the branch. It returns a checklist:
@@ -64,30 +75,39 @@ and the branch. It returns a checklist:
 - Every claimed defect proven: a script that fails, or a concrete input -> wrong output.
   Unproven claims are not findings.
 
-Fix every confirmed finding with a regression test before opening the PR.
+## 5. Astra review of the branch (before the PR)
 
-## 5. Pull request
-
-- Push and open a ready (non-draft) PR. Body: what changed for users, why, how it
-  was verified, what is deliberately not included. No AI footer.
-
-## 6. Astra review of the PR
-
-Pass the risk list, not a bare `codex exec review` (which cannot take a prompt
-together with `--base`). Write `$S/pr-review.md`: "Review `git diff origin/main...HEAD`
-for bugs. For each risk below, say whether the diff handles it, with file:line;
-then list other defects, each with a concrete failing input." followed by the
-"Risks to handle" list from `design.md`.
+Run it in parallel with step 4. Pass the risk list, not a bare `codex exec review`
+(which cannot take a prompt together with `--base`). Write `$S/pr-review.md`:
+"Review `git diff origin/main...HEAD` for bugs. For each risk below, say whether the
+diff handles it, with file:line; then list other defects, each with a concrete failing
+input. Check especially: lock order across all operations on the same rows,
+transaction boundaries, identity taken from arguments, switch-off and other-backend paths."
+followed by the "Risks to handle" list from `design.md`.
 
 ```bash
 codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
   --skip-git-repo-check --ephemeral -o "$S/review.md" "$(cat "$S/pr-review.md")" < /dev/null
 ```
 
-- Fix every valid finding with a regression test; rebut the rest in a PR comment
-  only if the user asked for comments, otherwise note it in the report.
+## 6. Fix loop (until clean, still before the PR)
 
-## 7. Arm the PR
+- Merge the findings of steps 4 and 5 into one list; the builder fixes all of them,
+  each with a regression test, and commits WITHOUT pushing.
+- Astra reviews the fix diff (`git diff <last reviewed SHA>..HEAD`) before the push:
+  fixes are where new concurrency and atomicity bugs come from. Fix what it finds.
+- One push per round. Repeat until a round has no valid findings; rebut invalid ones
+  in the report.
+
+## 7. Pull request
+
+- Open a ready (non-draft) PR only now. Body: what changed for users, why, how it was
+  verified (both reviews clean, remote tests), what is deliberately not included. No AI footer.
+- Devin and CI findings after the PR follow the same loop: batch them, fix all,
+  Astra on the fix diff, one push. Never push fixes piecemeal: every push restarts
+  Devin and CI.
+
+## 8. Arm the PR
 
 - Desktop app: `ccd_pr` `get_status` (bind the PR if needed), then `set_monitor`
   with auto-fix + address comments, and `set_auto_merge`.
