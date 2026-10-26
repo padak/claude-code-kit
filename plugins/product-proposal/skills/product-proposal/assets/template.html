@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="cs" data-lang="cs" data-title-cs="[UKÁZKA] Návrh: Uložené filtry v reportech" data-title-en="[SAMPLE] Proposal: Saved report filters">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[UKÁZKA] Návrh: Uložené filtry v reportech</title>
+<link rel="stylesheet" href="/_static/fonts/fonts.css">
+<link rel="stylesheet" href="/ds/ds_C-_CIyerl8dQ1ZzkXFE9zwrn/css?v=2">
+<style>
+/* @component base */
+*,*::before,*::after{box-sizing:border-box}
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:5rem}
+body{margin:0;background:var(--ds-background);color:var(--ds-text);font-family:var(--ds-font-body);font-size:var(--size-body);line-height:var(--line-body);font-variant-numeric:tabular-nums}
+html[data-lang="cs"] body [lang="en"],html[data-lang="en"] body [lang="cs"]{display:none!important}
+a{color:var(--color-accent-default);text-underline-offset:.18em;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+code,kbd{font-family:var(--ds-font-mono);font-size:.875em;background:var(--color-bg-subtle);border:1px solid var(--ds-border);border-radius:var(--radius-sm);padding:.05em .3em;overflow-wrap:anywhere}
+h1,h2,h3,h4{line-height:var(--line-tight);color:var(--ds-text);text-wrap:balance}
+h3{font-size:var(--size-h3);font-weight:600;margin:var(--space-lg) 0 var(--space-sm)}
+h4{font-size:var(--size-body);font-weight:600;margin:0 0 var(--space-xs)}
+p,ul,ol,dl{margin:0 0 var(--space-sm)}
+ul,ol{padding-left:1.25rem}
+li+li{margin-top:.25rem}
+strong{font-weight:600}
+.pp-muted{color:var(--ds-muted)}
+.pp-small{font-size:var(--size-small)}
+.pp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--color-accent-default);outline-offset:2px}
+/* @component topbar */
+.pp-topbar{position:sticky;top:0;z-index:20;background:var(--ds-background);border-bottom:1px solid var(--ds-border)}
+.pp-topbar__inner{display:flex;align-items:center;gap:var(--space-sm);max-width:calc(var(--layout-toc) + var(--layout-wide) + var(--space-xl) + 2 * var(--space-md));margin:0 auto;padding:var(--space-xs) var(--space-md);min-height:3.25rem}
+.pp-topbar__title{flex:1 1 auto;min-width:0;font-weight:600;font-size:var(--size-small);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-topbar__meta{display:flex;align-items:center;gap:var(--space-xs);flex-wrap:wrap}
+.pp-lang{display:inline-flex;border:1px solid var(--color-border-strong);border-radius:999px;padding:2px;flex:none}
+.pp-lang button{font:inherit;font-size:var(--size-small);font-weight:600;letter-spacing:.04em;border:0;border-radius:999px;padding:.25rem .7rem;background:transparent;color:var(--ds-muted);cursor:pointer}
+.pp-lang button[aria-pressed="true"]{background:var(--ds-text);color:var(--ds-background)}
+@media (max-width:640px){.pp-topbar__title{display:none}.pp-topbar__meta{flex:1 1 auto}}
+/* @component badge */
+.pp-badge{display:inline-flex;align-items:center;gap:.4em;font-size:var(--size-small);font-weight:500;line-height:1.2;padding:.2em .6em;border:1px solid var(--ds-border);border-radius:999px;color:var(--ds-muted);background:var(--ds-surface);text-decoration:none;white-space:nowrap}
+a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-accent-default)}
+.pp-badge--linear{color:var(--color-accent-default);font-family:var(--ds-font-mono);font-weight:500}
+.pp-status::before{content:"";width:.5em;height:.5em;border-radius:50%;background:currentColor}
+.pp-status[data-status="draft"]{color:var(--ds-muted)}
+.pp-status[data-status="review"]{color:var(--color-accent-default)}
+.pp-status[data-status="approved"]{color:var(--color-status-ok)}
+.pp-status[data-status="rejected"]{color:var(--color-status-danger)}
+.pp-badge--concept{color:var(--color-status-warn);border:1px dashed currentColor;background:var(--ds-background);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.pp-ev{font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:.05em .4em;border-radius:var(--radius-sm);border:1px solid currentColor;vertical-align:.1em;white-space:nowrap}
+.pp-ev--verified{color:var(--color-status-ok)}
+.pp-ev--inferred{color:var(--ds-muted)}
+.pp-ev--unverified{color:var(--color-status-warn);border-style:dashed}
+/* @component layout */
+.pp-layout{display:grid;grid-template-columns:var(--layout-toc) minmax(0,1fr);gap:var(--space-xl);max-width:calc(var(--layout-toc) + var(--layout-wide) + var(--space-xl) + 2 * var(--space-md));margin:0 auto;padding:var(--space-lg) var(--space-md) var(--space-xl)}
+.pp-main{min-width:0;max-width:var(--layout-wide)}
+.pp-main p,.pp-main ul,.pp-main ol,.pp-main dl,.pp-prose{max-width:var(--layout-measure)}
+@media (max-width:960px){.pp-layout{grid-template-columns:minmax(0,1fr);gap:var(--space-md);padding-top:var(--space-md)}}
+/* @component header */
+.pp-header{margin-bottom:var(--space-lg)}
+.pp-kicker{font-size:var(--size-small);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ds-muted);margin:0 0 var(--space-xs)}
+.pp-header h1{font-family:var(--ds-font-heading);font-size:var(--size-h1);font-weight:600;letter-spacing:-.015em;margin:0 0 var(--space-md)}
+.pp-lead{font-size:var(--size-lead);line-height:1.55;max-width:var(--layout-measure);margin:0 0 var(--space-md)}
+.pp-facts{display:flex;flex-wrap:wrap;gap:var(--space-xs) var(--space-md);margin:0;padding:var(--space-sm) 0 0;border-top:1px solid var(--ds-border);font-size:var(--size-small);color:var(--ds-muted)}
+.pp-facts div{display:flex;gap:.35em}
+.pp-facts dt{font-weight:600;color:var(--ds-text)}
+.pp-facts dd{margin:0}
+@media (max-width:640px){.pp-header h1{font-size:1.75rem}}
+.pp-banner{border:1px dashed var(--color-border-strong);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-sm);font-size:var(--size-small);color:var(--ds-muted);margin:0 0 var(--space-md);max-width:var(--layout-measure)}
+/* @component toc */
+.pp-toc{position:sticky;top:4.5rem;align-self:start;max-height:calc(100vh - 5.5rem);overflow:auto;font-size:var(--size-small)}
+.pp-toc summary{font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ds-muted);cursor:pointer;padding:var(--space-xs) 0;list-style:none}
+.pp-toc summary::-webkit-details-marker{display:none}
+.pp-toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--ds-border)}
+.pp-toc li{margin:0}
+.pp-toc a{display:flex;gap:.6em;padding:.3rem .75rem;margin-left:-1px;border-left:2px solid transparent;color:var(--ds-muted);text-decoration:none;line-height:1.35}
+.pp-toc a:hover{color:var(--ds-text)}
+.pp-toc a[aria-current="true"]{color:var(--ds-text);border-left-color:var(--color-accent-default);font-weight:600}
+.pp-toc__num{font-family:var(--ds-font-mono);font-size:.75rem;color:var(--color-text-faint);min-width:1.4em;padding-top:.1em}
+@media (min-width:961px){.pp-toc summary{pointer-events:none}}
+@media (max-width:960px){.pp-toc{position:static;max-height:none;border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:0 var(--space-sm);background:var(--ds-surface)}.pp-toc summary{list-style:revert}.pp-toc ol{margin-bottom:var(--space-sm)}}
+/* @component section */
+.pp-section{padding-top:var(--space-lg);margin-top:var(--space-lg);border-top:1px solid var(--ds-border)}
+.pp-section>h2{display:flex;align-items:baseline;gap:.6em;font-family:var(--ds-font-heading);font-size:var(--size-h2);font-weight:600;letter-spacing:-.01em;margin:0 0 var(--space-md)}
+.pp-section__num{font-family:var(--ds-font-mono);font-size:var(--size-small);font-weight:500;color:var(--color-text-faint)}
+.pp-callout{border-left:3px solid var(--color-accent-default);background:var(--color-accent-soft);padding:var(--space-sm) var(--space-md);border-radius:0 var(--radius-md) var(--radius-md) 0;margin:0 0 var(--space-md);max-width:var(--layout-measure)}
+.pp-callout p:last-child{margin-bottom:0}
+/* @component table */
+.pp-table{overflow-x:auto;margin:0 0 var(--space-md);border:1px solid var(--ds-border);border-radius:var(--radius-md)}
+.pp-table table{width:100%;border-collapse:collapse;font-size:var(--size-small);line-height:1.45}
+.pp-table th,.pp-table td{text-align:left;vertical-align:top;padding:.55rem .75rem;border-bottom:1px solid var(--ds-border)}
+.pp-table thead th{background:var(--ds-surface);font-weight:600;color:var(--ds-muted);white-space:nowrap}
+.pp-table tbody tr:last-child>*{border-bottom:0}
+.pp-table td.num,.pp-table th.num{text-align:right}
+.pp-table .pp-col-agnes{background:var(--color-accent-soft)}
+.pp-table thead .pp-col-agnes{color:var(--color-accent-default)}
+.pp-table caption{caption-side:bottom;text-align:left;padding:.5rem .75rem;color:var(--ds-muted);font-size:var(--size-small)}
+.pp-mark{display:inline-flex;align-items:center;gap:.4em;white-space:nowrap}
+.pp-mark::before{content:"";flex:none;width:.7em;height:.7em;border-radius:50%;border:1.5px solid currentColor}
+.pp-mark--yes{color:var(--ds-text)}
+.pp-mark--yes::before{background:currentColor}
+.pp-mark--partial{color:var(--ds-muted)}
+.pp-mark--partial::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+.pp-mark--no{color:var(--color-text-faint)}
+.pp-yn{display:inline-block;font-weight:600;font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;padding:.1em .5em;border-radius:var(--radius-sm);border:1px solid var(--ds-border);color:var(--ds-muted);white-space:nowrap}
+.pp-yn--yes{background:var(--color-accent-default);border-color:var(--color-accent-default);color:var(--color-accent-on)}
+/* @component position-chart */
+.pp-position{margin:0 0 var(--space-md)}
+.pp-position svg{display:block;width:100%;height:auto;max-width:44rem;font-family:var(--ds-font-body)}
+.pp-pos-grid{stroke:var(--ds-border);stroke-width:1}
+.pp-pos-axis{stroke:var(--color-border-strong);stroke-width:1.25}
+.pp-pos-label{fill:var(--ds-muted);font-size:12px}
+.pp-pos-name{fill:var(--ds-text);font-size:13px;font-weight:500}
+.pp-pos-dot{fill:var(--ds-surface);stroke:var(--ds-muted);stroke-width:1.5}
+.pp-pos-dot--agnes{fill:var(--color-accent-default);stroke:var(--color-accent-default)}
+.pp-pos-dot--now{fill:var(--ds-background);stroke:var(--color-accent-default);stroke-width:2}
+.pp-pos-name--agnes{fill:var(--color-accent-default);font-weight:600}
+.pp-pos-path{fill:none;stroke:var(--color-accent-default);stroke-width:1.5;stroke-dasharray:5 4}
+.pp-pos-arrow{fill:var(--color-accent-default)}
+/* @component figure */
+.pp-figure{margin:0 0 var(--space-md)}
+.pp-figure figcaption{font-size:var(--size-small);color:var(--ds-muted);margin-top:var(--space-xs);max-width:var(--layout-measure)}
+.pp-figure figcaption strong{color:var(--ds-text)}
+.pp-shot__frame{position:relative;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden;background:var(--ds-surface)}
+.pp-shot__frame img{display:block;width:100%;height:auto}
+.pp-shot__overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.pp-shot__ring{fill:none;stroke:var(--color-accent-default);stroke-width:3;stroke-dasharray:8 6}
+.pp-shot__pin circle{fill:var(--color-accent-default);stroke:var(--ds-background);stroke-width:3}
+.pp-shot__pin text{fill:var(--color-accent-on);font-family:var(--ds-font-body);font-weight:700;font-size:20px;text-anchor:middle;dominant-baseline:central}
+.pp-shot__notes{margin:var(--space-xs) 0 0;padding-left:1.5rem}
+.pp-shot__notes li::marker{font-weight:700;color:var(--color-accent-default)}
+.pp-shot--concept .pp-shot__frame{border:2px dashed var(--color-status-warn)}
+.pp-shot--concept .pp-badge--concept{position:absolute;top:.6rem;left:.6rem;z-index:1}
+/* @component c4-diagram */
+.pp-c4{overflow-x:auto}
+.pp-c4 svg{display:block;width:100%;min-width:36rem;height:auto;font-family:var(--ds-font-body)}
+.c4-boundary{fill:none;stroke:var(--color-border-strong);stroke-width:1;stroke-dasharray:6 4}
+.c4-boundary-label{fill:var(--ds-muted);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.c4-box{fill:var(--ds-surface);stroke:var(--color-border-strong);stroke-width:1.25}
+.c4-box--changed{fill:var(--color-accent-soft);stroke:var(--color-accent-default);stroke-width:2}
+.c4-box--new{fill:var(--color-accent-soft);stroke:var(--color-accent-default);stroke-width:2;stroke-dasharray:6 4}
+.c4-box--external{fill:var(--color-bg-subtle);stroke:var(--ds-muted);stroke-dasharray:3 3}
+.c4-title{fill:var(--ds-text);font-size:14px;font-weight:600}
+.c4-tech{fill:var(--ds-muted);font-size:11px;font-family:var(--ds-font-mono)}
+.c4-desc{fill:var(--ds-muted);font-size:12px}
+.c4-edge{fill:none;stroke:var(--ds-muted);stroke-width:1.3}
+.c4-edge--changed{stroke:var(--color-accent-default);stroke-width:2}
+.c4-edge-label{fill:var(--ds-muted);font-size:11px}
+.c4-arrow{fill:var(--ds-muted)}
+.c4-arrow--changed{fill:var(--color-accent-default)}
+.pp-legend{display:flex;flex-wrap:wrap;gap:var(--space-xs) var(--space-md);list-style:none;padding:0;margin:var(--space-xs) 0 0;font-size:var(--size-small);color:var(--ds-muted)}
+.pp-legend li{display:flex;align-items:center;gap:.4em;margin:0}
+.pp-legend i{display:inline-block;width:1.4em;height:.9em;border-radius:3px;border:1.5px solid var(--color-border-strong);background:var(--ds-surface)}
+.pp-legend i.changed{border-color:var(--color-accent-default);background:var(--color-accent-soft)}
+.pp-legend i.new{border:1.5px dashed var(--color-accent-default);background:var(--color-accent-soft)}
+.pp-legend i.external{border:1.5px dashed var(--ds-muted);background:var(--color-bg-subtle)}
+/* @component decision-card */
+.pp-decision{border:1px solid var(--ds-border);border-radius:var(--ds-radius);padding:var(--space-md);margin:0 0 var(--space-md);background:var(--ds-background)}
+.pp-decision__head{display:flex;gap:var(--space-sm);align-items:baseline;margin-bottom:var(--space-sm)}
+.pp-decision__id{font-family:var(--ds-font-mono);font-size:var(--size-small);font-weight:600;color:var(--color-accent-default);flex:none}
+.pp-decision__head h3{margin:0;font-size:var(--size-h3)}
+.pp-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:var(--space-sm);margin:0 0 var(--space-sm)}
+.pp-option{position:relative;border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:var(--space-sm);background:var(--ds-surface)}
+.pp-option p{font-size:var(--size-small);margin:0;color:var(--ds-muted)}
+.pp-option__key{font-family:var(--ds-font-mono);font-weight:600;color:var(--ds-muted);margin-right:.3em}
+.pp-option--recommended{border:2px solid var(--color-accent-default);background:var(--color-accent-soft)}
+.pp-option__flag{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--color-accent-on);background:var(--color-accent-default);border-radius:var(--radius-sm);padding:.1em .45em;margin-bottom:.4rem}
+.pp-reason{font-size:var(--size-small);margin:0 0 var(--space-sm);max-width:var(--layout-measure)}
+.pp-form{border-top:1px solid var(--ds-border);padding-top:var(--space-sm)}
+.pp-form fieldset{border:0;margin:0 0 var(--space-sm);padding:0}
+.pp-form legend{font-weight:600;font-size:var(--size-small);margin-bottom:.35rem;padding:0}
+.pp-form__choices{display:flex;flex-wrap:wrap;gap:.4rem}
+.pp-form__choices label{display:inline-flex;align-items:center;gap:.4em;font-size:var(--size-small);border:1px solid var(--ds-border);border-radius:999px;padding:.3rem .75rem;cursor:pointer;background:var(--ds-surface)}
+.pp-form__choices label:has(input:checked){border-color:var(--color-accent-default);background:var(--color-accent-soft);color:var(--ds-text)}
+.pp-form__choices input{accent-color:var(--color-accent-default);margin:0}
+.pp-form__comment{display:block;font-weight:600;font-size:var(--size-small);margin-bottom:var(--space-sm)}
+.pp-form textarea{display:block;width:100%;max-width:var(--layout-measure);margin-top:.35rem;font:inherit;font-weight:400;font-size:var(--size-body);color:var(--ds-text);background:var(--ds-background);border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:.5rem .65rem;resize:vertical}
+.pp-button{font:inherit;font-size:var(--size-small);font-weight:600;border:1px solid var(--color-accent-default);background:var(--color-accent-default);color:var(--color-accent-on);border-radius:var(--radius-md);padding:.5rem 1rem;cursor:pointer}
+.pp-button:hover{filter:brightness(1.08)}
+.pp-form__note{font-size:var(--size-small);color:var(--ds-muted);margin:var(--space-xs) 0 0}
+.pp-form__note[data-kind="error"]{color:var(--color-status-danger)}
+.pp-form__off{font-size:var(--size-small);color:var(--ds-muted);border-top:1px solid var(--ds-border);padding-top:var(--space-sm);margin:0}
+/* @component timeline */
+.pp-timeline{list-style:none;padding:0;margin:0 0 var(--space-md);display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:var(--space-sm)}
+.pp-phase{margin:0;border-top:3px solid var(--color-border-strong);padding-top:var(--space-sm)}
+.pp-phase--current{border-top-color:var(--color-accent-default)}
+.pp-phase__when{font-family:var(--ds-font-mono);font-size:.75rem;color:var(--ds-muted)}
+.pp-phase h4{margin:.2rem 0 .3rem}
+.pp-phase p{font-size:var(--size-small);margin:0 0 .35rem;color:var(--ds-muted)}
+.pp-phase p strong{color:var(--ds-text)}
+/* @component acceptance */
+.pp-gwt{display:grid;gap:var(--space-sm);margin:0 0 var(--space-md)}
+.pp-gwt__case{border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);background:var(--ds-surface)}
+.pp-gwt__case h4{font-size:var(--size-small)}
+.pp-gwt__case dl{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;margin:0;font-size:var(--size-small)}
+.pp-gwt__case dt{font-family:var(--ds-font-mono);font-weight:600;color:var(--color-accent-default);text-transform:uppercase;font-size:.75rem;padding-top:.15em}
+.pp-gwt__case dd{margin:0}
+/* @component glossary */
+.pp-glossary{display:grid;grid-template-columns:minmax(8rem,12rem) 1fr;gap:var(--space-xs) var(--space-md);max-width:var(--layout-measure)}
+.pp-glossary dt{font-weight:600}
+.pp-glossary dd{margin:0;color:var(--ds-muted)}
+@media (max-width:640px){.pp-glossary{grid-template-columns:1fr}.pp-glossary dd{margin-bottom:var(--space-xs)}}
+/* @component sources */
+.pp-sources{font-size:var(--size-small);padding-left:1.75rem}
+.pp-sources li{padding-left:.25rem}
+.pp-sources li:target{background:var(--color-accent-soft)}
+.pp-cite{font-size:.75em;vertical-align:super;line-height:0;text-decoration:none;font-weight:600}
+/* @component appendix */
+.pp-appendix{border:1px solid var(--ds-border);border-radius:var(--radius-md);margin:0 0 var(--space-sm);background:var(--ds-background)}
+.pp-appendix>summary{cursor:pointer;font-weight:600;padding:var(--space-sm) var(--space-md)}
+.pp-appendix>div{padding:0 var(--space-md) var(--space-sm)}
+.pp-appendix pre{font-family:var(--ds-font-mono);font-size:.8125rem;background:var(--color-bg-subtle);border:1px solid var(--ds-border);border-radius:var(--radius-sm);padding:var(--space-sm);overflow:auto;line-height:1.5}
+/* @component print */
+@media print{
+  :root{--ds-background:#fff;--ds-surface:#fff;--ds-text:#000;--ds-muted:#333;--ds-border:#bbb}
+  html{font-size:11pt}
+  .pp-topbar,.pp-toc,.pp-form,.pp-form__off,.pp-banner{display:none!important}
+  .pp-layout{display:block;max-width:none;padding:0}
+  .pp-main{max-width:none}
+  .pp-section{break-inside:auto;page-break-before:auto}
+  .pp-section>h2,.pp-decision__head,figure,.pp-option,.pp-gwt__case,table{break-inside:avoid}
+  a{color:inherit}
+  .pp-sources a[href^="http"]::after{content:" (" attr(href) ")";word-break:break-all}
+}
+</style>
+</head>
+<body>
+<header class="pp-topbar">
+  <div class="pp-topbar__inner">
+    <div class="pp-topbar__title"><span lang="cs">[UKÁZKA] Uložené filtry v reportech</span><span lang="en">[SAMPLE] Saved report filters</span></div>
+    <div class="pp-topbar__meta">
+      <a class="pp-badge pp-badge--linear" href="https://linear.app/keboola/issue/TEAG-123" target="_blank" rel="noopener" title="Linear">TEAG-123</a>
+      <span class="pp-badge pp-status" data-status="review"><span lang="cs">Ke kontrole</span><span lang="en">In review</span></span>
+      <span class="pp-badge">v1</span>
+    </div>
+    <div class="pp-lang" role="group" aria-label="Jazyk / Language">
+      <button type="button" data-set-lang="cs" aria-pressed="true" title="Čeština">CZ</button>
+      <button type="button" data-set-lang="en" aria-pressed="false" title="English">EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="pp-layout">
+  <nav class="pp-toc" aria-label="Obsah / Contents">
+    <details open>
+      <summary><span lang="cs">Obsah</span><span lang="en">Contents</span></summary>
+      <ol data-toc></ol>
+    </details>
+  </nav>
+
+  <main class="pp-main">
+    <header class="pp-header">
+      <p class="pp-banner"><span lang="cs">Šablona s ukázkovým obsahem. Všechny názvy, čísla, odkazy a cesty jsou smyšlené.</span><span lang="en">Template with sample content. All names, numbers, links and paths are made up.</span></p>
+      <p class="pp-kicker"><span lang="cs">Produktový návrh</span><span lang="en">Product proposal</span></p>
+      <h1><span lang="cs">[UKÁZKA] Uložené filtry v reportech: jedno kliknutí místo pěti</span><span lang="en">[SAMPLE] Saved report filters: one click instead of five</span></h1>
+      <p class="pp-lead" lang="cs">Analytici si v reportu uloží sadu filtrů a znovu ji použijí jedním kliknutím. Týká se všech 120 aktivních analytiků na instanci. Potřebujeme rozhodnout D1 a D2 do 6. 11. 2026, aby fáze 1 stihla prosincové vydání.</p>
+      <p class="pp-lead" lang="en">Analysts save a set of report filters and reapply it with one click. It affects all 120 active analysts on the instance. We need decisions D1 and D2 by 6 Nov 2026 so phase 1 makes the December release.</p>
+      <dl class="pp-facts">
+        <div><dt lang="cs">Autor</dt><dt lang="en">Owner</dt><dd>Jan Ukázka</dd></div>
+        <div><dt lang="cs">Rozhoduje</dt><dt lang="en">Decides</dt><dd>Petr Šimeček</dd></div>
+        <div><dt lang="cs">Aktualizováno</dt><dt lang="en">Updated</dt><dd>2026-10-23</dd></div>
+        <div><dt lang="cs">Data k</dt><dt lang="en">Evidence as of</dt><dd>2026-10-20</dd></div>
+      </dl>
+    </header>
+
+    <!-- cs:changes -->
+    <section class="pp-section" id="changes" data-cs="changes">
+      <h2><span class="pp-section__num">00</span><span lang="cs">Co se změnilo</span><span lang="en">What changed</span></h2>
+      <div class="pp-callout" lang="cs"><p>Jen od verze 2. Ve verzi 1 sekci smažte.</p></div>
+      <div class="pp-callout" lang="en"><p>Only from version 2. Delete this section in version 1.</p></div>
+      <ul lang="cs">
+        <li><strong>D1:</strong> doporučení změněno z A na B, protože sdílené filtry chtěly 3 z 5 respondentů (komentář #12).</li>
+      </ul>
+      <ul lang="en">
+        <li><strong>D1:</strong> recommendation changed from A to B because 3 of 5 respondents asked for shared filters (comment #12).</li>
+      </ul>
+    </section>
+
+    <!-- cs:summary -->
+    <section class="pp-section" id="summary" data-cs="summary">
+      <h2><span class="pp-section__num">01</span><span lang="cs">Shrnutí a potřebná rozhodnutí</span><span lang="en">Summary and decisions needed</span></h2>
+      <ul lang="cs">
+        <li>Tlačítko <em>Uložit filtry</em> v hlavičce reportu uloží aktuální filtry pod jménem.</li>
+        <li>Uložené sady jsou vidět v rozbalovacím menu; výchozí sadu lze připnout.</li>
+        <li>Fáze 1 jen osobní sady, fáze 2 sdílení se skupinou.</li>
+        <li>Za přepínačem <code>saved_report_filters</code>, výchozí stav vypnuto.</li>
+      </ul>
+      <ul lang="en">
+        <li>A <em>Save filters</em> button in the report header saves the current filters under a name.</li>
+        <li>Saved sets appear in a drop-down; one can be pinned as the default.</li>
+        <li>Phase 1 is personal sets only, phase 2 adds sharing with a group.</li>
+        <li>Behind the <code>saved_report_filters</code> switch, off by default.</li>
+      </ul>
+      <div class="pp-table"><table>
+        <thead><tr><th>#</th><th><span lang="cs">Rozhodnutí</span><span lang="en">Decision</span></th><th><span lang="cs">Doporučení</span><span lang="en">Recommendation</span></th></tr></thead>
+        <tbody>
+          <tr><td><a href="#d1">D1</a></td><td><span lang="cs">Sdílet sady už ve fázi 1?</span><span lang="en">Share sets in phase 1?</span></td><td><span lang="cs">B: ne, až ve fázi 2</span><span lang="en">B: no, in phase 2</span></td></tr>
+          <tr><td><a href="#d2">D2</a></td><td><span lang="cs">Kde sady ukládat?</span><span lang="en">Where to store sets?</span></td><td><span lang="cs">A: Postgres, nová tabulka</span><span lang="en">A: Postgres, new table</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- cs:problem -->
+    <section class="pp-section" id="problem" data-cs="problem">
+      <h2><span class="pp-section__num">02</span><span lang="cs">Problém</span><span lang="en">The problem</span></h2>
+      <div class="pp-prose" lang="cs">
+        <p><strong>Kdo:</strong> analytici, kteří otevírají stejný report několikrát týdně. <strong>Situace:</strong> po každém otevření nastavují 4 až 6 filtrů znovu. <strong>Cena dnes:</strong> medián 47 s na otevření, 1 900 otevření týdně, tedy asi 25 hodin týdně <span class="pp-ev pp-ev--inferred">odvozeno</span><a class="pp-cite" href="#src-1">[1]</a>.</p>
+        <p><strong>Příklad:</strong> „Každé pondělí naklikám region, měnu a tři produkty. Kdyby si to report pamatoval, ušetřím čtvrt hodiny.“ (ticket TEAG-000, 2026-10-02)<a class="pp-cite" href="#src-2">[2]</a></p>
+      </div>
+      <div class="pp-prose" lang="en">
+        <p><strong>Who:</strong> analysts who open the same report several times a week. <strong>Situation:</strong> after each open they set 4 to 6 filters again. <strong>Cost today:</strong> median 47 s per open, 1,900 opens a week, about 25 hours a week <span class="pp-ev pp-ev--inferred">inferred</span><a class="pp-cite" href="#src-1">[1]</a>.</p>
+        <p><strong>Example:</strong> "Every Monday I click region, currency and three products. If the report remembered it, I would save a quarter of an hour." (ticket TEAG-000, 2026-10-02)<a class="pp-cite" href="#src-2">[2]</a></p>
+      </div>
+    </section>
+
+    <!-- cs:goals -->
+    <section class="pp-section" id="goals" data-cs="goals">
+      <h2><span class="pp-section__num">03</span><span lang="cs">Cíle a necíle</span><span lang="en">Goals and non-goals</span></h2>
+      <div class="pp-prose" lang="cs">
+        <h4>Cíle</h4>
+        <ul><li>Analytik obnoví uloženou sadu filtrů jedním kliknutím.</li><li>Výchozí sada se použije sama při otevření reportu.</li></ul>
+        <h4>Necíle</h4>
+        <ul><li>Filtry napříč různými reporty.</li><li>Plánované odesílání reportu s filtry.</li></ul>
+      </div>
+      <div class="pp-prose" lang="en">
+        <h4>Goals</h4>
+        <ul><li>An analyst restores a saved filter set with one click.</li><li>A default set applies on its own when the report opens.</li></ul>
+        <h4>Non-goals</h4>
+        <ul><li>Filters shared across different reports.</li><li>Scheduled delivery of a filtered report.</li></ul>
+      </div>
+    </section>
+
+    <!-- cs:principles -->
+    <section class="pp-section" id="principles" data-cs="principles">
+      <h2><span class="pp-section__num">04</span><span lang="cs">Principy</span><span lang="en">Principles</span></h2>
+      <ol lang="cs">
+        <li>Uložená sada nikdy nerozšíří přístup k datům; filtr jen zužuje.<a class="pp-cite" href="#src-3">[3]</a></li>
+        <li>Stejné chování na webu, v CLI i MCP.</li>
+        <li>Nová funkce za přepínačem, výchozí stav vypnuto.</li>
+      </ol>
+      <ol lang="en">
+        <li>A saved set never widens data access; a filter only narrows.<a class="pp-cite" href="#src-3">[3]</a></li>
+        <li>The same behaviour on the web, in the CLI and over MCP.</li>
+        <li>New feature behind a switch, off by default.</li>
+      </ol>
+    </section>
+
+    <!-- cs:metrics -->
+    <section class="pp-section" id="metrics" data-cs="metrics">
+      <h2><span class="pp-section__num">05</span><span lang="cs">Jak poznáme, že to funguje</span><span lang="en">How we know it worked</span></h2>
+      <div class="pp-table"><table>
+        <thead><tr><th><span lang="cs">Metrika</span><span lang="en">Metric</span></th><th class="num"><span lang="cs">Dnes</span><span lang="en">Baseline</span></th><th class="num"><span lang="cs">Cíl</span><span lang="en">Target</span></th><th><span lang="cs">Do</span><span lang="en">By</span></th></tr></thead>
+        <tbody>
+          <tr><td><span lang="cs">Medián času od otevření po první graf</span><span lang="en">Median time from open to first chart</span></td><td class="num">47 s</td><td class="num">≤ 10 s</td><td>2027-02-28</td></tr>
+          <tr><td><span lang="cs">Podíl otevření s uloženou sadou</span><span lang="en">Share of opens with a saved set</span></td><td class="num">0 %</td><td class="num">≥ 40 %</td><td>2027-02-28</td></tr>
+        </tbody>
+        <caption><span lang="cs">Ochranné metriky: p95 načtení reportu nesmí stoupnout nad 2,0 s (dnes 1,6 s); žádný nárůst chyb 4xx/5xx na API reportů.</span><span lang="en">Guardrails: report load p95 must not rise above 2.0 s (today 1.6 s); no increase in 4xx/5xx errors on the report API.</span></caption>
+      </table></div>
+    </section>
+
+    <!-- cs:current-state -->
+    <section class="pp-section" id="current-state" data-cs="current-state">
+      <h2><span class="pp-section__num">06</span><span lang="cs">Současný stav v Agnes</span><span lang="en">Current state in Agnes</span></h2>
+      <div class="pp-prose" lang="cs">
+        <p><strong>Pro uživatele:</strong> filtry žijí jen v URL; po zavření karty jsou pryč <span class="pp-ev pp-ev--verified">ověřeno</span>.</p>
+        <p><strong>V kódu:</strong> stav filtrů drží <code>web/src/example/ReportFilters.tsx</code>; API <code>app/api/example_reports.py</code> filtry neukládá.</p>
+      </div>
+      <div class="pp-prose" lang="en">
+        <p><strong>For users:</strong> filters live only in the URL; they are gone once the tab closes <span class="pp-ev pp-ev--verified">verified</span>.</p>
+        <p><strong>In code:</strong> <code>web/src/example/ReportFilters.tsx</code> holds the filter state; the API <code>app/api/example_reports.py</code> does not store filters.</p>
+      </div>
+      <figure class="pp-figure pp-shot">
+        <div class="pp-shot__frame">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjcyMCIgdmlld0JveD0iMCAwIDEyMDAgNzIwIj4KPHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNzIwIiBmaWxsPSIjZmZmZmZmIi8+CjxyZWN0IHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjY0IiBmaWxsPSIjMTgxODFiIi8+PHJlY3QgeD0iMjQiIHk9IjIyIiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iIzUyNTI1YiIvPgo8cmVjdCB4PSIwIiB5PSI2NCIgd2lkdGg9IjIyMCIgaGVpZ2h0PSI2NTYiIGZpbGw9IiNmNGY0ZjYiLz4KPHJlY3QgeD0iMjQiIHk9IjEwMCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSIyNCIgeT0iMTQ0IiB3aWR0aD0iMTUxIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjI0IiB5PSIxODgiIHdpZHRoPSIxMjIiIGhlaWdodD0iMTQiIHJ4PSIzIiBmaWxsPSIjZDRkNGRhIi8+PHJlY3QgeD0iMjQiIHk9IjIzMiIgd2lkdGg9IjE1MyIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSIyNCIgeT0iMjc2IiB3aWR0aD0iMTI0IiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjI0IiB5PSIzMjAiIHdpZHRoPSIxNTUiIGhlaWdodD0iMTQiIHJ4PSIzIiBmaWxsPSIjZDRkNGRhIi8+PHJlY3QgeD0iMjQiIHk9IjM2NCIgd2lkdGg9IjEyNiIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSIyNCIgeT0iNDA4IiB3aWR0aD0iMTU3IiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPgo8cmVjdCB4PSIyNTAiIHk9Ijk2IiB3aWR0aD0iOTIwIiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0iI2ZhZmFmYSIgc3Ryb2tlPSIjZTJlMmU2Ii8+PHJlY3QgeD0iMjYyIiB5PSIxMTAiIHdpZHRoPSI5NiIgaGVpZ2h0PSIzNiIgcng9IjE4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjNGM0Y2MiLz48cmVjdCB4PSIyODAiIHk9IjEyMyIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEwIiByeD0iMyIgZmlsbD0iI2ExYTFhYSIvPjxyZWN0IHg9IjM3MCIgeT0iMTEwIiB3aWR0aD0iOTYiIGhlaWdodD0iMzYiIHJ4PSIxOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzRjNGNjIi8+PHJlY3QgeD0iMzg4IiB5PSIxMjMiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgcng9IjMiIGZpbGw9IiNhMWExYWEiLz48cmVjdCB4PSI0NzgiIHk9IjExMCIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjM2IiByeD0iMTgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M0YzRjYyIvPjxyZWN0IHg9IjQ5NiIgeT0iMTIzIiB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHJ4PSIzIiBmaWxsPSIjYTFhMWFhIi8+PHJlY3QgeD0iNTg2IiB5PSIxMTAiIHdpZHRoPSI5NiIgaGVpZ2h0PSIzNiIgcng9IjE4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjNGM0Y2MiLz48cmVjdCB4PSI2MDQiIHk9IjEyMyIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEwIiByeD0iMyIgZmlsbD0iI2ExYTFhYSIvPjxyZWN0IHg9IjY5NCIgeT0iMTEwIiB3aWR0aD0iOTYiIGhlaWdodD0iMzYiIHJ4PSIxOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzRjNGNjIi8+PHJlY3QgeD0iNzEyIiB5PSIxMjMiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgcng9IjMiIGZpbGw9IiNhMWExYWEiLz4KPHJlY3QgeD0iMTAxNiIgeT0iMTEwIiB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjM2IiByeD0iNiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzRjNGNjIi8+PHJlY3QgeD0iMTA0MCIgeT0iMTIzIiB3aWR0aD0iOTYiIGhlaWdodD0iMTAiIHJ4PSIzIiBmaWxsPSIjYTFhMWFhIi8+CjxyZWN0IHg9IjI1MCIgeT0iMTgwIiB3aWR0aD0iOTIwIiBoZWlnaHQ9IjI0IiByeD0iMyIgZmlsbD0iI2ZmZmZmZiIvPjxyZWN0IHg9IjI1MCIgeT0iMTg2IiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyIiByeD0iMyIgZmlsbD0iIzcxNzE3YSIvPgo8cmVjdCB4PSIyNTAiIHk9IjIyMCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjIzMyIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjIzMyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjIzMyIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjI3OCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjI5MSIgd2lkdGg9IjIzMyIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjI5MSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjI5MSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjMzNiIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjM0OSIgd2lkdGg9IjI4NiIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjM0OSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjM0OSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjM5NCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjQwNyIgd2lkdGg9IjMzOSIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjQwNyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjQwNyIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjQ1MiIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjQ2NSIgd2lkdGg9IjM5MiIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjQ2NSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjQ2NSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjUxMCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjUyMyIgd2lkdGg9IjIyNSIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjUyMyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjUyMyIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjU2OCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjU4MSIgd2lkdGg9IjI3OCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjU4MSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjU4MSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz4KCjx0ZXh0IHg9IjcxMCIgeT0iNjYwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxODE4MWIiIGZpbGwtb3BhY2l0eT0iMC4xMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UExBQ0VIT0xERVIgU0NSRUVOU0hPVDwvdGV4dD4KPC9zdmc+" width="1200" height="720" alt="Ukázkový snímek obrazovky reportu s panelem filtrů / Sample report screenshot with the filter panel">
+          <svg class="pp-shot__overlay" viewBox="0 0 1200 720" aria-hidden="true">
+            <rect class="pp-shot__ring" x="250" y="96" width="560" height="64" rx="10"/>
+            <g class="pp-shot__pin" transform="translate(250 96)"><circle r="18"/><text>1</text></g>
+            <rect class="pp-shot__ring" x="1004" y="96" width="168" height="64" rx="10"/>
+            <g class="pp-shot__pin" transform="translate(1004 96)"><circle r="18"/><text>2</text></g>
+          </svg>
+        </div>
+        <figcaption>
+          <span lang="cs"><strong>Dnes musí analytik nastavit filtry ručně při každém otevření.</strong> Ukázkový snímek, 2026-10-20.</span>
+          <span lang="en"><strong>Today an analyst sets the filters by hand on every open.</strong> Sample screenshot, 2026-10-20.</span>
+          <ol class="pp-shot__notes" lang="cs"><li>Pět filtrů, žádné uložení.</li><li>Export zachová filtry jen v souboru, ne v reportu.</li></ol>
+          <ol class="pp-shot__notes" lang="en"><li>Five filters, no save.</li><li>Export keeps the filters in the file only, not in the report.</li></ol>
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- cs:research -->
+    <section class="pp-section" id="research" data-cs="research">
+      <h2><span class="pp-section__num">07</span><span lang="cs">Průzkum a konkurence</span><span lang="en">Research and competition</span></h2>
+      <p lang="cs">Konkurent A i B ukládají filtry na úrovni uživatele; jen B je umí sdílet se skupinou.<a class="pp-cite" href="#src-4">[4]</a><a class="pp-cite" href="#src-5">[5]</a></p>
+      <p lang="en">Competitors A and B both save filters per user; only B shares them with a group.<a class="pp-cite" href="#src-4">[4]</a><a class="pp-cite" href="#src-5">[5]</a></p>
+      <div class="pp-table"><table>
+        <thead><tr>
+          <th><span lang="cs">Schopnost</span><span lang="en">Capability</span></th>
+          <th><span lang="cs">Konkurent A</span><span lang="en">Competitor A</span></th>
+          <th><span lang="cs">Konkurent B</span><span lang="en">Competitor B</span></th>
+          <th class="pp-col-agnes"><span lang="cs">Agnes dnes</span><span lang="en">Agnes now</span></th>
+          <th class="pp-col-agnes"><span lang="cs">Po fázi 1</span><span lang="en">After phase 1</span></th>
+          <th class="pp-col-agnes"><span lang="cs">Po fázi 2</span><span lang="en">After phase 2</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td><span lang="cs">Uložit sadu filtrů</span><span lang="en">Save a filter set</span></td>
+            <td><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td>
+            <td><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--no"><span lang="cs">Ne</span><span lang="en">No</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td></tr>
+          <tr><td><span lang="cs">Sdílet se skupinou</span><span lang="en">Share with a group</span></td>
+            <td><span class="pp-mark pp-mark--no"><span lang="cs">Ne</span><span lang="en">No</span></span></td>
+            <td><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--no"><span lang="cs">Ne</span><span lang="en">No</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--no"><span lang="cs">Ne</span><span lang="en">No</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td></tr>
+          <tr><td><span lang="cs">Dostupné přes API / agenta</span><span lang="en">Available via API / agent</span></td>
+            <td><span class="pp-mark pp-mark--partial"><span lang="cs">Částečně</span><span lang="en">Partly</span></span></td>
+            <td><span class="pp-mark pp-mark--no"><span lang="cs">Ne</span><span lang="en">No</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--no"><span lang="cs">Ne</span><span lang="en">No</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td>
+            <td class="pp-col-agnes"><span class="pp-mark pp-mark--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td></tr>
+        </tbody>
+        <caption><span lang="cs">Plný kruh = ano, půlkruh = částečně, prázdný = ne. Zdroje [4], [5], ověřeno 2026-10-20.</span><span lang="en">Full circle = yes, half = partly, empty = no. Sources [4], [5], checked 2026-10-20.</span></caption>
+      </table></div>
+      <figure class="pp-figure pp-position" data-position>
+        <script type="application/json">{
+          "x": {"cs": "Sdílení a správa →", "en": "Sharing and governance →"},
+          "y": {"cs": "Rychlost pro analytika →", "en": "Speed for the analyst →"},
+          "points": [
+            {"cs": "Konkurent A", "en": "Competitor A", "x": 0.25, "y": 0.70},
+            {"cs": "Konkurent B", "en": "Competitor B", "x": 0.65, "y": 0.60},
+            {"cs": "Agnes dnes", "en": "Agnes now", "x": 0.55, "y": 0.20, "agnes": "now"},
+            {"cs": "Po fázi 1", "en": "After phase 1", "x": 0.60, "y": 0.70, "agnes": "phase"},
+            {"cs": "Po fázi 2", "en": "After phase 2", "x": 0.85, "y": 0.85, "agnes": "phase"}
+          ]
+        }</script>
+        <svg role="img" aria-labelledby="pos-cap"></svg>
+        <figcaption id="pos-cap"><span lang="cs"><strong>Fáze 2 posune Agnes před oba konkurenty ve sdílení i rychlosti.</strong> Polohy jsou odhad autora z tabulky výše.</span><span lang="en"><strong>Phase 2 moves Agnes ahead of both competitors in sharing and speed.</strong> Positions are the author's estimate from the table above.</span></figcaption>
+      </figure>
+    </section>
+
+    <!-- cs:proposal -->
+    <section class="pp-section" id="proposal" data-cs="proposal">
+      <h2><span class="pp-section__num">08</span><span lang="cs">Návrh</span><span lang="en">Proposal</span></h2>
+      <div class="pp-prose" lang="cs">
+        <h4>Cesta uživatele</h4>
+        <ol><li>Analytik nastaví filtry a klikne <em>Uložit filtry</em>.</li><li>Zadá jméno (max. 60 znaků) a volitelně zaškrtne <em>Výchozí</em>.</li><li>Při dalším otevření se výchozí sada použije sama; jiné vybere z menu.</li></ol>
+        <h4>Chování a limity</h4>
+        <ul><li>Max. 20 sad na uživatele a report; 21. uložení ukáže chybu s odkazem na správu sad.</li><li>Filtr na sloupec, který zmizel, se přeskočí a uživatel to uvidí v liště.</li></ul>
+      </div>
+      <div class="pp-prose" lang="en">
+        <h4>User journey</h4>
+        <ol><li>The analyst sets filters and clicks <em>Save filters</em>.</li><li>Enters a name (max 60 characters) and optionally ticks <em>Default</em>.</li><li>On the next open the default set applies on its own; others are picked from the menu.</li></ol>
+        <h4>Behaviour and limits</h4>
+        <ul><li>Max 20 sets per user and report; the 21st save shows an error linking to set management.</li><li>A filter on a column that no longer exists is skipped, and the user sees that in a bar.</li></ul>
+      </div>
+      <figure class="pp-figure pp-shot pp-shot--concept">
+        <div class="pp-shot__frame">
+          <span class="pp-badge pp-badge--concept"><span lang="cs">Koncept</span><span lang="en">Concept</span></span>
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjcyMCIgdmlld0JveD0iMCAwIDEyMDAgNzIwIj4KPHJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNzIwIiBmaWxsPSIjZmZmZmZmIi8+CjxyZWN0IHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjY0IiBmaWxsPSIjMTgxODFiIi8+PHJlY3QgeD0iMjQiIHk9IjIyIiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjIwIiByeD0iNCIgZmlsbD0iIzUyNTI1YiIvPgo8cmVjdCB4PSIwIiB5PSI2NCIgd2lkdGg9IjIyMCIgaGVpZ2h0PSI2NTYiIGZpbGw9IiNmNGY0ZjYiLz4KPHJlY3QgeD0iMjQiIHk9IjEwMCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSIyNCIgeT0iMTQ0IiB3aWR0aD0iMTUxIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjI0IiB5PSIxODgiIHdpZHRoPSIxMjIiIGhlaWdodD0iMTQiIHJ4PSIzIiBmaWxsPSIjZDRkNGRhIi8+PHJlY3QgeD0iMjQiIHk9IjIzMiIgd2lkdGg9IjE1MyIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSIyNCIgeT0iMjc2IiB3aWR0aD0iMTI0IiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjI0IiB5PSIzMjAiIHdpZHRoPSIxNTUiIGhlaWdodD0iMTQiIHJ4PSIzIiBmaWxsPSIjZDRkNGRhIi8+PHJlY3QgeD0iMjQiIHk9IjM2NCIgd2lkdGg9IjEyNiIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSIyNCIgeT0iNDA4IiB3aWR0aD0iMTU3IiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPgo8cmVjdCB4PSIyNTAiIHk9Ijk2IiB3aWR0aD0iOTIwIiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0iI2ZhZmFmYSIgc3Ryb2tlPSIjZTJlMmU2Ii8+PHJlY3QgeD0iMjYyIiB5PSIxMTAiIHdpZHRoPSI5NiIgaGVpZ2h0PSIzNiIgcng9IjE4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjNGM0Y2MiLz48cmVjdCB4PSIyODAiIHk9IjEyMyIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEwIiByeD0iMyIgZmlsbD0iI2ExYTFhYSIvPjxyZWN0IHg9IjM3MCIgeT0iMTEwIiB3aWR0aD0iOTYiIGhlaWdodD0iMzYiIHJ4PSIxOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzRjNGNjIi8+PHJlY3QgeD0iMzg4IiB5PSIxMjMiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgcng9IjMiIGZpbGw9IiNhMWExYWEiLz48cmVjdCB4PSI0NzgiIHk9IjExMCIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjM2IiByeD0iMTgiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M0YzRjYyIvPjxyZWN0IHg9IjQ5NiIgeT0iMTIzIiB3aWR0aD0iNjAiIGhlaWdodD0iMTAiIHJ4PSIzIiBmaWxsPSIjYTFhMWFhIi8+PHJlY3QgeD0iNTg2IiB5PSIxMTAiIHdpZHRoPSI5NiIgaGVpZ2h0PSIzNiIgcng9IjE4IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNjNGM0Y2MiLz48cmVjdCB4PSI2MDQiIHk9IjEyMyIgd2lkdGg9IjYwIiBoZWlnaHQ9IjEwIiByeD0iMyIgZmlsbD0iI2ExYTFhYSIvPjxyZWN0IHg9IjY5NCIgeT0iMTEwIiB3aWR0aD0iOTYiIGhlaWdodD0iMzYiIHJ4PSIxOCIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzRjNGNjIi8+PHJlY3QgeD0iNzEyIiB5PSIxMjMiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgcng9IjMiIGZpbGw9IiNhMWExYWEiLz4KPHJlY3QgeD0iMTAxNiIgeT0iMTEwIiB3aWR0aD0iMTQ0IiBoZWlnaHQ9IjM2IiByeD0iNiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjYzRjNGNjIi8+PHJlY3QgeD0iMTA0MCIgeT0iMTIzIiB3aWR0aD0iOTYiIGhlaWdodD0iMTAiIHJ4PSIzIiBmaWxsPSIjYTFhMWFhIi8+CjxyZWN0IHg9IjI1MCIgeT0iMTgwIiB3aWR0aD0iOTIwIiBoZWlnaHQ9IjI0IiByeD0iMyIgZmlsbD0iI2ZmZmZmZiIvPjxyZWN0IHg9IjI1MCIgeT0iMTg2IiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyIiByeD0iMyIgZmlsbD0iIzcxNzE3YSIvPgo8cmVjdCB4PSIyNTAiIHk9IjIyMCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjIzMyIgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjIzMyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjIzMyIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjI3OCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjI5MSIgd2lkdGg9IjIzMyIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjI5MSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjI5MSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjMzNiIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjM0OSIgd2lkdGg9IjI4NiIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjM0OSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjM0OSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjM5NCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjQwNyIgd2lkdGg9IjMzOSIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjQwNyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjQwNyIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjQ1MiIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjQ2NSIgd2lkdGg9IjM5MiIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjQ2NSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjQ2NSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjUxMCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjUyMyIgd2lkdGg9IjIyNSIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjUyMyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjUyMyIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz48cmVjdCB4PSIyNTAiIHk9IjU2OCIgd2lkdGg9IjkyMCIgaGVpZ2h0PSI0MCIgcng9IjQiIGZpbGw9IiNmNGY0ZjYiLz48cmVjdCB4PSIyNzAiIHk9IjU4MSIgd2lkdGg9IjI3OCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNkNGQ0ZGEiLz48cmVjdCB4PSI3NjAiIHk9IjU4MSIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE0IiByeD0iMyIgZmlsbD0iI2Q0ZDRkYSIvPjxyZWN0IHg9IjEwNDAiIHk9IjU4MSIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxNCIgcng9IjMiIGZpbGw9IiNjOGNmZTgiLz4KPHJlY3QgeD0iODMwIiB5PSIxNTAiIHdpZHRoPSIzMzAiIGhlaWdodD0iMjI2IiByeD0iMTAiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2M0YzRjYyIvPgo8cmVjdCB4PSI4NDYiIHk9IjE2OCIgd2lkdGg9IjI5OCIgaGVpZ2h0PSI0MCIgcng9IjYiIGZpbGw9IiNlZGYxZmQiLz48Y2lyY2xlIGN4PSI4NjYiIGN5PSIxODgiIHI9IjciIGZpbGw9IiMyZjU1ZDQiLz48cmVjdCB4PSI4ODQiIHk9IjE4MiIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxMiIgcng9IjMiIGZpbGw9IiMyZjU1ZDQiLz4KPHJlY3QgeD0iODQ2IiB5PSIyMTgiIHdpZHRoPSIyOTgiIGhlaWdodD0iNDAiIHJ4PSI2IiBmaWxsPSIjZmZmZmZmIi8+PHJlY3QgeD0iODg0IiB5PSIyMzIiIHdpZHRoPSIxMjAiIGhlaWdodD0iMTIiIHJ4PSIzIiBmaWxsPSIjYTFhMWFhIi8+CjxyZWN0IHg9Ijg0NiIgeT0iMjY2IiB3aWR0aD0iMjk4IiBoZWlnaHQ9IjQwIiByeD0iNiIgZmlsbD0iI2ZmZmZmZiIvPjxyZWN0IHg9Ijg4NCIgeT0iMjgwIiB3aWR0aD0iMTcwIiBoZWlnaHQ9IjEyIiByeD0iMyIgZmlsbD0iI2ExYTFhYSIvPgo8bGluZSB4MT0iODQ2IiB5MT0iMzE4IiB4Mj0iMTE0NCIgeTI9IjMxOCIgc3Ryb2tlPSIjZTJlMmU2Ii8+PHJlY3QgeD0iODYyIiB5PSIzMzQiIHdpZHRoPSIxNDAiIGhlaWdodD0iMTIiIHJ4PSIzIiBmaWxsPSIjMmY1NWQ0Ii8+Cjx0ZXh0IHg9IjcxMCIgeT0iNjYwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNDQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiMxODE4MWIiIGZpbGwtb3BhY2l0eT0iMC4xMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q09OQ0VQVCBNT0NLVVA8L3RleHQ+Cjwvc3ZnPg==" width="1200" height="720" alt="Koncept: menu uložených filtrů / Concept: saved filters menu">
+          <svg class="pp-shot__overlay" viewBox="0 0 1200 720" aria-hidden="true">
+            <rect class="pp-shot__ring" x="820" y="96" width="352" height="290" rx="12"/>
+            <g class="pp-shot__pin" transform="translate(820 96)"><circle r="18"/><text>1</text></g>
+          </svg>
+        </div>
+        <figcaption>
+          <span lang="cs"><strong>Koncept, ne návrh UI:</strong> menu uložených sad s připnutou výchozí sadou. Vygenerováno pro ilustraci.</span>
+          <span lang="en"><strong>Concept, not a UI spec:</strong> the saved-sets menu with a pinned default set. Generated for illustration.</span>
+          <ol class="pp-shot__notes" lang="cs"><li>Výchozí sada je první a označená špendlíkem.</li></ol>
+          <ol class="pp-shot__notes" lang="en"><li>The default set is first and marked with a pin.</li></ol>
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- cs:alternatives -->
+    <section class="pp-section" id="alternatives" data-cs="alternatives">
+      <h2><span class="pp-section__num">09</span><span lang="cs">Alternativy a proč tahle</span><span lang="en">Alternatives and why this one</span></h2>
+      <div class="pp-table"><table>
+        <thead><tr><th><span lang="cs">Varianta</span><span lang="en">Option</span></th><th><span lang="cs">Čas analytika</span><span lang="en">Analyst time</span></th><th><span lang="cs">Náklad</span><span lang="en">Effort</span></th><th><span lang="cs">Riziko</span><span lang="en">Risk</span></th></tr></thead>
+        <tbody>
+          <tr><td><span lang="cs">Nic nedělat</span><span lang="en">Do nothing</span></td><td>47 s</td><td>0</td><td><span lang="cs">Analytici odcházejí k nástroji A</span><span lang="en">Analysts move to tool A</span></td></tr>
+          <tr><td><span lang="cs">Záložky v prohlížeči (URL)</span><span lang="en">Browser bookmarks (URL)</span></td><td>15 s</td><td><span lang="cs">2 dny</span><span lang="en">2 days</span></td><td><span lang="cs">Nefunguje v CLI ani MCP</span><span lang="en">Does not work in CLI or MCP</span></td></tr>
+          <tr><td><strong><span lang="cs">Uložené sady (návrh)</span><span lang="en">Saved sets (proposal)</span></strong></td><td>≤ 10 s</td><td><span lang="cs">3 týdny</span><span lang="en">3 weeks</span></td><td><span lang="cs">Nová tabulka a migrace</span><span lang="en">New table and migration</span></td></tr>
+        </tbody>
+      </table></div>
+      <p lang="cs"><strong>Proč návrh:</strong> jen on splní princip 2 (stejné chování na všech plochách). Záložky jsou levnější, ale agent je nepoužije.</p>
+      <p lang="en"><strong>Why the proposal:</strong> only it meets principle 2 (same behaviour on every surface). Bookmarks are cheaper, but an agent cannot use them.</p>
+    </section>
+
+    <!-- cs:decisions -->
+    <section class="pp-section" id="decisions" data-cs="decisions">
+      <h2><span class="pp-section__num">10</span><span lang="cs">Rozhodnutí</span><span lang="en">Decisions</span></h2>
+
+      <article class="pp-decision" id="d1" data-decision="D1">
+        <div class="pp-decision__head"><span class="pp-decision__id">D1</span><h3><span lang="cs">Sdílet uložené sady se skupinou už ve fázi 1?</span><span lang="en">Share saved sets with a group already in phase 1?</span></h3></div>
+        <div class="pp-options">
+          <div class="pp-option" data-option="A"><h4><span class="pp-option__key">A</span><span lang="cs">Ano, hned</span><span lang="en">Yes, now</span></h4><p lang="cs">+2 týdny, nutná kontrola oprávnění skupin.</p><p lang="en">+2 weeks, needs a group permission check.</p></div>
+          <div class="pp-option pp-option--recommended" data-option="B"><span class="pp-option__flag"><span lang="cs">Doporučeno</span><span lang="en">Recommended</span></span><h4><span class="pp-option__key">B</span><span lang="cs">Ne, až ve fázi 2</span><span lang="en">No, in phase 2</span></h4><p lang="cs">Fáze 1 vyjde v prosinci.</p><p lang="en">Phase 1 ships in December.</p></div>
+        </div>
+        <p class="pp-reason" lang="cs"><strong>Proč B:</strong> 80 % otevření dělá autor reportu sám <span class="pp-ev pp-ev--inferred">odvozeno</span>; sdílení přinese méně, než kolik stojí zpoždění.</p>
+        <p class="pp-reason" lang="en"><strong>Why B:</strong> 80% of opens are by the report's own author <span class="pp-ev pp-ev--inferred">inferred</span>; sharing adds less than the delay costs.</p>
+        <form class="pp-form" data-decision="D1" novalidate>
+          <fieldset>
+            <legend><span lang="cs">Vaše volba</span><span lang="en">Your choice</span></legend>
+            <div class="pp-form__choices">
+              <label><input type="radio" name="choice" value="A"> A</label>
+              <label><input type="radio" name="choice" value="B"> B</label>
+              <label><input type="radio" name="choice" value="other"> <span lang="cs">Jinak</span><span lang="en">Other</span></label>
+            </div>
+          </fieldset>
+          <label class="pp-form__comment"><span lang="cs">Komentář (nepovinný)</span><span lang="en">Comment (optional)</span><textarea name="comment" rows="3"></textarea></label>
+          <button class="pp-button" type="submit"><span lang="cs">Odeslat odpověď</span><span lang="en">Send answer</span></button>
+          <p class="pp-form__note" role="status" hidden></p>
+        </form>
+      </article>
+
+      <article class="pp-decision" id="d2" data-decision="D2">
+        <div class="pp-decision__head"><span class="pp-decision__id">D2</span><h3><span lang="cs">Kde uložené sady ukládat?</span><span lang="en">Where do saved sets live?</span></h3></div>
+        <div class="pp-options">
+          <div class="pp-option pp-option--recommended" data-option="A"><span class="pp-option__flag"><span lang="cs">Doporučeno</span><span lang="en">Recommended</span></span><h4><span class="pp-option__key">A</span><span lang="cs">Postgres, nová tabulka</span><span lang="en">Postgres, new table</span></h4><p lang="cs">Jedno místo pro web, CLI i MCP.</p><p lang="en">One place for web, CLI and MCP.</p></div>
+          <div class="pp-option" data-option="B"><h4><span class="pp-option__key">B</span><span lang="cs">Nastavení uživatele (JSON)</span><span lang="en">User settings (JSON)</span></h4><p lang="cs">Bez migrace, ale bez sdílení.</p><p lang="en">No migration, but no sharing.</p></div>
+          <div class="pp-option" data-option="C"><h4><span class="pp-option__key">C</span><span lang="cs">Jen v prohlížeči</span><span lang="en">Browser only</span></h4><p lang="cs">Nejlevnější, nefunguje pro agenty.</p><p lang="en">Cheapest, does not work for agents.</p></div>
+        </div>
+        <p class="pp-reason" lang="cs"><strong>Proč A:</strong> fáze 2 potřebuje sdílení; B by se musela znovu migrovat.</p>
+        <p class="pp-reason" lang="en"><strong>Why A:</strong> phase 2 needs sharing; B would have to be migrated again.</p>
+        <form class="pp-form" data-decision="D2" novalidate>
+          <fieldset>
+            <legend><span lang="cs">Vaše volba</span><span lang="en">Your choice</span></legend>
+            <div class="pp-form__choices">
+              <label><input type="radio" name="choice" value="A"> A</label>
+              <label><input type="radio" name="choice" value="B"> B</label>
+              <label><input type="radio" name="choice" value="C"> C</label>
+              <label><input type="radio" name="choice" value="other"> <span lang="cs">Jinak</span><span lang="en">Other</span></label>
+            </div>
+          </fieldset>
+          <label class="pp-form__comment"><span lang="cs">Komentář (nepovinný)</span><span lang="en">Comment (optional)</span><textarea name="comment" rows="3"></textarea></label>
+          <button class="pp-button" type="submit"><span lang="cs">Odeslat odpověď</span><span lang="en">Send answer</span></button>
+          <p class="pp-form__note" role="status" hidden></p>
+        </form>
+      </article>
+    </section>
+
+    <!-- cs:architecture -->
+    <section class="pp-section" id="architecture" data-cs="architecture">
+      <h2><span class="pp-section__num">11</span><span lang="cs">Dopad na architekturu</span><span lang="en">Architecture impact</span></h2>
+      <figure class="pp-figure pp-c4">
+        <svg viewBox="0 0 760 330" role="img" aria-labelledby="c4-cap">
+          <defs>
+            <marker id="c4-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="c4-arrow" d="M0 0L10 5L0 10z"/></marker>
+            <marker id="c4-arrow-changed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="c4-arrow c4-arrow--changed" d="M0 0L10 5L0 10z"/></marker>
+          </defs>
+          <rect class="c4-boundary" x="10" y="10" width="560" height="310" rx="10"/>
+          <text class="c4-boundary-label" x="26" y="34">Agnes</text>
+          <rect class="c4-box c4-box--changed" x="30" y="56" width="220" height="86" rx="8"/>
+          <text class="c4-title" x="46" y="82">Web app</text><text class="c4-tech" x="46" y="100">React</text>
+          <text class="c4-desc" x="46" y="124"><tspan lang="cs">Menu uložených sad</tspan><tspan lang="en">Saved-sets menu</tspan></text>
+          <rect class="c4-box c4-box--changed" x="330" y="56" width="220" height="86" rx="8"/>
+          <text class="c4-title" x="346" y="82">API</text><text class="c4-tech" x="346" y="100">FastAPI</text>
+          <text class="c4-desc" x="346" y="124"><tspan lang="cs">/api/report-filters</tspan><tspan lang="en">/api/report-filters</tspan></text>
+          <rect class="c4-box c4-box--new" x="330" y="212" width="220" height="86" rx="8"/>
+          <text class="c4-title" x="346" y="238"><tspan lang="cs">Tabulka sad</tspan><tspan lang="en">Sets table</tspan></text><text class="c4-tech" x="346" y="256">Postgres</text>
+          <text class="c4-desc" x="346" y="280">report_filter_sets</text>
+          <rect class="c4-box" x="30" y="212" width="220" height="86" rx="8"/>
+          <text class="c4-title" x="46" y="238">CLI + MCP</text><text class="c4-tech" x="46" y="256">Python</text>
+          <text class="c4-desc" x="46" y="280"><tspan lang="cs">Nový příkaz, nástroj</tspan><tspan lang="en">New command, tool</tspan></text>
+          <rect class="c4-box c4-box--external" x="600" y="134" width="150" height="86" rx="8"/>
+          <text class="c4-title" x="614" y="160">Agent sandbox</text><text class="c4-tech" x="614" y="178"><tspan lang="cs">externí</tspan><tspan lang="en">external</tspan></text>
+          <text class="c4-desc" x="614" y="202"><tspan lang="cs">beze změny</tspan><tspan lang="en">unchanged</tspan></text>
+          <path class="c4-edge c4-edge--changed" d="M250 99H322" marker-end="url(#c4-arrow-changed)"/>
+          <text class="c4-edge-label" x="262" y="90">HTTPS</text>
+          <path class="c4-edge c4-edge--changed" d="M440 142V204" marker-end="url(#c4-arrow-changed)"/>
+          <text class="c4-edge-label" x="448" y="178">SQL</text>
+          <path class="c4-edge" d="M250 255H300V120H322" marker-end="url(#c4-arrow)"/>
+          <path class="c4-edge" d="M675 134V99H558" marker-end="url(#c4-arrow)"/>
+          <text class="c4-edge-label" x="600" y="90">MCP</text>
+        </svg>
+        <ul class="pp-legend">
+          <li><i class="changed"></i><span lang="cs">Mění se</span><span lang="en">Changes</span></li>
+          <li><i class="new"></i><span lang="cs">Nové</span><span lang="en">New</span></li>
+          <li><i></i><span lang="cs">Beze změny</span><span lang="en">Unchanged</span></li>
+          <li><i class="external"></i><span lang="cs">Externí služba</span><span lang="en">External service</span></li>
+        </ul>
+        <figcaption id="c4-cap"><span lang="cs"><strong>Mění se web a API, přibývá jedna tabulka; agent sandbox zůstává.</strong> Kontejnery podle <code>docs/c4/MODEL.md</code>.</span><span lang="en"><strong>The web app and API change and one table is added; the agent sandbox stays as is.</strong> Containers per <code>docs/c4/MODEL.md</code>.</span></figcaption>
+      </figure>
+      <div class="pp-table"><table>
+        <thead><tr><th><span lang="cs">Plocha</span><span lang="en">Surface</span></th><th><span lang="cs">Mění se?</span><span lang="en">Changes?</span></th><th><span lang="cs">Proč</span><span lang="en">Why</span></th></tr></thead>
+        <tbody>
+          <tr><td><span lang="cs">Testy</span><span lang="en">Tests</span></td><td><span class="pp-yn pp-yn--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td><td><span lang="cs">Nový endpoint a limit 20 sad.</span><span lang="en">New endpoint and the 20-set limit.</span></td></tr>
+          <tr><td><span lang="cs">Dokumentace</span><span lang="en">Docs</span></td><td><span class="pp-yn pp-yn--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td><td><span lang="cs">Uživatelská stránka reportů.</span><span lang="en">The reports user page.</span></td></tr>
+          <tr><td>Frontend</td><td><span class="pp-yn pp-yn--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td><td><span lang="cs">Tlačítko a menu v hlavičce reportu.</span><span lang="en">Button and menu in the report header.</span></td></tr>
+          <tr><td>API</td><td><span class="pp-yn pp-yn--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td><td><span lang="cs">CRUD pro sady.</span><span lang="en">CRUD for sets.</span></td></tr>
+          <tr><td>CLI</td><td><span class="pp-yn pp-yn--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td><td><span lang="cs">Princip 2: stejné chování.</span><span lang="en">Principle 2: same behaviour.</span></td></tr>
+          <tr><td>MCP</td><td><span class="pp-yn pp-yn--yes"><span lang="cs">Ano</span><span lang="en">Yes</span></span></td><td><span lang="cs">Princip 2: stejné chování.</span><span lang="en">Principle 2: same behaviour.</span></td></tr>
+          <tr><td><span lang="cs">Externí služby (agent sandbox)</span><span lang="en">External services (agent sandbox)</span></td><td><span class="pp-yn"><span lang="cs">Ne</span><span lang="en">No</span></span></td><td><span lang="cs">Agent volá MCP; sandbox se nemění.</span><span lang="en">The agent calls MCP; the sandbox does not change.</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- cs:delivery -->
+    <section class="pp-section" id="delivery" data-cs="delivery">
+      <h2><span class="pp-section__num">12</span><span lang="cs">Plán dodání</span><span lang="en">Delivery plan</span></h2>
+      <ol class="pp-timeline">
+        <li class="pp-phase pp-phase--current"><span class="pp-phase__when">2026-11 → 2026-12</span><h4><span lang="cs">Fáze 1: osobní sady</span><span lang="en">Phase 1: personal sets</span></h4><p lang="cs"><strong>Hotovo když:</strong> 10 analytiků na dev používá sady 2 týdny.</p><p lang="en"><strong>Done when:</strong> 10 analysts on dev use sets for 2 weeks.</p></li>
+        <li class="pp-phase"><span class="pp-phase__when">2027-01 → 2027-02</span><h4><span lang="cs">Fáze 2: sdílení</span><span lang="en">Phase 2: sharing</span></h4><p lang="cs"><strong>Hotovo když:</strong> sada sdílená se skupinou respektuje její oprávnění.</p><p lang="en"><strong>Done when:</strong> a set shared with a group respects its permissions.</p></li>
+        <li class="pp-phase"><span class="pp-phase__when">2027-03</span><h4><span lang="cs">Zapnout pro všechny</span><span lang="en">On for everyone</span></h4><p lang="cs"><strong>Hotovo když:</strong> metriky splní cíl a přepínač je odstraněn.</p><p lang="en"><strong>Done when:</strong> metrics meet target and the switch is removed.</p></li>
+      </ol>
+      <div class="pp-prose" lang="cs">
+        <p><strong>Přepínač:</strong> <code>saved_report_filters</code>, výchozí vypnuto. <strong>Závislosti:</strong> žádné. <strong>Riziko:</strong> sloupec zmizí ze zdroje → filtr se přeskočí a uživatel to vidí.</p>
+      </div>
+      <div class="pp-prose" lang="en">
+        <p><strong>Switch:</strong> <code>saved_report_filters</code>, off by default. <strong>Dependencies:</strong> none. <strong>Risk:</strong> a column disappears from the source → the filter is skipped and the user sees it.</p>
+      </div>
+      <h3><span lang="cs">Akceptační příklady</span><span lang="en">Acceptance examples</span></h3>
+      <div class="pp-gwt">
+        <div class="pp-gwt__case">
+          <h4><span lang="cs">Výchozí sada se použije sama</span><span lang="en">The default set applies on its own</span></h4>
+          <dl>
+            <dt lang="cs">Dáno</dt><dt lang="en">Given</dt><dd><span lang="cs">sada „Pondělí“ je výchozí</span><span lang="en">set "Monday" is the default</span></dd>
+            <dt lang="cs">Když</dt><dt lang="en">When</dt><dd><span lang="cs">analytik otevře report</span><span lang="en">the analyst opens the report</span></dd>
+            <dt lang="cs">Pak</dt><dt lang="en">Then</dt><dd><span lang="cs">report ukáže data s filtry sady „Pondělí“ do 2 s</span><span lang="en">the report shows data with the "Monday" filters within 2 s</span></dd>
+          </dl>
+        </div>
+        <div class="pp-gwt__case">
+          <h4><span lang="cs">Limit 20 sad</span><span lang="en">The 20-set limit</span></h4>
+          <dl>
+            <dt lang="cs">Dáno</dt><dt lang="en">Given</dt><dd><span lang="cs">uživatel má u reportu 20 sad</span><span lang="en">the user has 20 sets on the report</span></dd>
+            <dt lang="cs">Když</dt><dt lang="en">When</dt><dd><span lang="cs">uloží 21.</span><span lang="en">they save a 21st</span></dd>
+            <dt lang="cs">Pak</dt><dt lang="en">Then</dt><dd><span lang="cs">vidí chybu s odkazem na správu sad a nic se neuloží</span><span lang="en">they see an error linking to set management and nothing is saved</span></dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- cs:second-opinion -->
+    <section class="pp-section" id="second-opinion" data-cs="second-opinion">
+      <h2><span class="pp-section__num">13</span><span lang="cs">Druhý názor</span><span lang="en">Second opinion</span></h2>
+      <p lang="cs">GPT Astra posoudila verzi 1 dne 2026-10-22.</p>
+      <p lang="en">GPT Astra reviewed version 1 on 2026-10-22.</p>
+      <div class="pp-table"><table>
+        <thead><tr><th>#</th><th><span lang="cs">Nález</span><span lang="en">Finding</span></th><th><span lang="cs">Řešení</span><span lang="en">Resolution</span></th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><span lang="cs">Chybí chování při smazaném sloupci.</span><span lang="en">Behaviour for a deleted column is missing.</span></td><td><span lang="cs"><strong>Změněno:</strong> doplněno do Návrhu.</span><span lang="en"><strong>Changed:</strong> added to Proposal.</span></td></tr>
+          <tr><td>2</td><td><span lang="cs">Ukládat do localStorage.</span><span lang="en">Store in localStorage.</span></td><td><span lang="cs"><strong>Odmítnuto:</strong> porušuje princip 2.</span><span lang="en"><strong>Rebutted:</strong> breaks principle 2.</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- cs:glossary -->
+    <section class="pp-section" id="glossary" data-cs="glossary">
+      <h2><span class="pp-section__num">14</span><span lang="cs">Slovník</span><span lang="en">Glossary</span></h2>
+      <dl class="pp-glossary">
+        <dt><span lang="cs">Uložená sada filtrů</span><span lang="en">Saved filter set</span></dt>
+        <dd><span lang="cs">Pojmenovaná kombinace filtrů jednoho reportu, kterou lze znovu použít.</span><span lang="en">A named combination of one report's filters that can be reapplied.</span></dd>
+        <dt><span lang="cs">Výchozí sada</span><span lang="en">Default set</span></dt>
+        <dd><span lang="cs">Sada, která se použije sama při otevření reportu.</span><span lang="en">The set applied on its own when the report opens.</span></dd>
+      </dl>
+    </section>
+
+    <!-- cs:sources -->
+    <section class="pp-section" id="sources" data-cs="sources">
+      <h2><span class="pp-section__num">15</span><span lang="cs">Zdroje</span><span lang="en">Sources</span></h2>
+      <ol class="pp-sources">
+        <li id="src-1"><span lang="cs">Ukázková telemetrie otevření reportů, 2026-10-01 až 2026-10-14.</span><span lang="en">Sample report-open telemetry, 2026-10-01 to 2026-10-14.</span> <a href="https://example.com/telemetry" target="_blank" rel="noopener">example.com/telemetry</a></li>
+        <li id="src-2"><span lang="cs">Ukázkový ticket TEAG-000, 2026-10-02.</span><span lang="en">Sample ticket TEAG-000, 2026-10-02.</span> <a href="https://example.com/teag-000" target="_blank" rel="noopener">example.com/teag-000</a></li>
+        <li id="src-3"><code>docs/table-access-policies.md</code>, commit <code>0000000</code>.</li>
+        <li id="src-4"><span lang="cs">Konkurent A, dokumentace „Saved views“, čteno 2026-10-20.</span><span lang="en">Competitor A, "Saved views" docs, read 2026-10-20.</span> <a href="https://example.com/competitor-a" target="_blank" rel="noopener">example.com/competitor-a</a></li>
+        <li id="src-5"><span lang="cs">Konkurent B, dokumentace „Shared filters“, čteno 2026-10-20.</span><span lang="en">Competitor B, "Shared filters" docs, read 2026-10-20.</span> <a href="https://example.com/competitor-b" target="_blank" rel="noopener">example.com/competitor-b</a></li>
+      </ol>
+    </section>
+
+    <!-- cs:appendix -->
+    <section class="pp-section" id="appendix" data-cs="appendix">
+      <h2><span class="pp-section__num">16</span><span lang="cs">Příloha: technické detaily</span><span lang="en">Appendix: technical detail</span></h2>
+      <details class="pp-appendix">
+        <summary><span lang="cs">Datový model</span><span lang="en">Data model</span></summary>
+        <div>
+          <pre>report_filter_sets(
+  id uuid primary key,
+  report_id text not null,
+  owner_user_id uuid not null,
+  name varchar(60) not null,
+  filters jsonb not null,
+  is_default boolean not null default false
+)</pre>
+        </div>
+      </details>
+      <details class="pp-appendix">
+        <summary><span lang="cs">Tvar API</span><span lang="en">API shape</span></summary>
+        <div><pre>GET    /api/reports/{id}/filter-sets
+POST   /api/reports/{id}/filter-sets   {name, filters, is_default}
+DELETE /api/reports/{id}/filter-sets/{set_id}</pre></div>
+      </details>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var LANGS = ["cs", "en"];
+  var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function langFromHash() {
+    var m = /(?:^#|[#&;])(?:lang=)?(cs|en)(?=$|[&;])/.exec(location.hash || "");
+    return m ? m[1] : null;
+  }
+  function setLang(lang, remember) {
+    if (LANGS.indexOf(lang) < 0) lang = "cs";
+    root.setAttribute("data-lang", lang);
+    root.setAttribute("lang", lang);
+    var t = root.getAttribute("data-title-" + lang);
+    if (t) document.title = t;
+    document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-set-lang") === lang));
+    });
+    if (remember && langFromHash() !== lang) {
+      try { history.replaceState(null, "", "#" + lang); }
+      catch (e) { try { location.hash = lang; } catch (e2) {} }
+    }
+  }
+  setLang(langFromHash() || "cs", false);
+  document.querySelectorAll("[data-set-lang]").forEach(function (b) {
+    b.addEventListener("click", function () { setLang(b.getAttribute("data-set-lang"), true); });
+  });
+  window.addEventListener("hashchange", function () { var l = langFromHash(); if (l) setLang(l, false); });
+
+  var toc = document.querySelector("[data-toc]");
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section[data-cs]"));
+  var links = {};
+  if (toc) {
+    sections.forEach(function (s) {
+      var h = s.querySelector("h2");
+      if (!h) return;
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.href = "#" + s.id;
+      var num = h.querySelector(".pp-section__num");
+      var n = document.createElement("span");
+      n.className = "pp-toc__num";
+      n.textContent = num ? num.textContent : "";
+      a.appendChild(n);
+      var label = document.createElement("span");
+      h.querySelectorAll("[lang]").forEach(function (src) {
+        var span = document.createElement("span");
+        span.setAttribute("lang", src.getAttribute("lang"));
+        span.textContent = src.textContent;
+        label.appendChild(span);
+      });
+      a.appendChild(label);
+      li.appendChild(a);
+      toc.appendChild(li);
+      links[s.id] = a;
+    });
+  }
+  var tocDetails = document.querySelector(".pp-toc details");
+  var narrow = window.matchMedia("(max-width: 960px)");
+  function syncToc() { if (tocDetails) tocDetails.open = !narrow.matches; }
+  syncToc();
+  if (narrow.addEventListener) narrow.addEventListener("change", syncToc);
+
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var id = decodeURIComponent(a.getAttribute("href").slice(1));
+    if (!id || LANGS.indexOf(id) >= 0) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    var d = el.closest("details");
+    if (d) d.open = true;
+    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "-1");
+    el.focus({ preventScroll: true });
+    if (narrow.matches && tocDetails && tocDetails.contains(a)) tocDetails.open = false;
+  });
+
+  if ("IntersectionObserver" in window && sections.length) {
+    var visible = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { visible[en.target.id] = en.isIntersecting; });
+      var current = null;
+      for (var i = 0; i < sections.length; i++) { if (visible[sections[i].id]) { current = sections[i].id; break; } }
+      if (!current) return;
+      Object.keys(links).forEach(function (k) {
+        if (k === current) links[k].setAttribute("aria-current", "true");
+        else links[k].removeAttribute("aria-current");
+      });
+    }, { rootMargin: "-72px 0px -55% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+
+  var opened = [];
+  window.addEventListener("beforeprint", function () {
+    document.querySelectorAll("details:not([open])").forEach(function (d) { d.open = true; opened.push(d); });
+  });
+  window.addEventListener("afterprint", function () { opened.forEach(function (d) { d.open = false; }); opened = []; });
+
+  var NS = "http://www.w3.org/2000/svg";
+  function el(name, attrs, text) {
+    var n = document.createElementNS(NS, name);
+    Object.keys(attrs || {}).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function bilingual(parent, attrs, obj) {
+    LANGS.forEach(function (l) { var a = Object.assign({ lang: l }, attrs); parent.appendChild(el("text", a, obj[l] || "")); });
+  }
+  document.querySelectorAll("[data-position]").forEach(function (fig) {
+    var data;
+    try {
+      var src = fig.querySelector('script[type="application/json"], template[data-json]');
+      data = JSON.parse(src.content ? src.content.textContent : src.textContent);
+    } catch (e) { return; }
+    var svg = fig.querySelector("svg");
+    var W = 640, H = 400, L = 56, R = 24, T = 20, B = 52;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var pw = W - L - R, ph = H - T - B;
+    function px(v) { return L + v * pw; }
+    function py(v) { return T + (1 - v) * ph; }
+    [0.25, 0.5, 0.75].forEach(function (g) {
+      svg.appendChild(el("line", { "class": "pp-pos-grid", x1: px(g), x2: px(g), y1: T, y2: T + ph }));
+      svg.appendChild(el("line", { "class": "pp-pos-grid", x1: L, x2: L + pw, y1: py(g), y2: py(g) }));
+    });
+    svg.appendChild(el("line", { "class": "pp-pos-axis", x1: L, x2: L + pw, y1: T + ph, y2: T + ph }));
+    svg.appendChild(el("line", { "class": "pp-pos-axis", x1: L, x2: L, y1: T, y2: T + ph }));
+    bilingual(svg, { "class": "pp-pos-label", x: L + pw, y: H - 16, "text-anchor": "end" }, data.x);
+    var yl = el("g", { transform: "translate(18 " + T + ") rotate(-90)" });
+    bilingual(yl, { "class": "pp-pos-label", x: 0, y: 0, "text-anchor": "end" }, data.y);
+    svg.appendChild(yl);
+    var defs = el("defs");
+    var mk = el("marker", { id: "pos-arrow-" + Math.random().toString(36).slice(2), viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto" });
+    mk.appendChild(el("path", { "class": "pp-pos-arrow", d: "M0 0L10 5L0 10z" }));
+    defs.appendChild(mk);
+    svg.appendChild(defs);
+    var agnes = data.points.filter(function (p) { return p.agnes; });
+    if (agnes.length > 1) {
+      var pts = agnes.map(function (p) { return [px(p.x), py(p.y)]; });
+      var last = pts[pts.length - 1], prev = pts[pts.length - 2];
+      var dx = last[0] - prev[0], dy = last[1] - prev[1], len = Math.sqrt(dx * dx + dy * dy) || 1;
+      pts[pts.length - 1] = [last[0] - dx / len * 11, last[1] - dy / len * 11];
+      var d = pts.map(function (q, i) { return (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); }).join("");
+      svg.appendChild(el("path", { "class": "pp-pos-path", d: d, "marker-end": "url(#" + mk.id + ")" }));
+    }
+    var list = document.createElement("ul");
+    list.className = "pp-sr";
+    data.points.forEach(function (p) {
+      var cls = "pp-pos-dot" + (p.agnes === "now" ? " pp-pos-dot--now" : p.agnes ? " pp-pos-dot--agnes" : "");
+      svg.appendChild(el("circle", { "class": cls, cx: px(p.x), cy: py(p.y), r: p.agnes ? 7 : 6 }));
+      var right = p.x < 0.8;
+      bilingual(svg, { "class": "pp-pos-name" + (p.agnes ? " pp-pos-name--agnes" : ""), x: px(p.x) + (right ? 12 : 0), y: py(p.y) + (right ? 4 : -14), "text-anchor": right ? "start" : "middle" }, p);
+      LANGS.forEach(function (l) {
+        var li = document.createElement("li");
+        li.setAttribute("lang", l);
+        li.textContent = p[l] + ": " + Math.round(p.x * 100) + " / " + Math.round(p.y * 100);
+        list.appendChild(li);
+      });
+    });
+    fig.appendChild(list);
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var MSG = {
+      cs: {
+        pick: "Vyberte jednu možnost.",
+        sent: "Otevřelo se okno. Zkontrolujte text a stiskněte Odeslat (Send).",
+        popup_blocked: "Prohlížeč zablokoval okno. Povolte vyskakovací okna a zkuste to znovu.",
+        too_large: "Komentář je příliš dlouhý. Zkraťte ho.",
+        not_enabled: "Odpovědi formulářem jsou vypnuté. Napište komentář k dokumentu.",
+        invalid_body: "Odpověď se nepodařilo připravit. Zkuste to znovu.",
+        other: "Odeslání se nepovedlo: ",
+        off: "Odpovědi formulářem jsou u tohoto dokumentu vypnuté. Svůj názor napište jako komentář k dokumentu.",
+        choice: "Volba", comment: "Komentář", decision: "Rozhodnutí"
+      },
+      en: {
+        pick: "Pick one option.",
+        sent: "A window opened. Check the text and press Send.",
+        popup_blocked: "The browser blocked the window. Allow pop-ups and try again.",
+        too_large: "The comment is too long. Shorten it.",
+        not_enabled: "Form responses are off. Write a comment on the document instead.",
+        invalid_body: "The answer could not be prepared. Try again.",
+        other: "Could not send: ",
+        off: "Form responses are off for this document. Leave your view as a comment on the document.",
+        choice: "Choice", comment: "Comment", decision: "Decision"
+      }
+    };
+    function lang() { return root.getAttribute("data-lang") === "en" ? "en" : "cs"; }
+    function textIn(node, l) {
+      if (!node) return "";
+      var s = node.querySelector('[lang="' + l + '"]');
+      return (s || node).textContent.replace(/\s+/g, " ").trim();
+    }
+    var enabled = false;
+    try { enabled = !!(window.Agnes && typeof Agnes.formResponses === "function" && Agnes.formResponses()); } catch (e) { enabled = false; }
+    document.querySelectorAll("form.pp-form").forEach(function (form) {
+      var card = form.closest(".pp-decision");
+      var note = form.querySelector(".pp-form__note");
+      if (!enabled) {
+        var off = document.createElement("p");
+        off.className = "pp-form__off";
+        LANGS.forEach(function (l) {
+          var s = document.createElement("span");
+          s.setAttribute("lang", l);
+          s.textContent = MSG[l].off;
+          off.appendChild(s);
+        });
+        form.replaceWith(off);
+        return;
+      }
+      function show(text, kind) {
+        note.textContent = text;
+        if (kind) note.setAttribute("data-kind", kind); else note.removeAttribute("data-kind");
+        note.hidden = false;
+      }
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var l = lang(), m = MSG[l];
+        var picked = form.querySelector('input[name="choice"]:checked');
+        if (!picked) { show(m.pick, "error"); return; }
+        var id = form.getAttribute("data-decision");
+        var question = textIn(card.querySelector("h3"), l);
+        var value = picked.value;
+        var option = card.querySelector('.pp-option[data-option="' + value + '"] h4');
+        var optionText = option ? textIn(option, l) : textIn(picked.parentNode, l);
+        var comment = (form.querySelector("textarea").value || "").trim();
+        var body = m.decision + " " + id + ": " + question + "\n" +
+          m.choice + ": " + (value === "other" ? optionText : value + " – " + optionText) +
+          (comment ? "\n" + m.comment + ": " + comment : "");
+        var p;
+        try {
+          p = Agnes.respond({ title: id + " · " + question, body: body });
+        } catch (err) {
+          show(m.other + (err && err.code || err), "error");
+          return;
+        }
+        Promise.resolve(p).then(function () {
+          show(m.sent);
+        }, function (error) {
+          var code = error && error.code;
+          show(m[code] || (m.other + (code || error)), "error");
+        });
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 Personal [Claude Code](https://docs.anthropic.com/en/docs/claude-code) setup used by petr@keboola.com. Use at your own risk.
 
-A plugin marketplace with eight skills, plus the permission ruleset and global instructions I actually work with daily.
+A plugin marketplace with nine skills, plus the permission ruleset and global instructions I actually work with daily.
 
 ## Install
 
@@ -29,6 +29,7 @@ Each skill is its own plugin, so nothing arrives that you did not ask for. Brows
 | `keboola-data-app` | `/keboola-data-app` | Streamlit data apps for the Keboola platform: Storage Files API, OIDC auth via proxy headers, multi-step wizard patterns |
 | `polymarket` | `/polymarket` | Trading bots on Polymarket prediction markets: py-clob-client SDK, WebSocket streaming, order placement, whale tracking, arbitrage detection |
 | `post-merge` | `/post-merge` | After merging a PR: sync main, remove the merged worktree and branch, watch CI/CD. Works from a plain checkout or from a `.claude/worktrees` session |
+| `product-proposal` | `/product-proposal` | Bilingual (CZ/EN) product proposal as an Agnes Artifact: current state from the code, competitor research, surfaces matrix, argued proposal with alternatives, decisions prepared as meeting briefs with feedback forms, ambitious delivery plan, GPT Astra second opinion, linked to a Linear feature. Needs the `agnes` CLI and Agnes content and design systems |
 | `second-opinion` | `/second-opinion` | External review via the Codex, Antigravity (`agy`) or Claude Code CLIs — one-shot question, multi-round consultation, diff review, or multi-model consensus when a decision is worth the extra round trip |
 | `ship-with-astra` | `/ship-with-astra` | Ship a change end to end with GPT Astra (Codex CLI) as reviewer: short design brief, Astra design consultation, sub-agent build with TDD, PR, Astra PR review, then auto-fix and auto-merge until MERGED |
 | `swarm` | `/swarm` | Multi-agent implementation of a phased plan: a Tech Lead spawns Developer agents in isolated git worktrees per phase, reviews their PRs, handles retries and escalation |

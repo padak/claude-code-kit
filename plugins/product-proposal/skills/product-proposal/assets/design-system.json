@@ -1,0 +1,452 @@
+{
+  "slug": "product-proposal",
+  "name": "Product proposal",
+  "description": "Restrained neutral look for bilingual product proposals: Inter UI and body, Source Serif 4 headings, one blue accent, sticky table of contents, decision cards with feedback forms. Light and dark.",
+  "bundle": {
+    "tokens": {
+      "color": {
+        "$type": "color",
+        "bg": {
+          "page": {
+            "$value": "#ffffff"
+          },
+          "surface": {
+            "$value": "#f7f7f8"
+          },
+          "subtle": {
+            "$value": "#efeff1"
+          }
+        },
+        "text": {
+          "primary": {
+            "$value": "#18181b"
+          },
+          "secondary": {
+            "$value": "#55555f"
+          },
+          "faint": {
+            "$value": "#8b8b95"
+          }
+        },
+        "border": {
+          "default": {
+            "$value": "#e2e2e6"
+          },
+          "strong": {
+            "$value": "#c4c4cc"
+          }
+        },
+        "accent": {
+          "default": {
+            "$value": "#2f55d4",
+            "$description": "The single accent colour: links, recommended option, changed parts, current phase."
+          },
+          "on": {
+            "$value": "#ffffff"
+          },
+          "soft": {
+            "$value": "#edf1fd"
+          }
+        },
+        "status": {
+          "ok": {
+            "$value": "#1f7a4d"
+          },
+          "warn": {
+            "$value": "#9a5b00"
+          },
+          "danger": {
+            "$value": "#b42318"
+          }
+        },
+        "chart": {
+          "1": {
+            "$value": "#2f55d4"
+          },
+          "2": {
+            "$value": "#3f3f46"
+          },
+          "3": {
+            "$value": "#8b8b95"
+          },
+          "4": {
+            "$value": "#9db1ee"
+          },
+          "5": {
+            "$value": "#c4c4cc"
+          }
+        }
+      },
+      "font": {
+        "family": {
+          "$type": "fontFamily",
+          "body": {
+            "$value": [
+              "Inter",
+              "system-ui",
+              "-apple-system",
+              "Segoe UI",
+              "sans-serif"
+            ]
+          },
+          "heading": {
+            "$value": [
+              "Source Serif 4",
+              "Georgia",
+              "serif"
+            ]
+          },
+          "mono": {
+            "$value": [
+              "JetBrains Mono",
+              "ui-monospace",
+              "SFMono-Regular",
+              "Menlo",
+              "monospace"
+            ]
+          }
+        },
+        "weight": {
+          "$type": "fontWeight",
+          "regular": {
+            "$value": 400
+          },
+          "medium": {
+            "$value": 500
+          },
+          "semibold": {
+            "$value": 600
+          }
+        }
+      },
+      "size": {
+        "$type": "dimension",
+        "small": {
+          "$value": "0.8125rem"
+        },
+        "body": {
+          "$value": "1rem"
+        },
+        "lead": {
+          "$value": "1.1875rem"
+        },
+        "h3": {
+          "$value": "1.1875rem"
+        },
+        "h2": {
+          "$value": "1.625rem"
+        },
+        "h1": {
+          "$value": "2.25rem"
+        }
+      },
+      "line": {
+        "$type": "number",
+        "tight": {
+          "$value": 1.25
+        },
+        "body": {
+          "$value": 1.65
+        }
+      },
+      "space": {
+        "$type": "dimension",
+        "xs": {
+          "$value": "0.375rem"
+        },
+        "sm": {
+          "$value": "0.75rem"
+        },
+        "md": {
+          "$value": "1.25rem"
+        },
+        "lg": {
+          "$value": "2.25rem"
+        },
+        "xl": {
+          "$value": "3.5rem"
+        }
+      },
+      "radius": {
+        "$type": "dimension",
+        "sm": {
+          "$value": "4px"
+        },
+        "md": {
+          "$value": "6px"
+        },
+        "lg": {
+          "$value": "10px"
+        }
+      },
+      "layout": {
+        "$type": "dimension",
+        "measure": {
+          "$value": "42rem"
+        },
+        "wide": {
+          "$value": "58rem"
+        },
+        "toc": {
+          "$value": "14rem"
+        }
+      }
+    },
+    "modes": {
+      "dark": {
+        "color": {
+          "bg": {
+            "page": {
+              "$value": "#121214",
+              "$type": "color"
+            },
+            "surface": {
+              "$value": "#1a1a1e",
+              "$type": "color"
+            },
+            "subtle": {
+              "$value": "#232328",
+              "$type": "color"
+            }
+          },
+          "text": {
+            "primary": {
+              "$value": "#ececef",
+              "$type": "color"
+            },
+            "secondary": {
+              "$value": "#a8a8b3",
+              "$type": "color"
+            },
+            "faint": {
+              "$value": "#76767f",
+              "$type": "color"
+            }
+          },
+          "border": {
+            "default": {
+              "$value": "#2c2c32",
+              "$type": "color"
+            },
+            "strong": {
+              "$value": "#45454d",
+              "$type": "color"
+            }
+          },
+          "accent": {
+            "default": {
+              "$value": "#8eaaff",
+              "$type": "color"
+            },
+            "on": {
+              "$value": "#0d1530",
+              "$type": "color"
+            },
+            "soft": {
+              "$value": "#1b2340",
+              "$type": "color"
+            }
+          },
+          "status": {
+            "ok": {
+              "$value": "#5cc08f",
+              "$type": "color"
+            },
+            "warn": {
+              "$value": "#e0a43c",
+              "$type": "color"
+            },
+            "danger": {
+              "$value": "#f07a6e",
+              "$type": "color"
+            }
+          },
+          "chart": {
+            "1": {
+              "$value": "#8eaaff",
+              "$type": "color"
+            },
+            "2": {
+              "$value": "#d4d4d8",
+              "$type": "color"
+            },
+            "3": {
+              "$value": "#8b8b95",
+              "$type": "color"
+            },
+            "4": {
+              "$value": "#4a5f9e",
+              "$type": "color"
+            },
+            "5": {
+              "$value": "#45454d",
+              "$type": "color"
+            }
+          }
+        }
+      }
+    },
+    "roles": {
+      "background": "{color.bg.page}",
+      "surface": "{color.bg.surface}",
+      "text": "{color.text.primary}",
+      "muted": "{color.text.secondary}",
+      "border": "{color.border.default}",
+      "accent": "{color.accent.default}",
+      "on_accent": "{color.accent.on}",
+      "font_body": "{font.family.body}",
+      "font_heading": "{font.family.heading}",
+      "font_mono": "{font.family.mono}",
+      "radius": "{radius.lg}",
+      "chart_palette": [
+        "{color.chart.1}",
+        "{color.chart.2}",
+        "{color.chart.3}",
+        "{color.chart.4}",
+        "{color.chart.5}"
+      ]
+    },
+    "guidance": "# Product proposal\n\nA restrained look for product proposals that a product owner reads closely,\ncomments on and decides from. The page must stay calm with 17 sections, two\nlanguages and several decision forms on it.\n\n## Principles\n\n1. **Neutral first, one accent.** Greys carry the page. The accent\n   (`--color-accent-default`) marks only what asks for attention: links, the\n   recommended option, what changes in a diagram, the current phase, the\n   active table-of-contents entry. Never use it as decoration or as a large\n   fill; `--color-accent-soft` is the only tint.\n2. **Status colours are semantic only.** `--color-status-ok|warn|danger` for\n   approved, concept/unverified and rejected/risk. Never rely on colour\n   alone: every mark has a word or a shape (filled, half, empty circle).\n3. **Reading width.** Prose stops at `--layout-measure` (42rem, about 75\n   characters of Inter at 16px). Tables, figures and diagrams may use\n   `--layout-wide` (58rem). The table of contents is `--layout-toc` wide.\n\n## Typography\n\n- **Inter** for the body and every piece of UI (top bar, badges, table of\n  contents, tables, forms): it is the most legible bundled sans at small\n  sizes and has tabular figures for numbers.\n- **Source Serif 4** only for the document title (`--size-h1`) and section\n  headings (`--size-h2`). A proposal has 17 sections; a serif heading marks\n  each break without heavy weight or colour, and tells the reader this is a\n  document to read, not an app screen. Sub-headings (h3, h4) stay in Inter\n  semibold. For an all-sans variant, point `font_heading` at the body\n  family; nothing else changes.\n- **JetBrains Mono** for code, repo paths, IDs (TEAG-123, D1) and section\n  numbers.\n- Body 1rem / 1.65; lead 1.1875rem. Do not shrink text to fit more.\n\n## Layout\n\nSticky top bar (title, Linear badge, status, version, CZ/EN toggle at the\nright), then a two-column grid: a sticky table of contents on the left and\nthe document on the right. At 960px and below the grid becomes one column\nand the table of contents folds into a collapsible box above the text.\nSections are separated by a hairline rule and `--space-lg`.\n\n## Bilingual pages\n\nBoth languages are in the page. Every piece of text exists twice, as\nsibling elements with `lang=\"cs\"` and `lang=\"en\"`; the root element's\n`data-lang` hides the other language. Czech is the default; the choice is\nkept only in the URL hash (`#cs`, `#en`) because the artifact sandbox has\nno storage.\n\n## Components\n\nUse the components below; build nothing that duplicates them. Every figure\nhas a caption whose first sentence is the takeaway (bold) and a text\nequivalent (notes list, table or hidden list). Generated images and\nmockups always use the concept variant with the \"Concept\" badge.\n\n## Dark mode and print\n\nEvery colour is a token with a dark value; never hard-code one. Print hides\nthe top bar, table of contents and forms, opens collapsed blocks and prints\nsource URLs.\n",
+    "components": [
+      {
+        "name": "pp-base",
+        "description": "Reset, body type, language switching, evidence chips.",
+        "when_to_use": "Always; it carries the bilingual hiding rule.",
+        "html": "<span class=\"pp-ev pp-ev--verified\">verified</span> <span class=\"pp-ev pp-ev--inferred\">inferred</span> <span class=\"pp-ev pp-ev--unverified\">unverified</span>",
+        "css": "*,*::before,*::after{box-sizing:border-box}\n:root{color-scheme:light dark}\n:root[data-theme=\"light\"]{color-scheme:light}\n:root[data-theme=\"dark\"]{color-scheme:dark}\nhtml{-webkit-text-size-adjust:100%;scroll-padding-top:5rem}\nbody{margin:0;background:var(--ds-background);color:var(--ds-text);font-family:var(--ds-font-body);font-size:var(--size-body);line-height:var(--line-body);font-variant-numeric:tabular-nums}\nhtml[data-lang=\"cs\"] body [lang=\"en\"],html[data-lang=\"en\"] body [lang=\"cs\"]{display:none!important}\na{color:var(--color-accent-default);text-underline-offset:.18em;text-decoration-thickness:1px}\na:hover{text-decoration-thickness:2px}\ncode,kbd{font-family:var(--ds-font-mono);font-size:.875em;background:var(--color-bg-subtle);border:1px solid var(--ds-border);border-radius:var(--radius-sm);padding:.05em .3em;overflow-wrap:anywhere}\nh1,h2,h3,h4{line-height:var(--line-tight);color:var(--ds-text);text-wrap:balance}\nh3{font-size:var(--size-h3);font-weight:600;margin:var(--space-lg) 0 var(--space-sm)}\nh4{font-size:var(--size-body);font-weight:600;margin:0 0 var(--space-xs)}\np,ul,ol,dl{margin:0 0 var(--space-sm)}\nul,ol{padding-left:1.25rem}\nli+li{margin-top:.25rem}\nstrong{font-weight:600}\n.pp-muted{color:var(--ds-muted)}\n.pp-small{font-size:var(--size-small)}\n.pp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}\n:focus-visible{outline:2px solid var(--color-accent-default);outline-offset:2px}"
+      },
+      {
+        "name": "pp-topbar",
+        "description": "Sticky bar: short title, Linear badge, status, version, CZ/EN toggle.",
+        "when_to_use": "Once, first element of the body.",
+        "html": "<header class=\"pp-topbar\"><div class=\"pp-topbar__inner\"><div class=\"pp-topbar__title\"><span lang=\"cs\">Název</span><span lang=\"en\">Title</span></div><div class=\"pp-topbar__meta\"><a class=\"pp-badge pp-badge--linear\" href=\"https://linear.app/keboola/issue/TEAG-123\">TEAG-123</a><span class=\"pp-badge pp-status\" data-status=\"review\"><span lang=\"cs\">Ke kontrole</span><span lang=\"en\">In review</span></span><span class=\"pp-badge\">v1</span></div><div class=\"pp-lang\" role=\"group\" aria-label=\"Jazyk / Language\"><button type=\"button\" data-set-lang=\"cs\" aria-pressed=\"true\">CZ</button><button type=\"button\" data-set-lang=\"en\" aria-pressed=\"false\">EN</button></div></div></header>",
+        "css": ".pp-topbar{position:sticky;top:0;z-index:20;background:var(--ds-background);border-bottom:1px solid var(--ds-border)}\n.pp-topbar__inner{display:flex;align-items:center;gap:var(--space-sm);max-width:calc(var(--layout-toc) + var(--layout-wide) + var(--space-xl) + 2 * var(--space-md));margin:0 auto;padding:var(--space-xs) var(--space-md);min-height:3.25rem}\n.pp-topbar__title{flex:1 1 auto;min-width:0;font-weight:600;font-size:var(--size-small);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n.pp-topbar__meta{display:flex;align-items:center;gap:var(--space-xs);flex-wrap:wrap}\n.pp-lang{display:inline-flex;border:1px solid var(--color-border-strong);border-radius:999px;padding:2px;flex:none}\n.pp-lang button{font:inherit;font-size:var(--size-small);font-weight:600;letter-spacing:.04em;border:0;border-radius:999px;padding:.25rem .7rem;background:transparent;color:var(--ds-muted);cursor:pointer}\n.pp-lang button[aria-pressed=\"true\"]{background:var(--ds-text);color:var(--ds-background)}\n@media (max-width:640px){.pp-topbar__title{display:none}.pp-topbar__meta{flex:1 1 auto}}"
+      },
+      {
+        "name": "pp-badge",
+        "description": "Pills: Linear ID, status (draft, review, approved, rejected), version, Concept; evidence chips verified/inferred/unverified.",
+        "when_to_use": "Top bar, figure captions, next to a claim.",
+        "html": "<span class=\"pp-badge pp-status\" data-status=\"approved\">Approved</span> <span class=\"pp-badge pp-badge--concept\">Concept</span>",
+        "css": ".pp-badge{display:inline-flex;align-items:center;gap:.4em;font-size:var(--size-small);font-weight:500;line-height:1.2;padding:.2em .6em;border:1px solid var(--ds-border);border-radius:999px;color:var(--ds-muted);background:var(--ds-surface);text-decoration:none;white-space:nowrap}\na.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-accent-default)}\n.pp-badge--linear{color:var(--color-accent-default);font-family:var(--ds-font-mono);font-weight:500}\n.pp-status::before{content:\"\";width:.5em;height:.5em;border-radius:50%;background:currentColor}\n.pp-status[data-status=\"draft\"]{color:var(--ds-muted)}\n.pp-status[data-status=\"review\"]{color:var(--color-accent-default)}\n.pp-status[data-status=\"approved\"]{color:var(--color-status-ok)}\n.pp-status[data-status=\"rejected\"]{color:var(--color-status-danger)}\n.pp-badge--concept{color:var(--color-status-warn);border:1px dashed currentColor;background:var(--ds-background);text-transform:uppercase;letter-spacing:.06em;font-weight:600}\n.pp-ev{font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:.05em .4em;border-radius:var(--radius-sm);border:1px solid currentColor;vertical-align:.1em;white-space:nowrap}\n.pp-ev--verified{color:var(--color-status-ok)}\n.pp-ev--inferred{color:var(--ds-muted)}\n.pp-ev--unverified{color:var(--color-status-warn);border-style:dashed}"
+      },
+      {
+        "name": "pp-layout",
+        "description": "Two-column grid: table of contents and document; one column at 960px.",
+        "when_to_use": "Once, wraps the table of contents and main.",
+        "html": "<div class=\"pp-layout\"><nav class=\"pp-toc\">...</nav><main class=\"pp-main\">...</main></div>",
+        "css": ".pp-layout{display:grid;grid-template-columns:var(--layout-toc) minmax(0,1fr);gap:var(--space-xl);max-width:calc(var(--layout-toc) + var(--layout-wide) + var(--space-xl) + 2 * var(--space-md));margin:0 auto;padding:var(--space-lg) var(--space-md) var(--space-xl)}\n.pp-main{min-width:0;max-width:var(--layout-wide)}\n.pp-main p,.pp-main ul,.pp-main ol,.pp-main dl,.pp-prose{max-width:var(--layout-measure)}\n@media (max-width:960px){.pp-layout{grid-template-columns:minmax(0,1fr);gap:var(--space-md);padding-top:var(--space-md)}}"
+      },
+      {
+        "name": "pp-header",
+        "description": "Kicker, title, lead (max three sentences) and facts row (owner, decider, updated, evidence as of).",
+        "when_to_use": "Top of the document.",
+        "html": "<header class=\"pp-header\"><p class=\"pp-kicker\">Product proposal</p><h1>Title</h1><p class=\"pp-lead\">Lead.</p><dl class=\"pp-facts\"><div><dt>Owner</dt><dd>Name</dd></div></dl></header>",
+        "css": ".pp-header{margin-bottom:var(--space-lg)}\n.pp-kicker{font-size:var(--size-small);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ds-muted);margin:0 0 var(--space-xs)}\n.pp-header h1{font-family:var(--ds-font-heading);font-size:var(--size-h1);font-weight:600;letter-spacing:-.015em;margin:0 0 var(--space-md)}\n.pp-lead{font-size:var(--size-lead);line-height:1.55;max-width:var(--layout-measure);margin:0 0 var(--space-md)}\n.pp-facts{display:flex;flex-wrap:wrap;gap:var(--space-xs) var(--space-md);margin:0;padding:var(--space-sm) 0 0;border-top:1px solid var(--ds-border);font-size:var(--size-small);color:var(--ds-muted)}\n.pp-facts div{display:flex;gap:.35em}\n.pp-facts dt{font-weight:600;color:var(--ds-text)}\n.pp-facts dd{margin:0}\n@media (max-width:640px){.pp-header h1{font-size:1.75rem}}\n.pp-banner{border:1px dashed var(--color-border-strong);border-radius:var(--radius-md);padding:var(--space-xs) var(--space-sm);font-size:var(--size-small);color:var(--ds-muted);margin:0 0 var(--space-md);max-width:var(--layout-measure)}"
+      },
+      {
+        "name": "pp-toc",
+        "description": "Sticky table of contents built from the sections; collapsible on a phone.",
+        "when_to_use": "Once, in the layout's first column.",
+        "html": "<nav class=\"pp-toc\" aria-label=\"Obsah / Contents\"><details open><summary><span lang=\"cs\">Obsah</span><span lang=\"en\">Contents</span></summary><ol data-toc></ol></details></nav>",
+        "css": ".pp-toc{position:sticky;top:4.5rem;align-self:start;max-height:calc(100vh - 5.5rem);overflow:auto;font-size:var(--size-small)}\n.pp-toc summary{font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ds-muted);cursor:pointer;padding:var(--space-xs) 0;list-style:none}\n.pp-toc summary::-webkit-details-marker{display:none}\n.pp-toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--ds-border)}\n.pp-toc li{margin:0}\n.pp-toc a{display:flex;gap:.6em;padding:.3rem .75rem;margin-left:-1px;border-left:2px solid transparent;color:var(--ds-muted);text-decoration:none;line-height:1.35}\n.pp-toc a:hover{color:var(--ds-text)}\n.pp-toc a[aria-current=\"true\"]{color:var(--ds-text);border-left-color:var(--color-accent-default);font-weight:600}\n.pp-toc__num{font-family:var(--ds-font-mono);font-size:.75rem;color:var(--color-text-faint);min-width:1.4em;padding-top:.1em}\n@media (min-width:961px){.pp-toc summary{pointer-events:none}}\n@media (max-width:960px){.pp-toc{position:static;max-height:none;border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:0 var(--space-sm);background:var(--ds-surface)}.pp-toc summary{list-style:revert}.pp-toc ol{margin-bottom:var(--space-sm)}}"
+      },
+      {
+        "name": "pp-section",
+        "description": "Numbered section with a serif heading and a callout box.",
+        "when_to_use": "One per content-system section; id = the cs marker id.",
+        "html": "<section class=\"pp-section\" id=\"problem\" data-cs=\"problem\"><h2><span class=\"pp-section__num\">02</span><span lang=\"cs\">Problém</span><span lang=\"en\">The problem</span></h2><p lang=\"cs\">Text.</p><p lang=\"en\">Text.</p></section>",
+        "css": ".pp-section{padding-top:var(--space-lg);margin-top:var(--space-lg);border-top:1px solid var(--ds-border)}\n.pp-section>h2{display:flex;align-items:baseline;gap:.6em;font-family:var(--ds-font-heading);font-size:var(--size-h2);font-weight:600;letter-spacing:-.01em;margin:0 0 var(--space-md)}\n.pp-section__num{font-family:var(--ds-font-mono);font-size:var(--size-small);font-weight:500;color:var(--color-text-faint)}\n.pp-callout{border-left:3px solid var(--color-accent-default);background:var(--color-accent-soft);padding:var(--space-sm) var(--space-md);border-radius:0 var(--radius-md) var(--radius-md) 0;margin:0 0 var(--space-md);max-width:var(--layout-measure)}\n.pp-callout p:last-child{margin-bottom:0}"
+      },
+      {
+        "name": "pp-table",
+        "description": "Bordered, scrollable table; Agnes columns highlighted; yes/partial/no marks; yes/no pills for a surfaces matrix.",
+        "when_to_use": "Comparisons, metrics, alternatives, surfaces matrix, Astra findings.",
+        "html": "<div class=\"pp-table\"><table><thead><tr><th>Capability</th><th>Competitor A</th><th class=\"pp-col-agnes\">Agnes now</th><th class=\"pp-col-agnes\">After phase 1</th></tr></thead><tbody><tr><td>Save a set</td><td><span class=\"pp-mark pp-mark--yes\">Yes</span></td><td class=\"pp-col-agnes\"><span class=\"pp-mark pp-mark--no\">No</span></td><td class=\"pp-col-agnes\"><span class=\"pp-mark pp-mark--partial\">Partly</span></td></tr></tbody></table></div>",
+        "css": ".pp-table{overflow-x:auto;margin:0 0 var(--space-md);border:1px solid var(--ds-border);border-radius:var(--radius-md)}\n.pp-table table{width:100%;border-collapse:collapse;font-size:var(--size-small);line-height:1.45}\n.pp-table th,.pp-table td{text-align:left;vertical-align:top;padding:.55rem .75rem;border-bottom:1px solid var(--ds-border)}\n.pp-table thead th{background:var(--ds-surface);font-weight:600;color:var(--ds-muted);white-space:nowrap}\n.pp-table tbody tr:last-child>*{border-bottom:0}\n.pp-table td.num,.pp-table th.num{text-align:right}\n.pp-table .pp-col-agnes{background:var(--color-accent-soft)}\n.pp-table thead .pp-col-agnes{color:var(--color-accent-default)}\n.pp-table caption{caption-side:bottom;text-align:left;padding:.5rem .75rem;color:var(--ds-muted);font-size:var(--size-small)}\n.pp-mark{display:inline-flex;align-items:center;gap:.4em;white-space:nowrap}\n.pp-mark::before{content:\"\";flex:none;width:.7em;height:.7em;border-radius:50%;border:1.5px solid currentColor}\n.pp-mark--yes{color:var(--ds-text)}\n.pp-mark--yes::before{background:currentColor}\n.pp-mark--partial{color:var(--ds-muted)}\n.pp-mark--partial::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}\n.pp-mark--no{color:var(--color-text-faint)}\n.pp-yn{display:inline-block;font-weight:600;font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;padding:.1em .5em;border-radius:var(--radius-sm);border:1px solid var(--ds-border);color:var(--ds-muted);white-space:nowrap}\n.pp-yn--yes{background:var(--color-accent-default);border-color:var(--color-accent-default);color:var(--color-accent-on)}"
+      },
+      {
+        "name": "pp-position-chart",
+        "description": "SVG position chart drawn from inline JSON: competitors and Agnes now / after each phase, with a path.",
+        "when_to_use": "Research section, under the comparison table.",
+        "html": "<figure class=\"pp-figure pp-position\" data-position><template data-json>{\"x\":{\"cs\":\"Osa X\",\"en\":\"X axis\"},\"y\":{\"cs\":\"Osa Y\",\"en\":\"Y axis\"},\"points\":[{\"cs\":\"A\",\"en\":\"A\",\"x\":0.3,\"y\":0.6},{\"cs\":\"Agnes dnes\",\"en\":\"Agnes now\",\"x\":0.5,\"y\":0.2,\"agnes\":\"now\"},{\"cs\":\"Po fázi 1\",\"en\":\"After phase 1\",\"x\":0.7,\"y\":0.7,\"agnes\":\"phase\"}]}</template><svg role=\"img\" aria-labelledby=\"pos-cap\"></svg><figcaption id=\"pos-cap\">Takeaway.</figcaption></figure>",
+        "css": ".pp-position{margin:0 0 var(--space-md)}\n.pp-position svg{display:block;width:100%;height:auto;max-width:44rem;font-family:var(--ds-font-body)}\n.pp-pos-grid{stroke:var(--ds-border);stroke-width:1}\n.pp-pos-axis{stroke:var(--color-border-strong);stroke-width:1.25}\n.pp-pos-label{fill:var(--ds-muted);font-size:12px}\n.pp-pos-name{fill:var(--ds-text);font-size:13px;font-weight:500}\n.pp-pos-dot{fill:var(--ds-surface);stroke:var(--ds-muted);stroke-width:1.5}\n.pp-pos-dot--agnes{fill:var(--color-accent-default);stroke:var(--color-accent-default)}\n.pp-pos-dot--now{fill:var(--ds-background);stroke:var(--color-accent-default);stroke-width:2}\n.pp-pos-name--agnes{fill:var(--color-accent-default);font-weight:600}\n.pp-pos-path{fill:none;stroke:var(--color-accent-default);stroke-width:1.5;stroke-dasharray:5 4}\n.pp-pos-arrow{fill:var(--color-accent-default)}"
+      },
+      {
+        "name": "pp-figure",
+        "description": "Annotated screenshot: image (data: URI) with an SVG overlay of numbered pins and rings, caption and notes; dashed concept variant with a badge.",
+        "when_to_use": "Current state (real screenshots) and proposal (concepts).",
+        "html": "<figure class=\"pp-figure pp-shot pp-shot--concept\"><div class=\"pp-shot__frame\"><span class=\"pp-badge pp-badge--concept\">Concept</span><img src=\"data:image/png;base64,...\" width=\"1200\" height=\"720\" alt=\"...\"><svg class=\"pp-shot__overlay\" viewBox=\"0 0 1200 720\" aria-hidden=\"true\"><rect class=\"pp-shot__ring\" x=\"100\" y=\"100\" width=\"300\" height=\"80\" rx=\"10\"/><g class=\"pp-shot__pin\" transform=\"translate(100 100)\"><circle r=\"18\"/><text>1</text></g></svg></div><figcaption><strong>Takeaway.</strong><ol class=\"pp-shot__notes\"><li>Note for pin 1.</li></ol></figcaption></figure>",
+        "css": ".pp-figure{margin:0 0 var(--space-md)}\n.pp-figure figcaption{font-size:var(--size-small);color:var(--ds-muted);margin-top:var(--space-xs);max-width:var(--layout-measure)}\n.pp-figure figcaption strong{color:var(--ds-text)}\n.pp-shot__frame{position:relative;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden;background:var(--ds-surface)}\n.pp-shot__frame img{display:block;width:100%;height:auto}\n.pp-shot__overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}\n.pp-shot__ring{fill:none;stroke:var(--color-accent-default);stroke-width:3;stroke-dasharray:8 6}\n.pp-shot__pin circle{fill:var(--color-accent-default);stroke:var(--ds-background);stroke-width:3}\n.pp-shot__pin text{fill:var(--color-accent-on);font-family:var(--ds-font-body);font-weight:700;font-size:20px;text-anchor:middle;dominant-baseline:central}\n.pp-shot__notes{margin:var(--space-xs) 0 0;padding-left:1.5rem}\n.pp-shot__notes li::marker{font-weight:700;color:var(--color-accent-default)}\n.pp-shot--concept .pp-shot__frame{border:2px dashed var(--color-status-warn)}\n.pp-shot--concept .pp-badge--concept{position:absolute;top:.6rem;left:.6rem;z-index:1}"
+      },
+      {
+        "name": "pp-c4-diagram",
+        "description": "C4-style SVG: boundary, boxes (changed, new, unchanged, external), arrows, legend.",
+        "when_to_use": "Architecture impact.",
+        "html": "<figure class=\"pp-figure pp-c4\"><svg viewBox=\"0 0 760 330\" role=\"img\"><rect class=\"c4-boundary\" x=\"10\" y=\"10\" width=\"560\" height=\"310\" rx=\"10\"/><rect class=\"c4-box c4-box--changed\" x=\"30\" y=\"56\" width=\"220\" height=\"86\" rx=\"8\"/><text class=\"c4-title\" x=\"46\" y=\"82\">API</text><text class=\"c4-tech\" x=\"46\" y=\"100\">FastAPI</text><path class=\"c4-edge c4-edge--changed\" d=\"M250 99H322\"/></svg><ul class=\"pp-legend\"><li><i class=\"changed\"></i>Changes</li><li><i class=\"new\"></i>New</li><li><i></i>Unchanged</li><li><i class=\"external\"></i>External</li></ul></figure>",
+        "css": ".pp-c4{overflow-x:auto}\n.pp-c4 svg{display:block;width:100%;min-width:36rem;height:auto;font-family:var(--ds-font-body)}\n.c4-boundary{fill:none;stroke:var(--color-border-strong);stroke-width:1;stroke-dasharray:6 4}\n.c4-boundary-label{fill:var(--ds-muted);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}\n.c4-box{fill:var(--ds-surface);stroke:var(--color-border-strong);stroke-width:1.25}\n.c4-box--changed{fill:var(--color-accent-soft);stroke:var(--color-accent-default);stroke-width:2}\n.c4-box--new{fill:var(--color-accent-soft);stroke:var(--color-accent-default);stroke-width:2;stroke-dasharray:6 4}\n.c4-box--external{fill:var(--color-bg-subtle);stroke:var(--ds-muted);stroke-dasharray:3 3}\n.c4-title{fill:var(--ds-text);font-size:14px;font-weight:600}\n.c4-tech{fill:var(--ds-muted);font-size:11px;font-family:var(--ds-font-mono)}\n.c4-desc{fill:var(--ds-muted);font-size:12px}\n.c4-edge{fill:none;stroke:var(--ds-muted);stroke-width:1.3}\n.c4-edge--changed{stroke:var(--color-accent-default);stroke-width:2}\n.c4-edge-label{fill:var(--ds-muted);font-size:11px}\n.c4-arrow{fill:var(--ds-muted)}\n.c4-arrow--changed{fill:var(--color-accent-default)}\n.pp-legend{display:flex;flex-wrap:wrap;gap:var(--space-xs) var(--space-md);list-style:none;padding:0;margin:var(--space-xs) 0 0;font-size:var(--size-small);color:var(--ds-muted)}\n.pp-legend li{display:flex;align-items:center;gap:.4em;margin:0}\n.pp-legend i{display:inline-block;width:1.4em;height:.9em;border-radius:3px;border:1.5px solid var(--color-border-strong);background:var(--ds-surface)}\n.pp-legend i.changed{border-color:var(--color-accent-default);background:var(--color-accent-soft)}\n.pp-legend i.new{border:1.5px dashed var(--color-accent-default);background:var(--color-accent-soft)}\n.pp-legend i.external{border:1.5px dashed var(--ds-muted);background:var(--color-bg-subtle)}"
+      },
+      {
+        "name": "pp-decision-card",
+        "description": "Question, option cards with the recommended one highlighted, reasoning, and a choice + comment form sent with Agnes.respond.",
+        "when_to_use": "Decisions section, one card per decision.",
+        "html": "<article class=\"pp-decision\" id=\"d1\"><div class=\"pp-decision__head\"><span class=\"pp-decision__id\">D1</span><h3>Question?</h3></div><div class=\"pp-options\"><div class=\"pp-option\" data-option=\"A\"><h4><span class=\"pp-option__key\">A</span>Option</h4><p>Cost.</p></div><div class=\"pp-option pp-option--recommended\" data-option=\"B\"><span class=\"pp-option__flag\">Recommended</span><h4><span class=\"pp-option__key\">B</span>Option</h4><p>Cost.</p></div></div><p class=\"pp-reason\"><strong>Why B:</strong> reason.</p><form class=\"pp-form\" data-decision=\"D1\" novalidate><fieldset><legend>Your choice</legend><div class=\"pp-form__choices\"><label><input type=\"radio\" name=\"choice\" value=\"A\"> A</label><label><input type=\"radio\" name=\"choice\" value=\"B\"> B</label></div></fieldset><label class=\"pp-form__comment\">Comment<textarea name=\"comment\" rows=\"3\"></textarea></label><button class=\"pp-button\" type=\"submit\">Send answer</button><p class=\"pp-form__note\" role=\"status\" hidden></p></form></article>",
+        "css": ".pp-decision{border:1px solid var(--ds-border);border-radius:var(--ds-radius);padding:var(--space-md);margin:0 0 var(--space-md);background:var(--ds-background)}\n.pp-decision__head{display:flex;gap:var(--space-sm);align-items:baseline;margin-bottom:var(--space-sm)}\n.pp-decision__id{font-family:var(--ds-font-mono);font-size:var(--size-small);font-weight:600;color:var(--color-accent-default);flex:none}\n.pp-decision__head h3{margin:0;font-size:var(--size-h3)}\n.pp-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:var(--space-sm);margin:0 0 var(--space-sm)}\n.pp-option{position:relative;border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:var(--space-sm);background:var(--ds-surface)}\n.pp-option p{font-size:var(--size-small);margin:0;color:var(--ds-muted)}\n.pp-option__key{font-family:var(--ds-font-mono);font-weight:600;color:var(--ds-muted);margin-right:.3em}\n.pp-option--recommended{border:2px solid var(--color-accent-default);background:var(--color-accent-soft)}\n.pp-option__flag{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--color-accent-on);background:var(--color-accent-default);border-radius:var(--radius-sm);padding:.1em .45em;margin-bottom:.4rem}\n.pp-reason{font-size:var(--size-small);margin:0 0 var(--space-sm);max-width:var(--layout-measure)}\n.pp-form{border-top:1px solid var(--ds-border);padding-top:var(--space-sm)}\n.pp-form fieldset{border:0;margin:0 0 var(--space-sm);padding:0}\n.pp-form legend{font-weight:600;font-size:var(--size-small);margin-bottom:.35rem;padding:0}\n.pp-form__choices{display:flex;flex-wrap:wrap;gap:.4rem}\n.pp-form__choices label{display:inline-flex;align-items:center;gap:.4em;font-size:var(--size-small);border:1px solid var(--ds-border);border-radius:999px;padding:.3rem .75rem;cursor:pointer;background:var(--ds-surface)}\n.pp-form__choices label:has(input:checked){border-color:var(--color-accent-default);background:var(--color-accent-soft);color:var(--ds-text)}\n.pp-form__choices input{accent-color:var(--color-accent-default);margin:0}\n.pp-form__comment{display:block;font-weight:600;font-size:var(--size-small);margin-bottom:var(--space-sm)}\n.pp-form textarea{display:block;width:100%;max-width:var(--layout-measure);margin-top:.35rem;font:inherit;font-weight:400;font-size:var(--size-body);color:var(--ds-text);background:var(--ds-background);border:1px solid var(--color-border-strong);border-radius:var(--radius-md);padding:.5rem .65rem;resize:vertical}\n.pp-button{font:inherit;font-size:var(--size-small);font-weight:600;border:1px solid var(--color-accent-default);background:var(--color-accent-default);color:var(--color-accent-on);border-radius:var(--radius-md);padding:.5rem 1rem;cursor:pointer}\n.pp-button:hover{filter:brightness(1.08)}\n.pp-form__note{font-size:var(--size-small);color:var(--ds-muted);margin:var(--space-xs) 0 0}\n.pp-form__note[data-kind=\"error\"]{color:var(--color-status-danger)}\n.pp-form__off{font-size:var(--size-small);color:var(--ds-muted);border-top:1px solid var(--ds-border);padding-top:var(--space-sm);margin:0}"
+      },
+      {
+        "name": "pp-timeline",
+        "description": "Phase timeline: dates, name, exit criterion; current phase in the accent.",
+        "when_to_use": "Delivery plan.",
+        "html": "<ol class=\"pp-timeline\"><li class=\"pp-phase pp-phase--current\"><span class=\"pp-phase__when\">2026-11 → 2026-12</span><h4>Phase 1</h4><p><strong>Done when:</strong> criterion.</p></li><li class=\"pp-phase\"><span class=\"pp-phase__when\">2027-01</span><h4>Phase 2</h4><p>...</p></li></ol>",
+        "css": ".pp-timeline{list-style:none;padding:0;margin:0 0 var(--space-md);display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:var(--space-sm)}\n.pp-phase{margin:0;border-top:3px solid var(--color-border-strong);padding-top:var(--space-sm)}\n.pp-phase--current{border-top-color:var(--color-accent-default)}\n.pp-phase__when{font-family:var(--ds-font-mono);font-size:.75rem;color:var(--ds-muted)}\n.pp-phase h4{margin:.2rem 0 .3rem}\n.pp-phase p{font-size:var(--size-small);margin:0 0 .35rem;color:var(--ds-muted)}\n.pp-phase p strong{color:var(--ds-text)}"
+      },
+      {
+        "name": "pp-acceptance",
+        "description": "Given / when / then cards.",
+        "when_to_use": "Delivery plan, acceptance examples.",
+        "html": "<div class=\"pp-gwt\"><div class=\"pp-gwt__case\"><h4>Case</h4><dl><dt>Given</dt><dd>state</dd><dt>When</dt><dd>action</dd><dt>Then</dt><dd>observable result</dd></dl></div></div>",
+        "css": ".pp-gwt{display:grid;gap:var(--space-sm);margin:0 0 var(--space-md)}\n.pp-gwt__case{border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:var(--space-sm) var(--space-md);background:var(--ds-surface)}\n.pp-gwt__case h4{font-size:var(--size-small)}\n.pp-gwt__case dl{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem;margin:0;font-size:var(--size-small)}\n.pp-gwt__case dt{font-family:var(--ds-font-mono);font-weight:600;color:var(--color-accent-default);text-transform:uppercase;font-size:.75rem;padding-top:.15em}\n.pp-gwt__case dd{margin:0}"
+      },
+      {
+        "name": "pp-glossary",
+        "description": "Two-column definition list.",
+        "when_to_use": "Glossary.",
+        "html": "<dl class=\"pp-glossary\"><dt>Term</dt><dd>Definition.</dd></dl>",
+        "css": ".pp-glossary{display:grid;grid-template-columns:minmax(8rem,12rem) 1fr;gap:var(--space-xs) var(--space-md);max-width:var(--layout-measure)}\n.pp-glossary dt{font-weight:600}\n.pp-glossary dd{margin:0;color:var(--ds-muted)}\n@media (max-width:640px){.pp-glossary{grid-template-columns:1fr}.pp-glossary dd{margin-bottom:var(--space-xs)}}"
+      },
+      {
+        "name": "pp-sources",
+        "description": "Numbered sources with anchors; superscript citation links.",
+        "when_to_use": "Sources section; cite with <a class=\"pp-cite\" href=\"#src-N\">[N]</a>.",
+        "html": "<ol class=\"pp-sources\"><li id=\"src-1\">Title, date. <a href=\"https://example.com\">example.com</a></li></ol>",
+        "css": ".pp-sources{font-size:var(--size-small);padding-left:1.75rem}\n.pp-sources li{padding-left:.25rem}\n.pp-sources li:target{background:var(--color-accent-soft)}\n.pp-cite{font-size:.75em;vertical-align:super;line-height:0;text-decoration:none;font-weight:600}"
+      },
+      {
+        "name": "pp-appendix",
+        "description": "Collapsible blocks for technical detail.",
+        "when_to_use": "Appendix.",
+        "html": "<details class=\"pp-appendix\"><summary>Data model</summary><div><pre>...</pre></div></details>",
+        "css": ".pp-appendix{border:1px solid var(--ds-border);border-radius:var(--radius-md);margin:0 0 var(--space-sm);background:var(--ds-background)}\n.pp-appendix>summary{cursor:pointer;font-weight:600;padding:var(--space-sm) var(--space-md)}\n.pp-appendix>div{padding:0 var(--space-md) var(--space-sm)}\n.pp-appendix pre{font-family:var(--ds-font-mono);font-size:.8125rem;background:var(--color-bg-subtle);border:1px solid var(--ds-border);border-radius:var(--radius-sm);padding:var(--space-sm);overflow:auto;line-height:1.5}"
+      },
+      {
+        "name": "pp-print",
+        "description": "Print rules.",
+        "when_to_use": "Always.",
+        "html": "<!-- print rules apply to the whole page -->",
+        "css": "@media print{\n  :root{--ds-background:#fff;--ds-surface:#fff;--ds-text:#000;--ds-muted:#333;--ds-border:#bbb}\n  html{font-size:11pt}\n  .pp-topbar,.pp-toc,.pp-form,.pp-form__off,.pp-banner{display:none!important}\n  .pp-layout{display:block;max-width:none;padding:0}\n  .pp-main{max-width:none}\n  .pp-section{break-inside:auto;page-break-before:auto}\n  .pp-section>h2,.pp-decision__head,figure,.pp-option,.pp-gwt__case,table{break-inside:avoid}\n  a{color:inherit}\n  .pp-sources a[href^=\"http\"]::after{content:\" (\" attr(href) \")\";word-break:break-all}\n}"
+      }
+    ],
+    "charts": {
+      "library": "inline-svg",
+      "notes": "Hand-drawn SVG styled by tokens: position chart, C4 diagram, annotated screenshots. Takeaway caption and a text equivalent for each."
+    },
+    "diagrams": {
+      "library": "none",
+      "notes": "C4-style inline SVG with the c4-* classes; no Mermaid, so it styles with the tokens in both modes."
+    },
+    "fonts": [
+      {
+        "href": "/_static/fonts/fonts.css"
+      }
+    ]
+  }
+}
