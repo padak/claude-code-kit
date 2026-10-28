@@ -18,7 +18,7 @@ to a file so the result survives a backgrounded or crashed run.
 | Antigravity `agy` (Google) | `gemini-3.1-pro-high` | `gemini-3.8-flash` + `--effort medium` | `gemini-3.8-flash` + `--effort low` |
 | Claude Code (Anthropic) | `claude-fable-5-1` / `claude-opus-5` | `claude-sonnet-5` | `claude-haiku-4-5-20251001` |
 
-**Strategy / design consultations -> `gpt-6-astra` with `-c model_reasoning_effort="high"`.**
+**Strategy / design consultations -> `gpt-6-astra` with `-c model_reasoning_effort="medium"`.**
 
 Effort scales: Codex `low` < `medium` < `high` < `xhigh` < `max` (+ `ultra`); agy
 `low` < `medium` < `high`; Claude `low` < `medium` < `high` < `xhigh` < `max`.
@@ -61,7 +61,7 @@ codex exec -m gpt-5.6-terra -c model_reasoning_effort="medium" -s read-only --ep
 cat "$OUT/answer.md"
 
 # Deep design review (Astra, high)
-codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only --ephemeral \
+codex exec -m gpt-6-astra -c model_reasoning_effort="medium" -s read-only --ephemeral \
   --skip-git-repo-check -o "$OUT/answer.md" "Your question here" < /dev/null
 ```
 
@@ -90,7 +90,7 @@ codex review -c model="gpt-5.6-terra" -c model_reasoning_effort="medium" \
   "Focus on concurrency bugs and missing error handling" < /dev/null > "$OUT/review.md"
 
 # same review with exec-style flags (-m, -o, --ephemeral, --skip-git-repo-check)
-codex exec review --uncommitted -m gpt-6-astra -c model_reasoning_effort="high" --ephemeral \
+codex exec review --uncommitted -m gpt-6-astra -c model_reasoning_effort="medium" --ephemeral \
   -o "$OUT/review.md" < /dev/null
 ```
 
@@ -192,7 +192,7 @@ what you accept or reject and why, then asks the next question.
 
 | CLI | Round 1 | Round 2+ |
 |-----|---------|----------|
-| codex | `codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only --skip-git-repo-check -o r1.md "$(cat brief1.md)" < /dev/null` (no `--ephemeral`) | `codex exec resume --last --skip-git-repo-check -o r2.md "$(cat brief2.md)" < /dev/null` |
+| codex | `codex exec -m gpt-6-astra -c model_reasoning_effort="medium" -s read-only --skip-git-repo-check -o r1.md "$(cat brief1.md)" < /dev/null` (no `--ephemeral`) | `codex exec resume --last --skip-git-repo-check -o r2.md "$(cat brief2.md)" < /dev/null` |
 | agy | `agy -p "$(cat brief1.md)" --model gemini-3.1-pro-high --output-format json > r1.json < /dev/null` (`conversation_id` inside) | `agy -c -p "$(cat brief2.md)" --output-format text > r2.md < /dev/null` (or `--conversation <id>` instead of `-c`) |
 | claude | `claude -p "$(cat brief1.md)" --model claude-opus-5 --tools "" --output-format json > r1.json < /dev/null` (`session_id` inside, no `--no-session-persistence`) | `claude -p --resume <session_id> --tools "" --output-format text "$(cat brief2.md)" > r2.md < /dev/null` |
 

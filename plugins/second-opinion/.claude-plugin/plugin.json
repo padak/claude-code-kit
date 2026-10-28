@@ -1,6 +1,6 @@
 {
   "name": "second-opinion",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Get a second opinion from the OpenAI (Codex), Google (Antigravity CLI, agy) or Anthropic (Claude Code) CLIs. Single provider, multi-round consultation, diff review, or multi-model consensus for architecture decisions and security review.",
   "author": {
     "name": "Petr Simecek",

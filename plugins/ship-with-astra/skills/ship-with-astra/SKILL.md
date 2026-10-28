@@ -21,7 +21,7 @@ no code in chat, PR states exactly as `gh` reports them.
 Use the `second-opinion` skill. Run from the repo root, in the background:
 
 ```bash
-codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
+codex exec -m gpt-6-astra -c model_reasoning_effort="medium" -s read-only \
   --skip-git-repo-check -o "$S/r1.md" "$(cat "$S/brief1.md")" < /dev/null
 ```
 
@@ -86,7 +86,7 @@ transaction boundaries, identity taken from arguments, switch-off and other-back
 followed by the "Risks to handle" list from `design.md`.
 
 ```bash
-codex exec -m gpt-6-astra -c model_reasoning_effort="high" -s read-only \
+codex exec -m gpt-6-astra -c model_reasoning_effort="medium" -s read-only \
   --skip-git-repo-check --ephemeral -o "$S/review.md" "$(cat "$S/pr-review.md")" < /dev/null
 ```
 
