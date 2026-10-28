@@ -1,0 +1,146 @@
+<!-- Sections added once the build starts (content system variant "building"). Insert each block at its place in the section order: handoff and howto after status, acceptance after plan, retro and log after architecture. -->
+
+    <!-- cs:handoff -->
+    <section class="pp-section" id="handoff" data-cs="handoff">
+      <h2><span class="pp-section__num">00</span><span lang="cs">Pokračuj tady</span><span lang="en">Continue here</span></h2>
+<div class="pp-prose"><div class="pp-table"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Active slices</td>
+<td>W01 saved filter sets, <a href="https://github.com/keboola/agnes-the-ai-analyst/pull/1234">PR 1234</a>: MERGED 2026-11-02, deployed to dev · W02 pinned default, <a href="https://github.com/keboola/agnes-the-ai-analyst/pull/1239">PR 1239</a>, branch <code>claude/pinned-default</code>: OPEN, REVIEW_REQUIRED, AUTO-MERGE ENABLED (read 2026-11-03 10:00)</td>
+</tr>
+<tr>
+<td>Last verified result</td>
+<td>W01 save and reapply verified on dev (E2E scenario 1); CI green on the W02 head</td>
+</tr>
+<tr>
+<td>Next action</td>
+<td>Land W02, then run E2E scenario 2 (the 21st set is refused)</td>
+</tr>
+<tr>
+<td>Blockers</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Where the work lives</td>
+<td>Session "Saved report filters" (worktree <code>saved-filters-1a2b3c</code>)</td>
+</tr>
+<tr>
+<td>Responsible</td>
+<td>Jan Ukázka, built with Claude</td>
+</tr>
+</tbody>
+</table></div></div>
+    </section>
+
+    <!-- cs:howto -->
+    <section class="pp-section" id="howto" data-cs="howto">
+      <h2><span class="pp-section__num">00</span><span lang="cs">Co to umí teď</span><span lang="en">What it does today</span></h2>
+<div class="pp-prose" lang="cs"><p><strong>Stav na agnes.keboola.dev k 3. 11.</strong></p>
+<ol>
+<li><strong>Ulož sadu.</strong> V hlavičce reportu <em>Uložit filtry</em>, zadej jméno.</li>
+<li><strong>Použij sadu.</strong> Rozbal menu sad a vyber ji.</li>
+</ol>
+<p><strong>Omezení:</strong> sdílení se skupinou zatím není (D1); nejvýš 20 sad na report.</p></div>
+<div class="pp-prose" lang="en"><p><strong>State on agnes.keboola.dev as of 3 Nov.</strong></p>
+<ol>
+<li><strong>Save a set.</strong> In the report header <em>Save filters</em>, enter a name.</li>
+<li><strong>Apply a set.</strong> Open the sets menu and pick it.</li>
+</ol>
+<p><strong>Limits:</strong> no sharing with a group yet (D1); at most 20 sets per report.</p></div>
+    </section>
+
+    <!-- cs:acceptance -->
+    <section class="pp-section" id="acceptance" data-cs="acceptance">
+      <h2><span class="pp-section__num">00</span><span lang="cs">Převzetí a připomínky</span><span lang="en">Acceptance and feedback</span></h2>
+<div class="pp-prose" lang="cs"><p><strong>Verdikt převzetí:</strong> zatím žádný. E2E plán převzetí: <a href="https://artifacts.agnes.keboola.dev/p/EXAMPLE">odkaz na artefakt</a> (content system End-to-end test plan).</p></div>
+<div class="pp-prose" lang="en"><p><strong>Acceptance verdict:</strong> none yet. E2E acceptance plan: <a href="https://artifacts.agnes.keboola.dev/p/EXAMPLE">link to the artifact</a> (content system End-to-end test plan).</p></div>
+<div class="pp-prose"><h3>What was verified</h3>
+<div class="pp-table"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+<th>When</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Save and reapply a set on dev</td>
+<td>passed</td>
+<td>2026-11-03</td>
+<td>E2E plan, scenario 1</td>
+</tr>
+<tr>
+<td>The 21st set is refused</td>
+<td>not tried</td>
+<td>–</td>
+<td>–</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Feedback register</h3>
+<div class="pp-table"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>From</th>
+<th>When</th>
+<th>State</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The sets menu hides the default marker on a phone</td>
+<td>Petr Šimeček</td>
+<td>2026-11-03</td>
+<td>fixed</td>
+<td><a href="https://github.com/keboola/agnes-the-ai-analyst/pull/1240">PR 1240</a></td>
+</tr>
+</tbody>
+</table></div>
+<h3>Known issues</h3>
+<ul>
+<li>A set that refers to a removed column is skipped; the user sees a notice.</li>
+</ul></div>
+    </section>
+
+    <!-- cs:retro -->
+    <section class="pp-section" id="retro" data-cs="retro">
+      <h2><span class="pp-section__num">00</span><span lang="cs">Retro</span><span lang="en">Retro</span></h2>
+<div class="pp-prose" lang="cs"><p><strong>Co fungovalo:</strong> W01 a W02 se stavěly souběžně a sloučily se za den (deník 2. 11.). <strong>Co nefungovalo:</strong> CI dvakrát padlo na stejném flaky testu (deník, 2×). <strong>Co měníme:</strong></p></div>
+<div class="pp-prose" lang="en"><p><strong>What worked:</strong> W01 and W02 were built in parallel and merged within a day (log, 2 Nov). <strong>What did not:</strong> CI failed twice on the same flaky test (log, 2×). <strong>What we change:</strong></p></div>
+<div class="pp-prose"><div class="pp-table"><table>
+<thead>
+<tr>
+<th>Change</th>
+<th>State</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quarantine the flaky test and file its fix</td>
+<td>in place</td>
+<td><a href="https://github.com/keboola/agnes-the-ai-analyst/pull/1241">PR 1241</a></td>
+</tr>
+</tbody>
+</table></div></div>
+    </section>
+
+    <!-- cs:log -->
+    <section class="pp-section" id="log" data-cs="log">
+      <h2><span class="pp-section__num">00</span><span lang="cs">Deník</span><span lang="en">Log</span></h2>
+<div class="pp-prose"><p>Generated by <code>progress.py render</code> from GitHub, this artifact's version history and <code>events.json</code>; times Europe/Prague with the zone shown, newest first.</p></div>
+<details class="pp-appendix"><summary>Log entries · Záznamy deníku</summary>
+<!-- gen:log --><ul class="pp-log"><li><code>03 Nov 10:00</code> · <strong>PR merged</strong> · #1234 W01 Save and reapply a personal filter set <a href="https://github.com/keboola/agnes-the-ai-analyst/pull/1234">link</a></li></ul><!-- /gen:log -->
+</details>
+    </section>

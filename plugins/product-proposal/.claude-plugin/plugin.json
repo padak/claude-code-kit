@@ -1,7 +1,7 @@
 {
   "name": "product-proposal",
-  "version": "1.1.0",
-  "description": "Bilingual (CZ/EN) product proposal published as an Agnes Artifact: evidence from code, competitor research, surfaces matrix, argued proposal with alternatives, decisions prepared as meeting briefs with feedback forms, delivery plan, GPT Astra second opinion, linked to a Linear feature.",
+  "version": "2.0.0",
+  "description": "Bilingual (CZ/EN) living PRD published as an Agnes Artifact, the single entry point of a feature through its life: status now, continue here, current behaviour, one slice table with a generated timeline and log, acceptance and feedback, a decision register with meeting-brief cards and forms, the full product design, agentic retro, GPT Astra second opinion, linked to a Linear feature.",
   "author": {
     "name": "Petr Simecek",
     "email": "petr@keboola.com"

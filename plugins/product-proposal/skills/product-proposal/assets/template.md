@@ -2,13 +2,13 @@
 
 <!-- lang:cs -->
 
-Linear: [TEAG-123](https://linear.app/keboola/issue/TEAG-123) · Stav: Ke kontrole · v1 · Autor: Jan Ukázka · Rozhoduje: Petr Šimeček · Aktualizováno: 2026-10-23 · Data k: 2026-10-20
+Linear: [TEAG-123](https://linear.app/keboola/issue/TEAG-123) · Stav: Návrh ke kontrole · v1 · Autor: Jan Ukázka · Rozhoduje: Petr Šimeček · Aktualizováno: 2026-10-23 · Data k: 2026-10-20
 
 Analytici si v reportu uloží sadu filtrů a znovu ji použijí jedním kliknutím. Týká se všech 120 aktivních analytiků na instanci. Potřebujeme rozhodnout D1 a D2 do 6. 11. 2026, aby fáze 1 stihla prosincové vydání.
 
 <!-- lang:en -->
 
-Linear: [TEAG-123](https://linear.app/keboola/issue/TEAG-123) · Status: In review · v1 · Owner: Jan Ukázka · Decides: Petr Šimeček · Updated: 2026-10-23 · Evidence as of: 2026-10-20
+Linear: [TEAG-123](https://linear.app/keboola/issue/TEAG-123) · Status: Proposal in review · v1 · Owner: Jan Ukázka · Decides: Petr Šimeček · Updated: 2026-10-23 · Evidence as of: 2026-10-20
 
 Analysts save a set of report filters and reapply it with one click. It affects all 120 active analysts on the instance. We need decisions D1 and D2 by 6 Nov 2026 so phase 1 makes the December release.
 
@@ -41,10 +41,7 @@ Only from version 2; delete this section in version 1.
 - Fáze 1 jen osobní sady, fáze 2 sdílení se skupinou.
 - Za přepínačem `saved_report_filters`, výchozí stav vypnuto.
 
-| # | Rozhodnutí | Doporučení |
-|---|---|---|
-| D1 | Sdílet sady už ve fázi 1? | B: ne, až ve fázi 2 |
-| D2 | Kde sady ukládat? | A: Postgres, nová tabulka |
+Rozhodnutí čekají v [registru](#decisions): D1 a D2.
 
 <!-- lang:en -->
 
@@ -53,10 +50,160 @@ Only from version 2; delete this section in version 1.
 - Phase 1 is personal sets only, phase 2 adds sharing with a group.
 - Behind the `saved_report_filters` switch, off by default.
 
-| # | Decision | Recommendation |
+Decisions wait in the [register](#decisions): D1 and D2.
+
+<!-- /lang -->
+
+<!-- cs:status -->
+## Stav teď · Status now
+
+<!-- lang:cs -->
+
+**Zaměření:** návrh ke kontrole; nic se zatím nestaví.
+
+| Stav | Kde | Ověřeno |
 |---|---|---|
-| D1 | Share sets in phase 1? | B: no, in phase 2 |
-| D2 | Where to store sets? | A: Postgres, new table |
+| Kód sloučen | nic | GitHub, 2026-10-23 10:00 |
+| Nasazeno | – | – |
+| Zapnuto | – | – |
+| Převzato | – | – |
+
+**Čas:** poslední práce 2026-10-23 10:00 (v1) · poslední ověření proti zdrojům 2026-10-23 10:00 · příští kontrola <span data-next-check="2026-11-06T09:00:00Z">6. 11. 10:00</span>
+
+**Čeká na tebe:** rozhodnutí D1 a D2 do 6. 11.
+
+**Čeká na jiné:** nic.
+
+**Odkazy:** [Linear TEAG-123](https://linear.app/keboola/issue/TEAG-123) · PR (zatím žádné) · související artefakty (žádné) · uživatelská dokumentace (zatím žádná)
+
+<!-- lang:en -->
+
+**Focus:** proposal in review; nothing is being built yet.
+
+| State | Where | Verified |
+|---|---|---|
+| Code merged | nothing | GitHub, 2026-10-23 10:00 |
+| Deployed | – | – |
+| Enabled | – | – |
+| Accepted | – | – |
+
+**Time:** last work 2026-10-23 10:00 (v1) · last reconciled with sources 2026-10-23 10:00 · next check <span data-next-check="2026-11-06T09:00:00Z">6 Nov 10:00</span>
+
+**Waiting for you:** decisions D1 and D2 by 6 Nov.
+
+**Waiting for others:** nothing.
+
+**Links:** [Linear TEAG-123](https://linear.app/keboola/issue/TEAG-123) · PRs (none yet) · related artifacts (none) · user docs (none yet)
+
+<!-- /lang -->
+
+<!-- cs:plan -->
+## Plán a práce · Plan and progress
+
+<!-- lang:cs -->
+
+Jedna tabulka slices níže je jediný zdroj plánu i průběhu; jakmile se staví, generuje ji `progress.py`.
+
+| Fáze | Kdy | Hotovo když |
+|---|---|---|
+| 1: osobní sady | 2026-11 → 2026-12 | 10 analytiků na dev používá sady 2 týdny. |
+| 2: sdílení | 2027-01 → 2027-02 | Sada sdílená se skupinou respektuje její oprávnění. |
+| Zapnout pro všechny | 2027-03 | Metriky splní cíl a přepínač je odstraněn. |
+
+**Přepínač:** `saved_report_filters`, výchozí vypnuto. **Závislosti:** žádné. **Riziko:** sloupec zmizí ze zdroje → filtr se přeskočí a uživatel to vidí.
+
+Akceptační příklady:
+
+- **Výchozí sada se použije sama.** Dáno: sada „Pondělí“ je výchozí. Když: analytik otevře report. Pak: report ukáže data s filtry sady „Pondělí“ do 2 s.
+- **Limit 20 sad.** Dáno: uživatel má u reportu 20 sad. Když: uloží 21. Pak: vidí chybu s odkazem na správu sad a nic se neuloží.
+
+<!-- lang:en -->
+
+The slice table below is the single source of the plan and the progress; once the build starts, `progress.py` generates it.
+
+| Phase | When | Done when |
+|---|---|---|
+| 1: personal sets | 2026-11 → 2026-12 | 10 analysts on dev use sets for 2 weeks. |
+| 2: sharing | 2027-01 → 2027-02 | A set shared with a group respects its permissions. |
+| On for everyone | 2027-03 | Metrics meet target and the switch is removed. |
+
+**Switch:** `saved_report_filters`, off by default. **Dependencies:** none. **Risk:** a column disappears from the source → the filter is skipped and the user sees it.
+
+Acceptance examples:
+
+- **The default set applies on its own.** Given: set "Monday" is the default. When: the analyst opens the report. Then: the report shows data with the "Monday" filters within 2 s.
+- **The 20-set limit.** Given: the user has 20 sets on the report. When: they save a 21st. Then: they see an error linking to set management and nothing is saved.
+
+<!-- /lang -->
+
+<!-- gen:slices -->
+Snapshot 2026-10-23 10:00 CEST, read from GitHub (keboola/agnes-the-ai-analyst).
+
+| ID | Alias | Phase | What a user gets | State | PR | Opened | Merged | Note |
+|---|---|---|---|---|---|---|---|---|
+| W01 | 1a | 1 | Save and reapply a personal filter set | planned | – | – | – | |
+| W02 | 1b | 1 | A pinned default set | planned | – | – | – | |
+| W03 | 2a | 2 | Share a set with a group | planned | – | – | – | after D1 |
+<!-- /gen:slices -->
+
+<!-- cs:decisions -->
+## Rozhodnutí · Decisions
+
+| ID | Question | Decision | When | Who | State | Source |
+|---|---|---|---|---|---|---|
+| D1 | Share sets in phase 1? | recommended B: in phase 2 | – | Petr Šimeček | open | card D1 |
+| D2 | Where to store sets? | recommended A: Postgres, new table | – | Petr Šimeček | open | card D2 |
+
+
+<!-- lang:cs -->
+
+### D1: Sdílet uložené sady se skupinou už ve fázi 1?
+
+**O co jde.** Dnes si každý analytik nastavuje filtry sám. Rozhodujeme, jestli si sady filtrů mohou kolegové předávat hned, nebo až později; určuje to termín fáze 1.
+
+**Jak to vypadá.** Jana uloží sadu „Pondělí“. *A:* Petr ji hned vidí v menu svého reportu. *B:* Petr ji uvidí až po fázi 2; do té doby si ji nastaví sám.
+
+| | A: ano, hned | B: až ve fázi 2 |
+|---|---|---|
+| Pro | Tým sdílí stejný pohled od prvního dne. | Fáze 1 vyjde v prosinci. |
+| Proti | +2 týdny; nutná kontrola oprávnění skupin. | Sdílení čeká 2 měsíce. |
+| Změnit později | Sdílení nejde vzít zpět, až ho lidé používají. | Přidat sdílení je snadné. |
+| Kdo to tak dělá | Konkurent B [5]. | Konkurent A [4]. |
+
+**Doporučení: B.** 80 % otevření dělá autor reportu sám (odvozeno); sdílení přinese méně, než kolik stojí zpoždění.
+
+### D2: Kde uložené sady ukládat?
+
+- **A: Postgres, nová tabulka (doporučeno).** Jedno místo pro web, CLI i MCP.
+- B: Nastavení uživatele (JSON). Bez migrace, ale bez sdílení.
+- C: Jen v prohlížeči. Nejlevnější, nefunguje pro agenty.
+
+**Proč A:** fáze 2 potřebuje sdílení; B by se musela znovu migrovat. Odpověď: formulář v dokumentu (volba + komentář).
+
+<!-- lang:en -->
+
+### D1: Share saved sets with a group already in phase 1?
+
+**What it is about.** Today each analyst sets filters alone. We decide whether colleagues can share filter sets at once or later; this sets the phase 1 date.
+
+**What it looks like.** Jana saves the set "Monday". *A:* Petr sees it in his report menu at once. *B:* Petr sees it only after phase 2; until then he sets it himself.
+
+| | A: yes, now | B: in phase 2 |
+|---|---|---|
+| Pros | The team shares one view from day one. | Phase 1 ships in December. |
+| Cons | +2 weeks; needs a group permission check. | Sharing waits 2 months. |
+| Change later | Sharing cannot be taken back once people use it. | Adding sharing is easy. |
+| Who does this | Competitor B [5]. | Competitor A [4]. |
+
+**Recommendation: B.** 80% of opens are by the report's own author (inferred); sharing adds less than the delay costs.
+
+### D2: Where do saved sets live?
+
+- **A: Postgres, new table (recommended).** One place for web, CLI and MCP.
+- B: User settings (JSON). No migration, but no sharing.
+- C: Browser only. Cheapest, does not work for agents.
+
+**Why A:** phase 2 needs sharing; B would have to be migrated again. Answer: the form in the document (choice + comment).
 
 <!-- /lang -->
 
@@ -128,19 +275,19 @@ Non-goals:
 
 <!-- lang:cs -->
 
-| Metrika | Dnes | Cíl | Do |
-|---|---:|---:|---|
-| Medián času od otevření po první graf | 47 s | ≤ 10 s | 2027-02-28 |
-| Podíl otevření s uloženou sadou | 0 % | ≥ 40 % | 2027-02-28 |
+| Metrika | Před stavbou | Cíl | Do | Naměřeno (kdy, důkaz) |
+|---|---:|---:|---|---|
+| Medián času od otevření po první graf | 47 s | ≤ 10 s | 2027-02-28 | neměřeno |
+| Podíl otevření s uloženou sadou | 0 % | ≥ 40 % | 2027-02-28 | neměřeno |
 
 Ochranné metriky: p95 načtení reportu nesmí stoupnout nad 2,0 s (dnes 1,6 s); žádný nárůst chyb 4xx/5xx na API reportů.
 
 <!-- lang:en -->
 
-| Metric | Baseline | Target | By |
-|---|---:|---:|---|
-| Median time from open to first chart | 47 s | ≤ 10 s | 2027-02-28 |
-| Share of opens with a saved set | 0% | ≥ 40% | 2027-02-28 |
+| Metric | Before the build | Target | By | Measured (when, evidence) |
+|---|---:|---:|---|---|
+| Median time from open to first chart | 47 s | ≤ 10 s | 2027-02-28 | not measured |
+| Share of opens with a saved set | 0% | ≥ 40% | 2027-02-28 | not measured |
 
 Guardrails: report load p95 must not rise above 2.0 s (today 1.6 s); no increase in 4xx/5xx errors on the report API.
 
@@ -256,61 +403,6 @@ Figure (**Concept**, generated for illustration, not a UI spec): the saved-sets 
 
 <!-- /lang -->
 
-<!-- cs:decisions -->
-## Rozhodnutí · Decisions
-
-<!-- lang:cs -->
-
-### D1: Sdílet uložené sady se skupinou už ve fázi 1?
-
-**O co jde.** Dnes si každý analytik nastavuje filtry sám. Rozhodujeme, jestli si sady filtrů mohou kolegové předávat hned, nebo až později; určuje to termín fáze 1.
-
-**Jak to vypadá.** Jana uloží sadu „Pondělí“. *A:* Petr ji hned vidí v menu svého reportu. *B:* Petr ji uvidí až po fázi 2; do té doby si ji nastaví sám.
-
-| | A: ano, hned | B: až ve fázi 2 |
-|---|---|---|
-| Pro | Tým sdílí stejný pohled od prvního dne. | Fáze 1 vyjde v prosinci. |
-| Proti | +2 týdny; nutná kontrola oprávnění skupin. | Sdílení čeká 2 měsíce. |
-| Změnit později | Sdílení nejde vzít zpět, až ho lidé používají. | Přidat sdílení je snadné. |
-| Kdo to tak dělá | Konkurent B [5]. | Konkurent A [4]. |
-
-**Doporučení: B.** 80 % otevření dělá autor reportu sám (odvozeno); sdílení přinese méně, než kolik stojí zpoždění.
-
-### D2: Kde uložené sady ukládat?
-
-- **A: Postgres, nová tabulka (doporučeno).** Jedno místo pro web, CLI i MCP.
-- B: Nastavení uživatele (JSON). Bez migrace, ale bez sdílení.
-- C: Jen v prohlížeči. Nejlevnější, nefunguje pro agenty.
-
-**Proč A:** fáze 2 potřebuje sdílení; B by se musela znovu migrovat. Odpověď: formulář v dokumentu (volba + komentář).
-
-<!-- lang:en -->
-
-### D1: Share saved sets with a group already in phase 1?
-
-**What it is about.** Today each analyst sets filters alone. We decide whether colleagues can share filter sets at once or later; this sets the phase 1 date.
-
-**What it looks like.** Jana saves the set "Monday". *A:* Petr sees it in his report menu at once. *B:* Petr sees it only after phase 2; until then he sets it himself.
-
-| | A: yes, now | B: in phase 2 |
-|---|---|---|
-| Pros | The team shares one view from day one. | Phase 1 ships in December. |
-| Cons | +2 weeks; needs a group permission check. | Sharing waits 2 months. |
-| Change later | Sharing cannot be taken back once people use it. | Adding sharing is easy. |
-| Who does this | Competitor B [5]. | Competitor A [4]. |
-
-**Recommendation: B.** 80% of opens are by the report's own author (inferred); sharing adds less than the delay costs.
-
-### D2: Where do saved sets live?
-
-- **A: Postgres, new table (recommended).** One place for web, CLI and MCP.
-- B: User settings (JSON). No migration, but no sharing.
-- C: Browser only. Cheapest, does not work for agents.
-
-**Why A:** phase 2 needs sharing; B would have to be migrated again. Answer: the form in the document (choice + comment).
-
-<!-- /lang -->
-
 <!-- cs:architecture -->
 ## Dopad na architekturu · Architecture impact
 
@@ -341,41 +433,6 @@ C4 diagram (containers per `docs/c4/MODEL.md`): **The web app and API change and
 | CLI | Yes | Principle 2: same behaviour. |
 | MCP | Yes | Principle 2: same behaviour. |
 | External services (agent sandbox) | No | The agent calls MCP; the sandbox does not change. |
-
-<!-- /lang -->
-
-<!-- cs:delivery -->
-## Plán dodání · Delivery plan
-
-<!-- lang:cs -->
-
-| Fáze | Kdy | Hotovo když |
-|---|---|---|
-| 1: osobní sady | 2026-11 → 2026-12 | 10 analytiků na dev používá sady 2 týdny. |
-| 2: sdílení | 2027-01 → 2027-02 | Sada sdílená se skupinou respektuje její oprávnění. |
-| Zapnout pro všechny | 2027-03 | Metriky splní cíl a přepínač je odstraněn. |
-
-**Přepínač:** `saved_report_filters`, výchozí vypnuto. **Závislosti:** žádné. **Riziko:** sloupec zmizí ze zdroje → filtr se přeskočí a uživatel to vidí.
-
-Akceptační příklady:
-
-- **Výchozí sada se použije sama.** Dáno: sada „Pondělí“ je výchozí. Když: analytik otevře report. Pak: report ukáže data s filtry sady „Pondělí“ do 2 s.
-- **Limit 20 sad.** Dáno: uživatel má u reportu 20 sad. Když: uloží 21. Pak: vidí chybu s odkazem na správu sad a nic se neuloží.
-
-<!-- lang:en -->
-
-| Phase | When | Done when |
-|---|---|---|
-| 1: personal sets | 2026-11 → 2026-12 | 10 analysts on dev use sets for 2 weeks. |
-| 2: sharing | 2027-01 → 2027-02 | A set shared with a group respects its permissions. |
-| On for everyone | 2027-03 | Metrics meet target and the switch is removed. |
-
-**Switch:** `saved_report_filters`, off by default. **Dependencies:** none. **Risk:** a column disappears from the source → the filter is skipped and the user sees it.
-
-Acceptance examples:
-
-- **The default set applies on its own.** Given: set "Monday" is the default. When: the analyst opens the report. Then: the report shows data with the "Monday" filters within 2 s.
-- **The 20-set limit.** Given: the user has 20 sets on the report. When: they save a 21st. Then: they see an error linking to set management and nothing is saved.
 
 <!-- /lang -->
 

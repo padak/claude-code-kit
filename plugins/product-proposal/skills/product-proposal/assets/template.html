@@ -223,6 +223,10 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
   a{color:inherit}
   .pp-sources a[href^="http"]::after{content:" (" attr(href) ")";word-break:break-all}
 }
+.pp-overdue{display:inline-block;margin-left:var(--space-xs);padding:0 .4rem;border-radius:var(--radius-sm);background:#b3261e;color:#fff;font-size:var(--size-small)}
+.pp-toc__group{list-style:none;margin:var(--space-sm) 0 0;font-size:var(--size-small);font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-faint)}
+.pp-log{list-style:none;padding:0;font-size:var(--size-small)}
+.pp-log li{padding:.15rem 0;border-bottom:1px solid var(--ds-border)}
 </style>
 </head>
 <body>
@@ -231,7 +235,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
     <div class="pp-topbar__title"><span lang="cs">[UKÁZKA] Uložené filtry v reportech</span><span lang="en">[SAMPLE] Saved report filters</span></div>
     <div class="pp-topbar__meta">
       <a class="pp-badge pp-badge--linear" href="https://linear.app/keboola/issue/TEAG-123" target="_blank" rel="noopener" title="Linear">TEAG-123</a>
-      <span class="pp-badge pp-status" data-status="review"><span lang="cs">Ke kontrole</span><span lang="en">In review</span></span>
+      <span class="pp-badge pp-status" data-status="review"><span lang="cs">Návrh ke kontrole</span><span lang="en">Proposal in review</span></span>
       <span class="pp-badge">v1</span>
     </div>
     <div class="pp-lang" role="group" aria-label="Jazyk / Language">
@@ -292,18 +296,146 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
         <li>Phase 1 is personal sets only, phase 2 adds sharing with a group.</li>
         <li>Behind the <code>saved_report_filters</code> switch, off by default.</li>
       </ul>
-      <div class="pp-table"><table>
-        <thead><tr><th>#</th><th><span lang="cs">Rozhodnutí</span><span lang="en">Decision</span></th><th><span lang="cs">Doporučení</span><span lang="en">Recommendation</span></th></tr></thead>
-        <tbody>
-          <tr><td><a href="#d1">D1</a></td><td><span lang="cs">Sdílet sady už ve fázi 1?</span><span lang="en">Share sets in phase 1?</span></td><td><span lang="cs">B: ne, až ve fázi 2</span><span lang="en">B: no, in phase 2</span></td></tr>
-          <tr><td><a href="#d2">D2</a></td><td><span lang="cs">Kde sady ukládat?</span><span lang="en">Where to store sets?</span></td><td><span lang="cs">A: Postgres, nová tabulka</span><span lang="en">A: Postgres, new table</span></td></tr>
-        </tbody>
-      </table></div>
+      <p lang="cs">Rozhodnutí čekají v <a href="#decisions">registru</a>: D1 a D2.</p><p lang="en">Decisions wait in the <a href="#decisions">register</a>: D1 and D2.</p>
+    </section>
+
+    <!-- cs:status -->
+    <section class="pp-section" id="status" data-cs="status">
+      <h2><span class="pp-section__num">02</span><span lang="cs">Stav teď</span><span lang="en">Status now</span></h2>
+      <div class="pp-prose" lang="cs">
+        <p><strong>Zaměření:</strong> návrh ke kontrole; nic se zatím nestaví.</p>
+        <div class="pp-table"><table><thead><tr><th>Stav</th><th>Kde</th><th>Ověřeno</th></tr></thead><tbody>
+          <tr><td>Kód sloučen</td><td>nic</td><td>GitHub, 2026-10-23 10:00</td></tr>
+          <tr><td>Nasazeno</td><td>–</td><td>–</td></tr>
+          <tr><td>Zapnuto</td><td>–</td><td>–</td></tr>
+          <tr><td>Převzato</td><td>–</td><td>–</td></tr>
+        </tbody></table></div>
+        <p><strong>Čas:</strong> poslední práce 2026-10-23 10:00 (v1) · poslední ověření proti zdrojům 2026-10-23 10:00 · příští kontrola <span data-next-check="2026-11-06T09:00:00Z">6. 11. 10:00</span></p>
+        <p><strong>Čeká na tebe:</strong> rozhodnutí <a href="#d1">D1</a> a <a href="#d2">D2</a> do 6. 11.</p>
+        <p><strong>Čeká na jiné:</strong> nic.</p>
+        <p><strong>Odkazy:</strong> <a href="https://linear.app/keboola/issue/TEAG-123">Linear TEAG-123</a> · PR (zatím žádné) · související artefakty (žádné) · uživatelská dokumentace (zatím žádná)</p>
+      </div>
+      <div class="pp-prose" lang="en">
+        <p><strong>Focus:</strong> proposal in review; nothing is being built yet.</p>
+        <div class="pp-table"><table><thead><tr><th>State</th><th>Where</th><th>Verified</th></tr></thead><tbody>
+          <tr><td>Code merged</td><td>nothing</td><td>GitHub, 2026-10-23 10:00</td></tr>
+          <tr><td>Deployed</td><td>–</td><td>–</td></tr>
+          <tr><td>Enabled</td><td>–</td><td>–</td></tr>
+          <tr><td>Accepted</td><td>–</td><td>–</td></tr>
+        </tbody></table></div>
+        <p><strong>Time:</strong> last work 2026-10-23 10:00 (v1) · last reconciled with sources 2026-10-23 10:00 · next check <span data-next-check="2026-11-06T09:00:00Z">6 Nov 10:00</span></p>
+        <p><strong>Waiting for you:</strong> decisions <a href="#d1">D1</a> and <a href="#d2">D2</a> by 6 Nov.</p>
+        <p><strong>Waiting for others:</strong> nothing.</p>
+        <p><strong>Links:</strong> <a href="https://linear.app/keboola/issue/TEAG-123">Linear TEAG-123</a> · PRs (none yet) · related artifacts (none) · user docs (none yet)</p>
+      </div>
+    </section>
+
+    <!-- cs:plan -->
+    <section class="pp-section" id="plan" data-cs="plan">
+      <h2><span class="pp-section__num">03</span><span lang="cs">Plán a práce</span><span lang="en">Plan and progress</span></h2>
+      <ol class="pp-timeline">
+        <li class="pp-phase pp-phase--current"><span class="pp-phase__when">2026-11 → 2026-12</span><h4><span lang="cs">Fáze 1: osobní sady</span><span lang="en">Phase 1: personal sets</span></h4><p lang="cs"><strong>Hotovo když:</strong> 10 analytiků na dev používá sady 2 týdny.</p><p lang="en"><strong>Done when:</strong> 10 analysts on dev use sets for 2 weeks.</p></li>
+        <li class="pp-phase"><span class="pp-phase__when">2027-01 → 2027-02</span><h4><span lang="cs">Fáze 2: sdílení</span><span lang="en">Phase 2: sharing</span></h4><p lang="cs"><strong>Hotovo když:</strong> sada sdílená se skupinou respektuje její oprávnění.</p><p lang="en"><strong>Done when:</strong> a set shared with a group respects its permissions.</p></li>
+        <li class="pp-phase"><span class="pp-phase__when">2027-03</span><h4><span lang="cs">Zapnout pro všechny</span><span lang="en">On for everyone</span></h4><p lang="cs"><strong>Hotovo když:</strong> metriky splní cíl a přepínač je odstraněn.</p><p lang="en"><strong>Done when:</strong> metrics meet target and the switch is removed.</p></li>
+      </ol>
+      <div class="pp-prose" lang="cs">
+        <p><strong>Přepínač:</strong> <code>saved_report_filters</code>, výchozí vypnuto. <strong>Závislosti:</strong> žádné. <strong>Riziko:</strong> sloupec zmizí ze zdroje → filtr se přeskočí a uživatel to vidí.</p>
+      </div>
+      <div class="pp-prose" lang="en">
+        <p><strong>Switch:</strong> <code>saved_report_filters</code>, off by default. <strong>Dependencies:</strong> none. <strong>Risk:</strong> a column disappears from the source → the filter is skipped and the user sees it.</p>
+      </div>
+      <h3><span lang="cs">Akceptační příklady</span><span lang="en">Acceptance examples</span></h3>
+      <div class="pp-gwt">
+        <div class="pp-gwt__case">
+          <h4><span lang="cs">Výchozí sada se použije sama</span><span lang="en">The default set applies on its own</span></h4>
+          <dl>
+            <dt lang="cs">Dáno</dt><dt lang="en">Given</dt><dd><span lang="cs">sada „Pondělí“ je výchozí</span><span lang="en">set "Monday" is the default</span></dd>
+            <dt lang="cs">Když</dt><dt lang="en">When</dt><dd><span lang="cs">analytik otevře report</span><span lang="en">the analyst opens the report</span></dd>
+            <dt lang="cs">Pak</dt><dt lang="en">Then</dt><dd><span lang="cs">report ukáže data s filtry sady „Pondělí“ do 2 s</span><span lang="en">the report shows data with the "Monday" filters within 2 s</span></dd>
+          </dl>
+        </div>
+        <div class="pp-gwt__case">
+          <h4><span lang="cs">Limit 20 sad</span><span lang="en">The 20-set limit</span></h4>
+          <dl>
+            <dt lang="cs">Dáno</dt><dt lang="en">Given</dt><dd><span lang="cs">uživatel má u reportu 20 sad</span><span lang="en">the user has 20 sets on the report</span></dd>
+            <dt lang="cs">Když</dt><dt lang="en">When</dt><dd><span lang="cs">uloží 21.</span><span lang="en">they save a 21st</span></dd>
+            <dt lang="cs">Pak</dt><dt lang="en">Then</dt><dd><span lang="cs">vidí chybu s odkazem na správu sad a nic se neuloží</span><span lang="en">they see an error linking to set management and nothing is saved</span></dd>
+          </dl>
+        </div>
+      </div>
+          <!-- gen:timeline -->
+      <p class="pp-callout"><span lang="cs">Časová osa se vygeneruje z tabulky slices, jakmile začne stavba (<code>progress.py render</code>).</span><span lang="en">The timeline is generated from the slice table once the build starts (<code>progress.py render</code>).</span></p>
+      <!-- /gen:timeline -->
+      <!-- gen:slices -->
+      <p>Snapshot 2026-10-23 10:00 CEST, read from GitHub (keboola/agnes-the-ai-analyst).</p>
+      <div class="pp-table"><table><thead><tr><th>ID</th><th>Alias</th><th>Phase</th><th>What a user gets</th><th>State</th><th>PR</th><th>Opened</th><th>Merged</th><th>Note</th></tr></thead><tbody>
+        <tr><td>W01</td><td>1a</td><td>1</td><td>Save and reapply a personal filter set</td><td>planned</td><td>–</td><td>–</td><td>–</td><td></td></tr>
+        <tr><td>W02</td><td>1b</td><td>1</td><td>A pinned default set</td><td>planned</td><td>–</td><td>–</td><td>–</td><td></td></tr>
+        <tr><td>W03</td><td>2a</td><td>2</td><td>Share a set with a group</td><td>planned</td><td>–</td><td>–</td><td>–</td><td>after D1</td></tr>
+      </tbody></table></div>
+      <!-- /gen:slices -->
+    </section>
+
+    <!-- cs:decisions -->
+    <section class="pp-section" id="decisions" data-cs="decisions">
+      <h2><span class="pp-section__num">04</span><span lang="cs">Rozhodnutí</span><span lang="en">Decisions</span></h2>
+      <div class="pp-table"><table><thead><tr><th>ID</th><th>Question</th><th>Decision</th><th>When</th><th>Who</th><th>State</th><th>Source</th></tr></thead><tbody>
+        <tr><td><a href="#d1">D1</a></td><td>Share sets in phase 1?</td><td>recommended B: in phase 2</td><td>–</td><td>Petr Šimeček</td><td>open</td><td>card D1</td></tr>
+        <tr><td><a href="#d2">D2</a></td><td>Where to store sets?</td><td>recommended A: Postgres, new table</td><td>–</td><td>Petr Šimeček</td><td>open</td><td>card D2</td></tr>
+      </tbody></table></div>
+
+      <article class="pp-decision" id="d1" data-decision="D1">
+        <div class="pp-decision__head"><span class="pp-decision__id">D1</span><h3><span lang="cs">Sdílet uložené sady se skupinou už ve fázi 1?</span><span lang="en">Share saved sets with a group already in phase 1?</span></h3></div>
+        <div class="pp-options">
+          <div class="pp-option" data-option="A"><h4><span class="pp-option__key">A</span><span lang="cs">Ano, hned</span><span lang="en">Yes, now</span></h4><p lang="cs">+2 týdny, nutná kontrola oprávnění skupin.</p><p lang="en">+2 weeks, needs a group permission check.</p></div>
+          <div class="pp-option pp-option--recommended" data-option="B"><span class="pp-option__flag"><span lang="cs">Doporučeno</span><span lang="en">Recommended</span></span><h4><span class="pp-option__key">B</span><span lang="cs">Ne, až ve fázi 2</span><span lang="en">No, in phase 2</span></h4><p lang="cs">Fáze 1 vyjde v prosinci.</p><p lang="en">Phase 1 ships in December.</p></div>
+        </div>
+        <p class="pp-reason" lang="cs"><strong>Proč B:</strong> 80 % otevření dělá autor reportu sám <span class="pp-ev pp-ev--inferred">odvozeno</span>; sdílení přinese méně, než kolik stojí zpoždění.</p>
+        <p class="pp-reason" lang="en"><strong>Why B:</strong> 80% of opens are by the report's own author <span class="pp-ev pp-ev--inferred">inferred</span>; sharing adds less than the delay costs.</p>
+        <form class="pp-form" data-decision="D1" novalidate>
+          <fieldset>
+            <legend><span lang="cs">Vaše volba</span><span lang="en">Your choice</span></legend>
+            <div class="pp-form__choices">
+              <label><input type="radio" name="choice" value="A"> A</label>
+              <label><input type="radio" name="choice" value="B"> B</label>
+              <label><input type="radio" name="choice" value="other"> <span lang="cs">Jinak</span><span lang="en">Other</span></label>
+            </div>
+          </fieldset>
+          <label class="pp-form__comment"><span lang="cs">Komentář (nepovinný)</span><span lang="en">Comment (optional)</span><textarea name="comment" rows="3"></textarea></label>
+          <button class="pp-button" type="submit"><span lang="cs">Odeslat odpověď</span><span lang="en">Send answer</span></button>
+          <p class="pp-form__note" role="status" hidden></p>
+        </form>
+      </article>
+
+      <article class="pp-decision" id="d2" data-decision="D2">
+        <div class="pp-decision__head"><span class="pp-decision__id">D2</span><h3><span lang="cs">Kde uložené sady ukládat?</span><span lang="en">Where do saved sets live?</span></h3></div>
+        <div class="pp-options">
+          <div class="pp-option pp-option--recommended" data-option="A"><span class="pp-option__flag"><span lang="cs">Doporučeno</span><span lang="en">Recommended</span></span><h4><span class="pp-option__key">A</span><span lang="cs">Postgres, nová tabulka</span><span lang="en">Postgres, new table</span></h4><p lang="cs">Jedno místo pro web, CLI i MCP.</p><p lang="en">One place for web, CLI and MCP.</p></div>
+          <div class="pp-option" data-option="B"><h4><span class="pp-option__key">B</span><span lang="cs">Nastavení uživatele (JSON)</span><span lang="en">User settings (JSON)</span></h4><p lang="cs">Bez migrace, ale bez sdílení.</p><p lang="en">No migration, but no sharing.</p></div>
+          <div class="pp-option" data-option="C"><h4><span class="pp-option__key">C</span><span lang="cs">Jen v prohlížeči</span><span lang="en">Browser only</span></h4><p lang="cs">Nejlevnější, nefunguje pro agenty.</p><p lang="en">Cheapest, does not work for agents.</p></div>
+        </div>
+        <p class="pp-reason" lang="cs"><strong>Proč A:</strong> fáze 2 potřebuje sdílení; B by se musela znovu migrovat.</p>
+        <p class="pp-reason" lang="en"><strong>Why A:</strong> phase 2 needs sharing; B would have to be migrated again.</p>
+        <form class="pp-form" data-decision="D2" novalidate>
+          <fieldset>
+            <legend><span lang="cs">Vaše volba</span><span lang="en">Your choice</span></legend>
+            <div class="pp-form__choices">
+              <label><input type="radio" name="choice" value="A"> A</label>
+              <label><input type="radio" name="choice" value="B"> B</label>
+              <label><input type="radio" name="choice" value="C"> C</label>
+              <label><input type="radio" name="choice" value="other"> <span lang="cs">Jinak</span><span lang="en">Other</span></label>
+            </div>
+          </fieldset>
+          <label class="pp-form__comment"><span lang="cs">Komentář (nepovinný)</span><span lang="en">Comment (optional)</span><textarea name="comment" rows="3"></textarea></label>
+          <button class="pp-button" type="submit"><span lang="cs">Odeslat odpověď</span><span lang="en">Send answer</span></button>
+          <p class="pp-form__note" role="status" hidden></p>
+        </form>
+      </article>
     </section>
 
     <!-- cs:problem -->
     <section class="pp-section" id="problem" data-cs="problem">
-      <h2><span class="pp-section__num">02</span><span lang="cs">Problém</span><span lang="en">The problem</span></h2>
+      <h2><span class="pp-section__num">05</span><span lang="cs">Problém</span><span lang="en">The problem</span></h2>
       <div class="pp-prose" lang="cs">
         <p><strong>Kdo:</strong> analytici, kteří otevírají stejný report několikrát týdně. <strong>Situace:</strong> po každém otevření nastavují 4 až 6 filtrů znovu. <strong>Cena dnes:</strong> medián 47 s na otevření, 1 900 otevření týdně, tedy asi 25 hodin týdně <span class="pp-ev pp-ev--inferred">odvozeno</span><a class="pp-cite" href="#src-1">[1]</a>.</p>
         <p><strong>Příklad:</strong> „Každé pondělí naklikám region, měnu a tři produkty. Kdyby si to report pamatoval, ušetřím čtvrt hodiny.“ (ticket TEAG-000, 2026-10-02)<a class="pp-cite" href="#src-2">[2]</a></p>
@@ -316,7 +448,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:goals -->
     <section class="pp-section" id="goals" data-cs="goals">
-      <h2><span class="pp-section__num">03</span><span lang="cs">Cíle a necíle</span><span lang="en">Goals and non-goals</span></h2>
+      <h2><span class="pp-section__num">06</span><span lang="cs">Cíle a necíle</span><span lang="en">Goals and non-goals</span></h2>
       <div class="pp-prose" lang="cs">
         <h4>Cíle</h4>
         <ul><li>Analytik obnoví uloženou sadu filtrů jedním kliknutím.</li><li>Výchozí sada se použije sama při otevření reportu.</li></ul>
@@ -333,7 +465,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:principles -->
     <section class="pp-section" id="principles" data-cs="principles">
-      <h2><span class="pp-section__num">04</span><span lang="cs">Principy</span><span lang="en">Principles</span></h2>
+      <h2><span class="pp-section__num">07</span><span lang="cs">Principy</span><span lang="en">Principles</span></h2>
       <ol lang="cs">
         <li>Uložená sada nikdy nerozšíří přístup k datům; filtr jen zužuje.<a class="pp-cite" href="#src-3">[3]</a></li>
         <li>Stejné chování na webu, v CLI i MCP.</li>
@@ -348,12 +480,12 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:metrics -->
     <section class="pp-section" id="metrics" data-cs="metrics">
-      <h2><span class="pp-section__num">05</span><span lang="cs">Jak poznáme, že to funguje</span><span lang="en">How we know it worked</span></h2>
+      <h2><span class="pp-section__num">08</span><span lang="cs">Jak poznáme, že to funguje</span><span lang="en">How we know it worked</span></h2>
       <div class="pp-table"><table>
-        <thead><tr><th><span lang="cs">Metrika</span><span lang="en">Metric</span></th><th class="num"><span lang="cs">Dnes</span><span lang="en">Baseline</span></th><th class="num"><span lang="cs">Cíl</span><span lang="en">Target</span></th><th><span lang="cs">Do</span><span lang="en">By</span></th></tr></thead>
+        <thead><tr><th><span lang="cs">Metrika</span><span lang="en">Metric</span></th><th class="num"><span lang="cs">Před stavbou</span><span lang="en">Before the build</span></th><th class="num"><span lang="cs">Cíl</span><span lang="en">Target</span></th><th><span lang="cs">Do</span><span lang="en">By</span></th><th><span lang="cs">Naměřeno (kdy, důkaz)</span><span lang="en">Measured (when, evidence)</span></th></tr></thead>
         <tbody>
-          <tr><td><span lang="cs">Medián času od otevření po první graf</span><span lang="en">Median time from open to first chart</span></td><td class="num">47 s</td><td class="num">≤ 10 s</td><td>2027-02-28</td></tr>
-          <tr><td><span lang="cs">Podíl otevření s uloženou sadou</span><span lang="en">Share of opens with a saved set</span></td><td class="num">0 %</td><td class="num">≥ 40 %</td><td>2027-02-28</td></tr>
+          <tr><td><span lang="cs">Medián času od otevření po první graf</span><span lang="en">Median time from open to first chart</span></td><td class="num">47 s</td><td class="num">≤ 10 s</td><td>2027-02-28</td><td><span lang="cs">neměřeno</span><span lang="en">not measured</span></td></tr>
+          <tr><td><span lang="cs">Podíl otevření s uloženou sadou</span><span lang="en">Share of opens with a saved set</span></td><td class="num">0 %</td><td class="num">≥ 40 %</td><td>2027-02-28</td><td><span lang="cs">neměřeno</span><span lang="en">not measured</span></td></tr>
         </tbody>
         <caption><span lang="cs">Ochranné metriky: p95 načtení reportu nesmí stoupnout nad 2,0 s (dnes 1,6 s); žádný nárůst chyb 4xx/5xx na API reportů.</span><span lang="en">Guardrails: report load p95 must not rise above 2.0 s (today 1.6 s); no increase in 4xx/5xx errors on the report API.</span></caption>
       </table></div>
@@ -361,7 +493,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:current-state -->
     <section class="pp-section" id="current-state" data-cs="current-state">
-      <h2><span class="pp-section__num">06</span><span lang="cs">Současný stav v Agnes</span><span lang="en">Current state in Agnes</span></h2>
+      <h2><span class="pp-section__num">09</span><span lang="cs">Současný stav v Agnes</span><span lang="en">Current state in Agnes</span></h2>
       <div class="pp-prose" lang="cs">
         <p><strong>Pro uživatele:</strong> filtry žijí jen v URL; po zavření karty jsou pryč <span class="pp-ev pp-ev--verified">ověřeno</span>.</p>
         <p><strong>V kódu:</strong> stav filtrů drží <code>web/src/example/ReportFilters.tsx</code>; API <code>app/api/example_reports.py</code> filtry neukládá.</p>
@@ -391,7 +523,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:research -->
     <section class="pp-section" id="research" data-cs="research">
-      <h2><span class="pp-section__num">07</span><span lang="cs">Průzkum a konkurence</span><span lang="en">Research and competition</span></h2>
+      <h2><span class="pp-section__num">10</span><span lang="cs">Průzkum a konkurence</span><span lang="en">Research and competition</span></h2>
       <p lang="cs">Konkurent A i B ukládají filtry na úrovni uživatele; jen B je umí sdílet se skupinou.<a class="pp-cite" href="#src-4">[4]</a><a class="pp-cite" href="#src-5">[5]</a></p>
       <p lang="en">Competitors A and B both save filters per user; only B shares them with a group.<a class="pp-cite" href="#src-4">[4]</a><a class="pp-cite" href="#src-5">[5]</a></p>
       <div class="pp-table"><table>
@@ -444,7 +576,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:proposal -->
     <section class="pp-section" id="proposal" data-cs="proposal">
-      <h2><span class="pp-section__num">08</span><span lang="cs">Návrh</span><span lang="en">Proposal</span></h2>
+      <h2><span class="pp-section__num">11</span><span lang="cs">Návrh</span><span lang="en">Proposal</span></h2>
       <div class="pp-prose" lang="cs">
         <h4>Cesta uživatele</h4>
         <ol><li>Analytik nastaví filtry a klikne <em>Uložit filtry</em>.</li><li>Zadá jméno (max. 60 znaků) a volitelně zaškrtne <em>Výchozí</em>.</li><li>Při dalším otevření se výchozí sada použije sama; jiné vybere z menu.</li></ol>
@@ -477,7 +609,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:alternatives -->
     <section class="pp-section" id="alternatives" data-cs="alternatives">
-      <h2><span class="pp-section__num">09</span><span lang="cs">Alternativy a proč tahle</span><span lang="en">Alternatives and why this one</span></h2>
+      <h2><span class="pp-section__num">12</span><span lang="cs">Alternativy a proč tahle</span><span lang="en">Alternatives and why this one</span></h2>
       <div class="pp-table"><table>
         <thead><tr><th><span lang="cs">Varianta</span><span lang="en">Option</span></th><th><span lang="cs">Čas analytika</span><span lang="en">Analyst time</span></th><th><span lang="cs">Náklad</span><span lang="en">Effort</span></th><th><span lang="cs">Riziko</span><span lang="en">Risk</span></th></tr></thead>
         <tbody>
@@ -490,62 +622,9 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
       <p lang="en"><strong>Why the proposal:</strong> only it meets principle 2 (same behaviour on every surface). Bookmarks are cheaper, but an agent cannot use them.</p>
     </section>
 
-    <!-- cs:decisions -->
-    <section class="pp-section" id="decisions" data-cs="decisions">
-      <h2><span class="pp-section__num">10</span><span lang="cs">Rozhodnutí</span><span lang="en">Decisions</span></h2>
-
-      <article class="pp-decision" id="d1" data-decision="D1">
-        <div class="pp-decision__head"><span class="pp-decision__id">D1</span><h3><span lang="cs">Sdílet uložené sady se skupinou už ve fázi 1?</span><span lang="en">Share saved sets with a group already in phase 1?</span></h3></div>
-        <div class="pp-options">
-          <div class="pp-option" data-option="A"><h4><span class="pp-option__key">A</span><span lang="cs">Ano, hned</span><span lang="en">Yes, now</span></h4><p lang="cs">+2 týdny, nutná kontrola oprávnění skupin.</p><p lang="en">+2 weeks, needs a group permission check.</p></div>
-          <div class="pp-option pp-option--recommended" data-option="B"><span class="pp-option__flag"><span lang="cs">Doporučeno</span><span lang="en">Recommended</span></span><h4><span class="pp-option__key">B</span><span lang="cs">Ne, až ve fázi 2</span><span lang="en">No, in phase 2</span></h4><p lang="cs">Fáze 1 vyjde v prosinci.</p><p lang="en">Phase 1 ships in December.</p></div>
-        </div>
-        <p class="pp-reason" lang="cs"><strong>Proč B:</strong> 80 % otevření dělá autor reportu sám <span class="pp-ev pp-ev--inferred">odvozeno</span>; sdílení přinese méně, než kolik stojí zpoždění.</p>
-        <p class="pp-reason" lang="en"><strong>Why B:</strong> 80% of opens are by the report's own author <span class="pp-ev pp-ev--inferred">inferred</span>; sharing adds less than the delay costs.</p>
-        <form class="pp-form" data-decision="D1" novalidate>
-          <fieldset>
-            <legend><span lang="cs">Vaše volba</span><span lang="en">Your choice</span></legend>
-            <div class="pp-form__choices">
-              <label><input type="radio" name="choice" value="A"> A</label>
-              <label><input type="radio" name="choice" value="B"> B</label>
-              <label><input type="radio" name="choice" value="other"> <span lang="cs">Jinak</span><span lang="en">Other</span></label>
-            </div>
-          </fieldset>
-          <label class="pp-form__comment"><span lang="cs">Komentář (nepovinný)</span><span lang="en">Comment (optional)</span><textarea name="comment" rows="3"></textarea></label>
-          <button class="pp-button" type="submit"><span lang="cs">Odeslat odpověď</span><span lang="en">Send answer</span></button>
-          <p class="pp-form__note" role="status" hidden></p>
-        </form>
-      </article>
-
-      <article class="pp-decision" id="d2" data-decision="D2">
-        <div class="pp-decision__head"><span class="pp-decision__id">D2</span><h3><span lang="cs">Kde uložené sady ukládat?</span><span lang="en">Where do saved sets live?</span></h3></div>
-        <div class="pp-options">
-          <div class="pp-option pp-option--recommended" data-option="A"><span class="pp-option__flag"><span lang="cs">Doporučeno</span><span lang="en">Recommended</span></span><h4><span class="pp-option__key">A</span><span lang="cs">Postgres, nová tabulka</span><span lang="en">Postgres, new table</span></h4><p lang="cs">Jedno místo pro web, CLI i MCP.</p><p lang="en">One place for web, CLI and MCP.</p></div>
-          <div class="pp-option" data-option="B"><h4><span class="pp-option__key">B</span><span lang="cs">Nastavení uživatele (JSON)</span><span lang="en">User settings (JSON)</span></h4><p lang="cs">Bez migrace, ale bez sdílení.</p><p lang="en">No migration, but no sharing.</p></div>
-          <div class="pp-option" data-option="C"><h4><span class="pp-option__key">C</span><span lang="cs">Jen v prohlížeči</span><span lang="en">Browser only</span></h4><p lang="cs">Nejlevnější, nefunguje pro agenty.</p><p lang="en">Cheapest, does not work for agents.</p></div>
-        </div>
-        <p class="pp-reason" lang="cs"><strong>Proč A:</strong> fáze 2 potřebuje sdílení; B by se musela znovu migrovat.</p>
-        <p class="pp-reason" lang="en"><strong>Why A:</strong> phase 2 needs sharing; B would have to be migrated again.</p>
-        <form class="pp-form" data-decision="D2" novalidate>
-          <fieldset>
-            <legend><span lang="cs">Vaše volba</span><span lang="en">Your choice</span></legend>
-            <div class="pp-form__choices">
-              <label><input type="radio" name="choice" value="A"> A</label>
-              <label><input type="radio" name="choice" value="B"> B</label>
-              <label><input type="radio" name="choice" value="C"> C</label>
-              <label><input type="radio" name="choice" value="other"> <span lang="cs">Jinak</span><span lang="en">Other</span></label>
-            </div>
-          </fieldset>
-          <label class="pp-form__comment"><span lang="cs">Komentář (nepovinný)</span><span lang="en">Comment (optional)</span><textarea name="comment" rows="3"></textarea></label>
-          <button class="pp-button" type="submit"><span lang="cs">Odeslat odpověď</span><span lang="en">Send answer</span></button>
-          <p class="pp-form__note" role="status" hidden></p>
-        </form>
-      </article>
-    </section>
-
     <!-- cs:architecture -->
     <section class="pp-section" id="architecture" data-cs="architecture">
-      <h2><span class="pp-section__num">11</span><span lang="cs">Dopad na architekturu</span><span lang="en">Architecture impact</span></h2>
+      <h2><span class="pp-section__num">13</span><span lang="cs">Dopad na architekturu</span><span lang="en">Architecture impact</span></h2>
       <figure class="pp-figure pp-c4">
         <svg viewBox="0 0 760 330" role="img" aria-labelledby="c4-cap">
           <defs>
@@ -599,44 +678,9 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
       </table></div>
     </section>
 
-    <!-- cs:delivery -->
-    <section class="pp-section" id="delivery" data-cs="delivery">
-      <h2><span class="pp-section__num">12</span><span lang="cs">Plán dodání</span><span lang="en">Delivery plan</span></h2>
-      <ol class="pp-timeline">
-        <li class="pp-phase pp-phase--current"><span class="pp-phase__when">2026-11 → 2026-12</span><h4><span lang="cs">Fáze 1: osobní sady</span><span lang="en">Phase 1: personal sets</span></h4><p lang="cs"><strong>Hotovo když:</strong> 10 analytiků na dev používá sady 2 týdny.</p><p lang="en"><strong>Done when:</strong> 10 analysts on dev use sets for 2 weeks.</p></li>
-        <li class="pp-phase"><span class="pp-phase__when">2027-01 → 2027-02</span><h4><span lang="cs">Fáze 2: sdílení</span><span lang="en">Phase 2: sharing</span></h4><p lang="cs"><strong>Hotovo když:</strong> sada sdílená se skupinou respektuje její oprávnění.</p><p lang="en"><strong>Done when:</strong> a set shared with a group respects its permissions.</p></li>
-        <li class="pp-phase"><span class="pp-phase__when">2027-03</span><h4><span lang="cs">Zapnout pro všechny</span><span lang="en">On for everyone</span></h4><p lang="cs"><strong>Hotovo když:</strong> metriky splní cíl a přepínač je odstraněn.</p><p lang="en"><strong>Done when:</strong> metrics meet target and the switch is removed.</p></li>
-      </ol>
-      <div class="pp-prose" lang="cs">
-        <p><strong>Přepínač:</strong> <code>saved_report_filters</code>, výchozí vypnuto. <strong>Závislosti:</strong> žádné. <strong>Riziko:</strong> sloupec zmizí ze zdroje → filtr se přeskočí a uživatel to vidí.</p>
-      </div>
-      <div class="pp-prose" lang="en">
-        <p><strong>Switch:</strong> <code>saved_report_filters</code>, off by default. <strong>Dependencies:</strong> none. <strong>Risk:</strong> a column disappears from the source → the filter is skipped and the user sees it.</p>
-      </div>
-      <h3><span lang="cs">Akceptační příklady</span><span lang="en">Acceptance examples</span></h3>
-      <div class="pp-gwt">
-        <div class="pp-gwt__case">
-          <h4><span lang="cs">Výchozí sada se použije sama</span><span lang="en">The default set applies on its own</span></h4>
-          <dl>
-            <dt lang="cs">Dáno</dt><dt lang="en">Given</dt><dd><span lang="cs">sada „Pondělí“ je výchozí</span><span lang="en">set "Monday" is the default</span></dd>
-            <dt lang="cs">Když</dt><dt lang="en">When</dt><dd><span lang="cs">analytik otevře report</span><span lang="en">the analyst opens the report</span></dd>
-            <dt lang="cs">Pak</dt><dt lang="en">Then</dt><dd><span lang="cs">report ukáže data s filtry sady „Pondělí“ do 2 s</span><span lang="en">the report shows data with the "Monday" filters within 2 s</span></dd>
-          </dl>
-        </div>
-        <div class="pp-gwt__case">
-          <h4><span lang="cs">Limit 20 sad</span><span lang="en">The 20-set limit</span></h4>
-          <dl>
-            <dt lang="cs">Dáno</dt><dt lang="en">Given</dt><dd><span lang="cs">uživatel má u reportu 20 sad</span><span lang="en">the user has 20 sets on the report</span></dd>
-            <dt lang="cs">Když</dt><dt lang="en">When</dt><dd><span lang="cs">uloží 21.</span><span lang="en">they save a 21st</span></dd>
-            <dt lang="cs">Pak</dt><dt lang="en">Then</dt><dd><span lang="cs">vidí chybu s odkazem na správu sad a nic se neuloží</span><span lang="en">they see an error linking to set management and nothing is saved</span></dd>
-          </dl>
-        </div>
-      </div>
-    </section>
-
     <!-- cs:second-opinion -->
     <section class="pp-section" id="second-opinion" data-cs="second-opinion">
-      <h2><span class="pp-section__num">13</span><span lang="cs">Druhý názor</span><span lang="en">Second opinion</span></h2>
+      <h2><span class="pp-section__num">14</span><span lang="cs">Druhý názor</span><span lang="en">Second opinion</span></h2>
       <p lang="cs">GPT Astra posoudila verzi 1 dne 2026-10-22.</p>
       <p lang="en">GPT Astra reviewed version 1 on 2026-10-22.</p>
       <div class="pp-table"><table>
@@ -650,7 +694,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:glossary -->
     <section class="pp-section" id="glossary" data-cs="glossary">
-      <h2><span class="pp-section__num">14</span><span lang="cs">Slovník</span><span lang="en">Glossary</span></h2>
+      <h2><span class="pp-section__num">15</span><span lang="cs">Slovník</span><span lang="en">Glossary</span></h2>
       <dl class="pp-glossary">
         <dt><span lang="cs">Uložená sada filtrů</span><span lang="en">Saved filter set</span></dt>
         <dd><span lang="cs">Pojmenovaná kombinace filtrů jednoho reportu, kterou lze znovu použít.</span><span lang="en">A named combination of one report's filters that can be reapplied.</span></dd>
@@ -661,7 +705,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:sources -->
     <section class="pp-section" id="sources" data-cs="sources">
-      <h2><span class="pp-section__num">15</span><span lang="cs">Zdroje</span><span lang="en">Sources</span></h2>
+      <h2><span class="pp-section__num">16</span><span lang="cs">Zdroje</span><span lang="en">Sources</span></h2>
       <ol class="pp-sources">
         <li id="src-1"><span lang="cs">Ukázková telemetrie otevření reportů, 2026-10-01 až 2026-10-14.</span><span lang="en">Sample report-open telemetry, 2026-10-01 to 2026-10-14.</span> <a href="https://example.com/telemetry" target="_blank" rel="noopener">example.com/telemetry</a></li>
         <li id="src-2"><span lang="cs">Ukázkový ticket TEAG-000, 2026-10-02.</span><span lang="en">Sample ticket TEAG-000, 2026-10-02.</span> <a href="https://example.com/teag-000" target="_blank" rel="noopener">example.com/teag-000</a></li>
@@ -673,7 +717,7 @@ a.pp-badge:hover{border-color:var(--color-accent-default);color:var(--color-acce
 
     <!-- cs:appendix -->
     <section class="pp-section" id="appendix" data-cs="appendix">
-      <h2><span class="pp-section__num">16</span><span lang="cs">Příloha: technické detaily</span><span lang="en">Appendix: technical detail</span></h2>
+      <h2><span class="pp-section__num">17</span><span lang="cs">Příloha: technické detaily</span><span lang="en">Appendix: technical detail</span></h2>
       <details class="pp-appendix">
         <summary><span lang="cs">Datový model</span><span lang="en">Data model</span></summary>
         <div>
@@ -694,6 +738,8 @@ POST   /api/reports/{id}/filter-sets   {name, filters, is_default}
 DELETE /api/reports/{id}/filter-sets/{set_id}</pre></div>
       </details>
     </section>
+
+
   </main>
 </div>
 
@@ -944,6 +990,32 @@ DELETE /api/reports/{id}/filter-sets/{set_id}</pre></div>
       });
     });
   });
+})();
+</script>
+<script>
+(function () {
+  var GROUPS = [[["summary", "changes"], "Teď", "Now"], [["problem"], "Návrh", "Proposal"], [["retro", "log", "second-opinion"], "Zpětně a reference", "Looking back and reference"]];
+  function run() {
+    var toc = document.querySelector("[data-toc]");
+    if (toc) GROUPS.forEach(function (g) {
+      var a = null;
+      g[0].some(function (id) { a = toc.querySelector('a[href="#' + id + '"]'); return !!a; });
+      if (!a) return;
+      var li = document.createElement("li");
+      li.className = "pp-toc__group";
+      li.innerHTML = '<span lang="cs">' + g[1] + '</span><span lang="en">' + g[2] + "</span>";
+      a.parentNode.parentNode.insertBefore(li, a.parentNode);
+    });
+    document.querySelectorAll("[data-next-check]").forEach(function (el) {
+      var due = Date.parse(el.getAttribute("data-next-check"));
+      if (isNaN(due) || Date.now() <= due) return;
+      var b = document.createElement("span");
+      b.className = "pp-overdue";
+      b.innerHTML = '<span lang="cs">aktualizace po termínu</span><span lang="en">update overdue</span>';
+      el.parentNode.insertBefore(b, el.nextSibling);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run); else run();
 })();
 </script>
 </body>
