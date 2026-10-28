@@ -1,0 +1,699 @@
+{
+ "title": "Převzetí: artefakty jako znalostní prostor (P1 + P3)",
+ "lead": "Ruční E2E test fází P1 (bezpečné publikování) a P3 (balík znalostí jedním voláním) na devu. Všechno, co potřebuješ, je tady: příprava, 17 testů a úklid. Výsledek rozhodne, zda P1 a P3 převezmeš a zda smí P3 na produkci.",
+ "meta": {
+  "feature": "Artefakty jako sdílené znalostní prostory",
+  "linear_id": "TEAG-1023",
+  "linear_url": "https://linear.app/keboola/issue/TEAG-1023",
+  "prd_id": "jSQ6CQUvUi76F8_GPZMil2IB",
+  "prd_url": "https://artifacts.agnes.keboola.dev/p/jSQ6CQUvUi76F8_GPZMil2IB",
+  "prd_title": "Artefakty jako mapa znalostí (PRD, v6)",
+  "env_url": "https://agnes.keboola.dev",
+  "build": "2026.44.0+2026.10.40771887478",
+  "approver": "Petr Šimeček",
+  "plan_version": "v3",
+  "written": "28. 10. 2026",
+  "duration": "asi 60 minut (příprava 15, testy 40, úklid 5); dá se rozdělit, stav se drží v adrese stránky",
+  "artifact_id": "geDVnnqJ5KjUojdkyR3JYpO4",
+  "results_cmd": "agnes artifact comments geDVnnqJ5KjUojdkyR3JYpO4 --origin form"
+ },
+ "areas": [
+  {
+   "area": "Bezpečné publikování (P1)",
+   "proves": "Publikace ze zastaralé verze nepřepíše tiše novější práci kolegy ani agenta; záměrný přepis jde; artefakt nezastaví limit 50 verzí.",
+   "tests": "T07–T13"
+  },
+  {
+   "area": "Balík znalostí přes CLI (P3)",
+   "proves": "Jeden příkaz dá agentovi celý obraz velkého artefaktu: osnovu s offsety, rozhodnutí, komentáře, verze a co vynechal.",
+   "tests": "T01–T03"
+  },
+  {
+   "area": "Balík přes MCP v agentovi",
+   "proves": "Agent v Claude Code si balík vezme sám jedním voláním nástroje.",
+   "tests": "T04, T09"
+  },
+  {
+   "area": "Balík přes REST",
+   "proves": "Integrace dostane stejná data jako JSON, s rozpočtem v parametru `max_chars`.",
+   "tests": "T05"
+  },
+  {
+   "area": "Rozpočet a vynechané",
+   "proves": "Malý rozpočet řekne, co vynechal a jakým příkazem to dočíst.",
+   "tests": "T01, T06"
+  },
+  {
+   "area": "Přístup",
+   "proves": "Bez přihlášení nebo bez práva číst se k balíku nikdo nedostane.",
+   "tests": "T14, T15"
+  },
+  {
+   "area": "Nedůvěryhodný obsah",
+   "proves": "Text komentářů jde do agenta ohraničený jako data, ne jako pokyny.",
+   "tests": "T16"
+  },
+  {
+   "area": "Vypínač",
+   "proves": "Vypnutý `artifact_knowledge_spaces` balík skryje.",
+   "tests": "T17"
+  }
+ ],
+ "not_tested": [
+  "Fáze P2, P4, P5, P6: ještě nejsou postavené.",
+  "Produkce (agnes.keboola.systems): P1 ani P3 tam nejsou nasazené.",
+  "Webové stránky artefaktů: P1 ani P3 je nemění.",
+  "Komentáře skryté před čtenářem zůstanou skryté i v balíku: potřebuje druhý účet a soukromé komentáře; kryje jen CI test `test_knowledge_bundle_keeps_hidden_comments_from_a_reader`.",
+  "Čtení balíku jen přes veřejný odkaz: potřebuje veřejný artefakt; chování popisuje `docs/artifacts.md` → Knowledge bundle."
+ ],
+ "known": [
+  "**W03**: řádky verzí v balíku a `agnes artifact show --version` ukazují místo data `None`. Opravuje PR [#5872](https://github.com/keboola/agnes-the-ai-analyst/pull/5872) (28. 10. OPEN, ještě není na devu). Dokud ho nenasadíme, `None` nehlas. Když místo `None` uvidíš datum, je oprava nasazená a T03 označ OK."
+ ],
+ "pass_rule": "Převezmeš, když T01, T02, T04 a T07–T14 dopadnou OK a není otevřená vada vysoké závažnosti. T05, T06 a T16 smí skončit jen se střední nebo nízkou vadou. T15 a T17 jsou volitelné; bez T15 platí převzetí s výhradou „oprávnění neověřeno živě“. T03 převzetí neblokuje. Závažnost: **vysoká** = publikace ze staré verze projde bez `--no-require-head`, nebo balík ukáže obsah někomu bez práva číst; **střední** = špatný počet, chybějící položka v `Left out`; **nízká** = vzhled výstupu.",
+ "prep_intro": "Vše v jednom terminálu (macOS Terminal nebo iTerm), proměnné z kroků se v něm drží až do konce.",
+ "prep": [
+  {
+   "id": "P01",
+   "title": "CLI je aktuální",
+   "min": 2,
+   "do": [
+    {
+     "text": "Otevři terminál a spusť:",
+     "cmd": "agnes version"
+    },
+    {
+     "text": "Jen když druhý řádek neříká `(up to date)`:",
+     "cmd": "agnes self-upgrade && agnes version"
+    }
+   ],
+   "see": [
+    "První řádek `agnes 2026.44.0+2026.10.40771887478` nebo novější.",
+    "Řádek `Server: https://agnes.keboola.dev offers … (up to date)`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu: `(up to date)`."
+  },
+  {
+   "id": "P02",
+   "title": "Jsi přihlášený na devu a vypínač je zapnutý",
+   "min": 1,
+   "do": [
+    {
+     "cmd": "agnes whoami"
+    },
+    {
+     "text": "Ověř, že balík odpovídá (to dokazuje zapnutý vypínač `artifact_knowledge_spaces`):",
+     "cmd": "agnes artifact knowledge jSQ6CQUvUi76F8_GPZMil2IB --max-chars 5000 | head -c 18; echo"
+    }
+   ],
+   "see": [
+    "`Name: Petr Šimeček` a `Instance: https://agnes.keboola.dev`.",
+    "Druhý příkaz vypíše `UNTRUSTED CONTENT:`."
+   ],
+   "watch": [
+    "Když druhý příkaz vypíše `Error: artifact_knowledge_spaces_disabled (HTTP 404)`, vypínač je vypnutý: krok označ Problém a napiš mi."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu; vypínač ověřen i v `agnes admin config export` (`artifact_knowledge_spaces: true`)."
+  },
+  {
+   "id": "P03",
+   "title": "Pracovní složka a proměnné",
+   "min": 1,
+   "why": "`W` je velký artefakt (PRD agentních workflow, ~300 000 znaků), `P` je PRD této feature. Oba se jen čtou.",
+   "do": [
+    {
+     "cmd": "mkdir -p ~/e2e-teag-1023 && cd ~/e2e-teag-1023\nW=zoEtD4Xg2_AeQCCJ_QvdzJ4g; P=jSQ6CQUvUi76F8_GPZMil2IB; echo \"W=$W P=$P\""
+    }
+   ],
+   "see": [
+    "`W=zoEtD4Xg2_AeQCCJ_QvdzJ4g P=jSQ6CQUvUi76F8_GPZMil2IB`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu."
+  },
+  {
+   "id": "P04",
+   "title": "Vytvoř jednorázový testovací artefakt pro P1",
+   "min": 2,
+   "why": "Testy T07–T13 do něj publikují ~70 verzí. Vidíš ho jen ty (audience shared, nikomu nesdílený). Na konci ho v úklidu dáš do koše.",
+   "do": [
+    {
+     "cmd": "printf '# v1\\n' > t.md\nA=$(agnes artifact create --markdown t.md --title \"E2E P1 scratch\" --visibility instance --audience shared --json | python3 -c \"import json,sys; print(json.load(sys.stdin)['id'])\"); echo \"A=$A\""
+    },
+    {
+     "cmd": "agnes artifact versions \"$A\""
+    },
+    "ID z prvního příkazu si zkopíruj do poznámky u tohoto kroku. Budeš ho potřebovat v T09 a v druhém terminálu v T12."
+   ],
+   "see": [
+    "`A=` a 24znakové ID.",
+    "Tabulka verzí má jediný řádek s `1` a `live`."
+   ],
+   "dry": "ne: vytváří artefakt, spouštíš ty. Příkaz `create --json` a pole `id` ověřeny v kódu CLI."
+  },
+  {
+   "id": "P05",
+   "title": "Hlavička pro REST volání",
+   "min": 1,
+   "why": "T05 volá REST přímo. Token se vezme z tvého přihlášení a zůstane jen v proměnné tohoto terminálu; na konci ji smažeš.",
+   "do": [
+    {
+     "cmd": "H=$(agnes mcp headers | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"Authorization\"])'); echo \"${H:0:7}…\""
+    }
+   ],
+   "see": [
+    "`Bearer …` (zbytek tokenu se nevypíše)."
+   ],
+   "undo": [
+    "V úklidu `unset H`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu."
+  },
+  {
+   "id": "P06",
+   "title": "Agnes MCP v Claude Code (pro T04 a T09)",
+   "min": 4,
+   "why": "Artefaktové nástroje (`artifact_knowledge`, `artifact_update`) má hostovaný MCP server Agnes. Teď ho v Claude Code nemáš nastavený.",
+   "do": [
+    {
+     "text": "V terminálu přidej server (token si Claude Code bere z `agnes mcp headers`, do konfigurace se neukládá):",
+     "cmd": "claude mcp add-json --scope user agnes_server '{\"type\":\"http\",\"url\":\"https://agnes.keboola.dev/api/mcp/http\",\"headersHelper\":\"agnes mcp headers\"}'"
+    },
+    "Otevři **nový** terminál (druhou záložku), spusť v něm `claude` a napiš `/mcp`."
+   ],
+   "see": [
+    "V seznamu `/mcp` je `agnes_server` se stavem connected.",
+    "Po výběru serveru jsou mezi nástroji `artifact_knowledge` a `artifact_update`."
+   ],
+   "watch": [
+    "Když `/mcp` ukáže failed: zkontroluj, že v novém terminálu funguje `agnes whoami` (headersHelper volá `agnes`)."
+   ],
+   "undo": [
+    "Volitelně v úklidu: `claude mcp remove --scope user agnes_server`."
+   ],
+   "dry": "částečně: endpoint a hlavička ověřeny přímým MCP voláním (tools/list obsahuje `artifact_knowledge` i `artifact_update`, `artifact_knowledge` vrátil balík). Příkaz `claude mcp add-json` jsem nespustil, aby se neměnila tvoje konfigurace."
+  },
+  {
+   "id": "P07",
+   "title": "Volitelně: druhý účet pro T15",
+   "min": 2,
+   "optional": true,
+   "do": [
+    "Domluv kolegu s účtem na agnes.keboola.dev, který **není admin** a nemá sdílený tvůj testovací artefakt. Pošli mu ID z P04.",
+    "Když nikoho nemáš, krok označ Hotovo s poznámkou „bez účtu B“ a T15 pak Přeskočeno."
+   ],
+   "see": [
+    "Víš, kdo T15 spustí, nebo že ho přeskočíš."
+   ]
+  }
+ ],
+ "tests_intro": "Pořadí je příběh: nejdřív běžné čtení (T01–T06), pak bezpečné publikování na testovacím artefaktu (T07–T13 navazují, nic mezi nimi neuklízej), nakonec přístup a bezpečnost (T14–T17). Výstupy CLI jsou anglicky, přesně jak je Agnes tiskne. Čísla, která uvádím, platí k 28. 10.; artefakty rostou, takže srovnávej se svým prvním krokem, ne s mými čísly.",
+ "tests": [
+  {
+   "id": "T01",
+   "alias": "S5",
+   "area": "Balík přes CLI",
+   "prio": "P1",
+   "min": 3,
+   "title": "Balík velkého artefaktu jedním příkazem",
+   "why": "Agent má z jednoho čtení pochopit artefakt s ~300 000 znaky a vědět, co dočíst.",
+   "do": [
+    {
+     "text": "Zjisti aktuální verzi:",
+     "cmd": "agnes artifact show $W | grep head_version"
+    },
+    {
+     "cmd": "time agnes artifact knowledge $W > w.txt\nhead -3 w.txt; grep -c '\\[offset' w.txt; grep -A16 '^Versions' w.txt | tail -16; sed -n '/^Left out/,$p' w.txt"
+    }
+   ],
+   "see": [
+    "`time` ukáže `real` (nebo `total`) pod 5 s.",
+    "První řádek začíná `UNTRUSTED CONTENT:`; třetí obsahuje `head=vN (latest)` se stejným N jako `head_version` z kroku 1.",
+    "`grep -c` vypíše kladné číslo (počet nadpisů s offsetem; 28. 10. to bylo 85).",
+    "Pod `Versions (N):` je nejvýš 15 řádků verzí; zbytek je v `Left out:` jako `versions: … (cap) — agnes artifact versions zoEtD4Xg2_AeQCCJ_QvdzJ4g`.",
+    "Každý řádek pod `Left out:` končí příkazem; poslední řádek souboru je `source: server`."
+   ],
+   "watch": [
+    "Text může být delší než 30 000 znaků: rozpočet platí na serveru před formátováním CLI. To je správně.",
+    "Datum `None` u verzí je známá vada W03, řeší ji T03."
+   ],
+   "paste": "výstup druhého příkazu",
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu: v48, 85 nadpisů, 15 verzí + `versions: 33 (cap)`, ~1 s."
+  },
+  {
+   "id": "T02",
+   "alias": "S6",
+   "area": "Balík přes CLI",
+   "prio": "P1",
+   "min": 3,
+   "title": "Offset z osnovy vede na správný nadpis a rozhodnutí sedí",
+   "do": [
+    {
+     "cmd": "agnes artifact knowledge $P > p.txt; grep -n 'Status now' p.txt"
+    },
+    {
+     "text": "Číslo z `[offset N]` dosaď místo N:",
+     "cmd": "agnes artifact read $P --offset N --limit 200 --raw | grep -m1 '^## '"
+    },
+    {
+     "text": "Porovnej počet rozhodnutí v balíku a v seznamu:",
+     "cmd": "grep -c '^  \\[adc_' p.txt; agnes artifact decision list $P | grep -c '^\\[adc_'"
+    }
+   ],
+   "see": [
+    "Krok 1 ukáže řádek `Stav teď · Status now  [offset N]` (28. 10.: N = 7186).",
+    "Krok 2 vypíše `## Stav teď · Status now` (řádek `[truncated: next --offset …]` nad ním je jen nápověda ke stránkování).",
+    "Krok 3 vypíše dvě stejná čísla (28. 10.: 16 a 16), nebo je rozdíl uvedený v `p.txt` pod `Left out:` jako `decisions: …`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu: offset 7186, 16 = 16."
+  },
+  {
+   "id": "T03",
+   "alias": "W03",
+   "area": "Balík přes CLI",
+   "prio": "P3",
+   "min": 1,
+   "title": "Datum u verzí (známá vada W03)",
+   "do": [
+    {
+     "cmd": "grep -A3 '^Versions' p.txt; agnes artifact show $P --version 1 | head -1"
+    }
+   ],
+   "see": [
+    "Místo `None` je u verzí datum a čas publikace → **OK** (oprava #5872 je na devu).",
+    "Pořád `None` (např. `v1 — live — None`) → známá vada: označ **Přeskočeno** s poznámkou „stále None“. Nehlas jako chybu."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu: zatím `None` (#5872 OPEN)."
+  },
+  {
+   "id": "T04",
+   "alias": "S7",
+   "area": "Balík přes MCP",
+   "prio": "P1",
+   "min": 4,
+   "title": "Agent v Claude Code použije balík sám",
+   "do": [
+    {
+     "text": "V Claude Code z P06 napiš:",
+     "label": "prompt",
+     "cmd": "Use the agnes_server tool artifact_knowledge on zoEtD4Xg2_AeQCCJ_QvdzJ4g and tell me how many headings it has and what was left out, with the calls to read each omitted part."
+    },
+    "Volitelně totéž v Agnes chatu: [agnes.keboola.dev/chat](https://agnes.keboola.dev/chat)."
+   ],
+   "see": [
+    "V přepisu je právě jedno volání `artifact_knowledge` (v Claude Code jako `agnes_server - artifact_knowledge`).",
+    "Odpověď uvede počet nadpisů (podobný jako `grep -c` v T01) a vynechané části s voláními jako `artifact_versions(...)` nebo `artifact_comments(...)`."
+   ],
+   "watch": [
+    "Když agent místo toho volá `artifact_read` po kouscích, je to Nejasné: napiš, co volal."
+   ],
+   "paste": "odpověď agenta",
+   "dry": "částečně: přímé MCP volání `artifact_knowledge` vrátilo balík; sezení Claude Code jsem nespouštěl."
+  },
+  {
+   "id": "T05",
+   "area": "Balík přes REST",
+   "prio": "P2",
+   "min": 3,
+   "title": "REST vrátí balík jako JSON s rozpočtem",
+   "do": [
+    {
+     "cmd": "curl -s -H \"Authorization: $H\" \"https://agnes.keboola.dev/api/artifacts/$P/knowledge?max_chars=5000\" -o r.json -w '%{http_code}\\n'\npython3 -c \"import json; d=json.load(open('r.json')); print(sorted(d)); print(d['max_chars'], len(d['omitted'])); print(d['omitted'][0]['cli']); print(d['omitted'][0]['mcp'])\""
+    },
+    {
+     "text": "Příliš malý rozpočet:",
+     "cmd": "curl -s -H \"Authorization: $H\" \"https://agnes.keboola.dev/api/artifacts/$P/knowledge?max_chars=100\"; echo"
+    }
+   ],
+   "see": [
+    "`200`, pak `['artifact', 'as_of', 'comments', 'decisions', 'links', 'live_data', 'max_chars', 'omitted', 'outline', 'versions']`.",
+    "`5000` a kladný počet vynechaných; pak příkaz CLI (`agnes artifact read … --offset N`) a volání MCP (`artifact_read(...)`).",
+    "Krok 2 vrátí chybu s textem `Input should be greater than or equal to 5000`."
+   ],
+   "watch": [
+    "REST nemá pole `untrusted` ani `notice` a těla komentářů jsou bez ohraničení. To je záměr: ohraničení přidává CLI a MCP (T16)."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu."
+  },
+  {
+   "id": "T06",
+   "alias": "S8",
+   "area": "Rozpočet a vynechané",
+   "prio": "P2",
+   "min": 2,
+   "title": "Malý rozpočet řekne, co vynechal a jak to dočíst",
+   "do": [
+    {
+     "cmd": "agnes artifact knowledge $P --max-chars 5000 > p5.txt; wc -c p.txt p5.txt; sed -n '/^Left out/,$p' p5.txt"
+    },
+    {
+     "text": "Spusť jeden z příkazů z `Left out`, např.:",
+     "cmd": "agnes artifact decision list $P | head -3"
+    }
+   ],
+   "see": [
+    "`p5.txt` je výrazně menší než `p.txt` (28. 10.: ~1 800 proti ~13 000 bajtům).",
+    "Řádky jako `decisions: 16 (budget) — agnes artifact decision list jSQ6CQUvUi76F8_GPZMil2IB`; každý má důvod v závorce (`budget`, `cap` nebo `truncated`) a příkaz.",
+    "Příkaz z kroku 2 vypíše rozhodnutí."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu."
+  },
+  {
+   "id": "T07",
+   "alias": "S1",
+   "area": "Bezpečné publikování",
+   "prio": "P1",
+   "min": 2,
+   "title": "Publikace ze zastaralé verze se odmítne (CLI)",
+   "why": "Testovací artefakt `$A` z P04 je na v1.",
+   "do": [
+    {
+     "cmd": "printf '# v2\\n' > t.md; agnes artifact update $A --base-version 1 --markdown t.md"
+    },
+    {
+     "text": "Teď znovu ze staré v1:",
+     "cmd": "printf '# v3\\n' > t.md; agnes artifact update $A --base-version 1 --markdown t.md; echo \"exit=$?\""
+    },
+    {
+     "cmd": "agnes artifact versions $A"
+    }
+   ],
+   "see": [
+    "Krok 1 vypíše řádek začínající `v2 —` a odkaz.",
+    "Krok 2 vypíše přesně `Error: base_version v1 is no longer the latest: v2 was published meanwhile (HTTP 409)` a `exit=1`.",
+    "Krok 3 ukáže dva řádky (1 a 2)."
+   ],
+   "paste": "výstup kroku 2",
+   "dry": "ne: zapisuje, spouštíš ty. Text chyby ověřila GPT Astra proti kódu."
+  },
+  {
+   "id": "T08",
+   "alias": "S2",
+   "area": "Bezpečné publikování",
+   "prio": "P1",
+   "min": 1,
+   "title": "Záměrný přepis jde s --no-require-head",
+   "do": [
+    {
+     "cmd": "agnes artifact update $A --base-version 1 --markdown t.md --no-require-head; agnes artifact read $A --raw"
+    }
+   ],
+   "see": [
+    "Řádek začínající `v3 —`, pak `# v3`."
+   ],
+   "dry": "ne: zapisuje."
+  },
+  {
+   "id": "T09",
+   "alias": "S3",
+   "area": "Bezpečné publikování",
+   "prio": "P1",
+   "min": 3,
+   "title": "Totéž přes MCP: zastaralá verze se odmítne",
+   "do": [
+    {
+     "text": "Vypiš si ID:",
+     "cmd": "echo $A"
+    },
+    {
+     "text": "V Claude Code z P06 napiš (místo <A> vlož ID):",
+     "label": "prompt",
+     "cmd": "Call the agnes_server tool artifact_update with artifact_id <A>, base_version 1 and markdown \"# mcp\". Do not retry and do not change the arguments. Show me the raw result."
+    },
+    {
+     "text": "Zpátky v prvním terminálu:",
+     "cmd": "agnes artifact versions $A"
+    }
+   ],
+   "see": [
+    "Nástroj vrátí chybu `409` s `base_not_head` a `head_version` 3.",
+    "`agnes artifact versions` pořád ukazuje tři řádky (žádná v4)."
+   ],
+   "watch": [
+    "Když agent sám zkusí znovu s `base_version 3` a v4 vznikne, nejde o chybu Agnes: označ Nejasné a popiš to."
+   ],
+   "paste": "výsledek nástroje",
+   "dry": "ne: zapisuje. Nástroj `artifact_update` je v seznamu MCP nástrojů na devu."
+  },
+  {
+   "id": "T10",
+   "alias": "S4",
+   "area": "Bezpečné publikování",
+   "prio": "P1",
+   "min": 4,
+   "title": "Artefakt nezastaví limit 50 verzí",
+   "why": "Dřív se artefakt zastavil na 50 verzích, teď je limit 9 999. Smyčka publikuje v4 až v55, každou proti předchozí verzi.",
+   "do": [
+    {
+     "cmd": "START=${START:-4}; END=${END:-55}\nfor i in $(seq \"$START\" \"$END\"); do\n  printf '# v%s\\n' \"$i\" > t.md\n  agnes artifact update \"$A\" --base-version $((i-1)) --markdown t.md --note \"e2e $i\" > /dev/null && echo \"ok v$i\" || { echo \"stopped at v$i\"; break; }\ndone"
+    },
+    {
+     "cmd": "agnes artifact versions \"$A\" --json | python3 -c \"import json,sys; d=json.load(sys.stdin)['data']; print(len(d), 'versions, newest', max(v['number'] for v in d))\""
+    }
+   ],
+   "see": [
+    "Smyčka vypisuje `ok v4` … `ok v55`, žádné `stopped at`.",
+    "Poslední příkaz vypíše `55 versions, newest 55`."
+   ],
+   "watch": [
+    "Trvá to asi 1–2 minuty. `stopped at v51` by byla vysoká vada."
+   ],
+   "dry": "ne: 52 zápisů."
+  },
+  {
+   "id": "T11",
+   "alias": "F6",
+   "area": "Bezpečné publikování",
+   "prio": "P2",
+   "min": 4,
+   "title": "Přerušená smyčka jde bez ztrát navázat",
+   "do": [
+    {
+     "text": "Spusť smyčku v56–v70 a po 3–4 řádcích `ok` stiskni Ctrl+C:",
+     "cmd": "START=56 END=70\nSTART=${START:-4}; END=${END:-55}\nfor i in $(seq \"$START\" \"$END\"); do\n  printf '# v%s\\n' \"$i\" > t.md\n  agnes artifact update \"$A\" --base-version $((i-1)) --markdown t.md --note \"e2e $i\" > /dev/null && echo \"ok v$i\" || { echo \"stopped at v$i\"; break; }\ndone"
+    },
+    {
+     "text": "Počkej 30 s a zjisti nejnovější verzi:",
+     "cmd": "N=$(agnes artifact versions \"$A\" --json | python3 -c \"import json,sys; print(max(v['number'] for v in json.load(sys.stdin)['data']))\"); echo \"N=$N\""
+    },
+    {
+     "text": "Naváž od další verze:",
+     "cmd": "START=$((N+1)) END=70\nSTART=${START:-4}; END=${END:-55}\nfor i in $(seq \"$START\" \"$END\"); do\n  printf '# v%s\\n' \"$i\" > t.md\n  agnes artifact update \"$A\" --base-version $((i-1)) --markdown t.md --note \"e2e $i\" > /dev/null && echo \"ok v$i\" || { echo \"stopped at v$i\"; break; }\ndone"
+    },
+    {
+     "cmd": "agnes artifact versions \"$A\" --json | python3 -c \"import json,sys; d=json.load(sys.stdin)['data']; print(len(d), 'versions, newest', max(v['number'] for v in d))\""
+    }
+   ],
+   "see": [
+    "`N` je poslední verze s `ok`, nebo o jednu vyšší (požadavek rozběhnutý při Ctrl+C mohl doběhnout).",
+    "Navázaná smyčka jede bez `stopped at` až do `ok v70`.",
+    "Poslední příkaz vypíše `70 versions, newest 70`."
+   ],
+   "dry": "ne: zapisuje."
+  },
+  {
+   "id": "T12",
+   "alias": "F1",
+   "area": "Bezpečné publikování",
+   "prio": "P2",
+   "min": 4,
+   "title": "Dva souběžné zápisy: projde právě jeden",
+   "do": [
+    {
+     "text": "Otevři druhou záložku terminálu a nastav v ní ID z P04:",
+     "cmd": "cd ~/e2e-teag-1023; A=<ID z P04>"
+    },
+    {
+     "text": "V **obou** terminálech:",
+     "cmd": "N=$(agnes artifact versions \"$A\" --json | python3 -c \"import json,sys; print(max(v['number'] for v in json.load(sys.stdin)['data']))\"); echo \"N=$N\""
+    },
+    {
+     "text": "V prvním terminálu napiš (zatím bez Enteru):",
+     "cmd": "printf '# race 1\\n' > r1.md; agnes artifact update $A --base-version $N --markdown r1.md"
+    },
+    {
+     "text": "Ve druhém terminálu napiš (zatím bez Enteru):",
+     "cmd": "printf '# race 2\\n' > r2.md; agnes artifact update $A --base-version $N --markdown r2.md"
+    },
+    "Stiskni Enter v obou co nejrychleji po sobě."
+   ],
+   "see": [
+    "Právě jeden terminál vypíše řádek `vM —`, kde M = N + 1 (po T11: `v71 —`).",
+    "Druhý vypíše `Error: base_version vN is no longer the latest: vM was published meanwhile (HTTP 409)` se stejnými čísly (po T11: v70 a v71)."
+   ],
+   "watch": [
+    "Když oba vypíšou `v71`/`v72` bez chyby, je to vysoká vada: vlož oba výstupy."
+   ],
+   "paste": "výstupy obou terminálů",
+   "dry": "ne: zapisuje."
+  },
+  {
+   "id": "T13",
+   "alias": "F2",
+   "area": "Bezpečné publikování",
+   "prio": "P2",
+   "min": 2,
+   "title": "Po odmítnutí jde publikovat znovu, nic se neztratí",
+   "do": [
+    {
+     "text": "V terminálu, který dostal chybu (příklad pro druhý; v prvním použij `r1.md`):",
+     "cmd": "N=$(agnes artifact versions \"$A\" --json | python3 -c \"import json,sys; print(max(v['number'] for v in json.load(sys.stdin)['data']))\"); echo \"N=$N\"\nagnes artifact update $A --base-version $N --markdown r2.md"
+    },
+    {
+     "cmd": "agnes artifact versions $A | tail -3"
+    }
+   ],
+   "see": [
+    "Publikace projde (po T11: `v72 —`).",
+    "Poslední dva řádky jsou obě verze ze závodu (po T11: 71 a 72), nic se neztratilo."
+   ],
+   "dry": "ne: zapisuje."
+  },
+  {
+   "id": "T14",
+   "alias": "F4",
+   "area": "Přístup",
+   "prio": "P2",
+   "min": 1,
+   "sec": true,
+   "title": "Bez přihlášení nic",
+   "do": [
+    {
+     "cmd": "curl -s -o /dev/null -w '%{http_code}\\n' https://agnes.keboola.dev/api/artifacts/$P/knowledge\ncurl -s -o /dev/null -w '%{http_code}\\n' -X POST https://agnes.keboola.dev/api/mcp/http -H 'content-type: application/json' -d '{}'"
+    }
+   ],
+   "see": [
+    "Oba řádky `401`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu."
+  },
+  {
+   "id": "T15",
+   "alias": "F3",
+   "area": "Přístup",
+   "prio": "P2",
+   "min": 3,
+   "sec": true,
+   "optional": true,
+   "title": "Kdo nemá právo číst, nedostane nic",
+   "do": [
+    "Kolega z P07 (není admin, artefakt mu nesdílíš) spustí na svém počítači, přihlášený na agnes.keboola.dev:",
+    {
+     "cmd": "agnes artifact knowledge <ID z P04>"
+    }
+   ],
+   "see": [
+    "`Error: artifact_not_found (HTTP 404)` a žádný obsah balíku (ani název artefaktu)."
+   ],
+   "watch": [
+    "Bez účtu B označ Přeskočeno; převzetí pak platí s výhradou „oprávnění neověřeno živě“."
+   ],
+   "dry": "částečně: odpověď `404` s `artifact_not_found` ověřena přes REST pro neexistující ID; s druhým účtem ne."
+  },
+  {
+   "id": "T16",
+   "alias": "S9",
+   "area": "Nedůvěryhodný obsah",
+   "prio": "P2",
+   "min": 2,
+   "sec": true,
+   "title": "Text komentářů je ohraničený jako data",
+   "do": [
+    {
+     "cmd": "agnes artifact knowledge $P --json > k.json\npython3 -c \"import json; d=json.load(open('k.json')); c=(d['comments'].get('open') or d['comments'].get('recent'))[0]['body']; print(d['untrusted'], c.splitlines()[0][:44], c.splitlines()[-1][:48]); print('notice' in d)\""
+    }
+   ],
+   "see": [
+    "První řádek: `True`, pak `<<<UNTRUSTED_ARTIFACT_CONTENT` s kódem a `<<<END_UNTRUSTED_ARTIFACT_CONTENT` se **stejným** kódem.",
+    "Druhý řádek: `True`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu: `True`, oba kódy shodné (kód se mění při každém volání), `True`."
+  },
+  {
+   "id": "T17",
+   "alias": "F5",
+   "area": "Vypínač",
+   "prio": "P3",
+   "min": 4,
+   "optional": true,
+   "title": "Vypnutý vypínač balík skryje",
+   "do": [
+    "Jen když chceš: v [Admin → Server config](https://agnes.keboola.dev/admin) vypni `artifact_knowledge_spaces` a ulož.",
+    {
+     "cmd": "agnes artifact knowledge $P --max-chars 5000 | head -c 18; echo"
+    },
+    "Hned zapni vypínač zpátky a příkaz zopakuj."
+   ],
+   "see": [
+    "Při vypnutém: `Error: artifact_knowledge_spaces_disabled (HTTP 404)`.",
+    "Po zapnutí znovu `UNTRUSTED CONTENT:`."
+   ],
+   "undo": [
+    "Vypínač zapni zpátky ještě v tomto testu; úklid C04 to ověří."
+   ],
+   "watch": [
+    "P1 (T07–T13) pod vypínačem není, funguje i při vypnutém."
+   ],
+   "dry": "ne: mění vypínač na devu."
+  }
+ ],
+ "cleanup": [
+  {
+   "id": "C01",
+   "title": "Testovací artefakt do koše",
+   "min": 1,
+   "do": [
+    {
+     "cmd": "agnes artifact trash $A"
+    }
+   ],
+   "see": [
+    "`<ID> trashed`."
+   ],
+   "undo": [
+    "Omylem? `agnes artifact restore $A`."
+   ],
+   "dry": "ne: mění artefakt."
+  },
+  {
+   "id": "C02",
+   "title": "Smaž token z terminálu a pracovní složku",
+   "min": 1,
+   "do": [
+    {
+     "cmd": "unset H; cd ~ && rm -r ~/e2e-teag-1023"
+    }
+   ],
+   "see": [
+    "Žádný výstup."
+   ]
+  },
+  {
+   "id": "C03",
+   "title": "Volitelně: odeber Agnes MCP z Claude Code",
+   "min": 1,
+   "optional": true,
+   "do": [
+    {
+     "text": "Jen když ho nechceš dál používat:",
+     "cmd": "claude mcp remove --scope user agnes_server"
+    }
+   ],
+   "see": [
+    "`Removed MCP server agnes_server …`."
+   ]
+  },
+  {
+   "id": "C04",
+   "title": "Vypínač zůstal zapnutý",
+   "min": 1,
+   "do": [
+    {
+     "cmd": "agnes artifact knowledge jSQ6CQUvUi76F8_GPZMil2IB --max-chars 5000 | head -c 18; echo"
+    }
+   ],
+   "see": [
+    "`UNTRUSTED CONTENT:`."
+   ],
+   "dry": "ano, Claude 28. 10. 2026 ~23:10 UTC na devu."
+  }
+ ]
+}
