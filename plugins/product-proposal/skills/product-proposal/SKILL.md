@@ -86,7 +86,7 @@ Run at the start and end of every work session on the feature, after every merge
 
 ### Publish
 - New: `agnes artifact create --html page.html --markdown-source draft.md --title "<title>" --visibility instance --audience everyone --design-system ds_C-_CIyerl8dQ1ZzkXFE9zwrn@2 --content-system ef74c6ed49c241f490b6fb95ad65f84e@5 --summary "<1-2 sentences>" --keywords teag-<n>,<topic words>`.
-- Update: `agnes artifact update <id> --base-version <head> --html ... --markdown-source ... --note "<what changed>" --summary ... --keywords ...` (summary and keywords every time). A conflict means someone published in between: read the new head, merge, rebuild.
+- Update: `agnes artifact update <id> --base-version <head> --require-head --html ... --markdown-source ... --note "<what changed>" --summary ... --keywords ...` (summary and keywords every time). Never drop `--require-head`: without it a stale base publishes anyway and silently replaces whatever another agent published in between. `409 base_not_head` means someone published in between: read the new head, merge, rebuild, retry.
 - Settings: `agnes artifact settings <id> --form-responses` (comments stay visible to everyone; everyone with access may answer).
 - Keywords are the public tags: always `teag-<n>` plus 2-5 topic words. Petr's private label: `agnes artifact tag <id> --add <topic>`.
 - Link back: the artifact URL on the Linear issue (`save_issue` with `links`; keep the Linear description short); satellites with `agnes artifact link add`.
