@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+:root{--bg:#f7f7f5;--surface:#fff;--surface-2:#f0f0ec;--text:#1d1d1b;--muted:#5d5d58;--border:#d9d9d3;--accent:#1f5fae;--accent-soft:#e5eefa;--ok:#1d7a3e;--ok-soft:#e3f3e8;--bug:#b3261e;--bug-soft:#fbe7e5;--skip:#6b6b66;--skip-soft:#ececea;--unclear:#9a6700;--unclear-soft:#fbf1d9;--sec:#8a1c7c;--sec-soft:#f7e6f4;--code-bg:#f1f1ee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--surface:#1f1f1d;--surface-2:#272725;--text:#ecece8;--muted:#a9a9a2;--border:#3a3a37;--accent:#7fb0ee;--accent-soft:#1e2d42;--ok:#6fcf8f;--ok-soft:#173222;--bug:#f28b82;--bug-soft:#3b1d1b;--skip:#b3b3ad;--skip-soft:#2c2c2a;--unclear:#f2c14e;--unclear-soft:#3a2f14;--sec:#e59ad9;--sec-soft:#3a1b35;--code-bg:#2a2a27}}
+:root[data-theme="dark"]{--bg:#161615;--surface:#1f1f1d;--surface-2:#272725;--text:#ecece8;--muted:#a9a9a2;--border:#3a3a37;--accent:#7fb0ee;--accent-soft:#1e2d42;--ok:#6fcf8f;--ok-soft:#173222;--bug:#f28b82;--bug-soft:#3b1d1b;--skip:#b3b3ad;--skip-soft:#2c2c2a;--unclear:#f2c14e;--unclear-soft:#3a2f14;--sec:#e59ad9;--sec-soft:#3a1b35;--code-bg:#2a2a27}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:16px 16px 80px}
+h1{font-size:1.7rem;line-height:1.25;margin:8px 0 4px}h2{font-size:1.3rem;margin:0 0 8px}h3{font-size:1.05rem;margin:16px 0 6px}
+a{color:var(--accent)}code,.mono,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+code{background:var(--code-bg);padding:1px 4px;border-radius:4px;overflow-wrap:anywhere}
+.muted{color:var(--muted)}.small{font-size:.88rem}.hidden{display:none!important}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin:16px 0}
+.grid{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px}.grid dt{color:var(--muted)}.grid dd{margin:0;overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse;font-size:.93rem}th,td{text-align:left;vertical-align:top;padding:6px 8px;border-bottom:1px solid var(--border)}th{color:var(--muted);font-weight:600}
+.tw{overflow-x:auto}
+.bar{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--border)}
+.bar-in{max-width:940px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.meter{flex:1 1 120px;height:8px;border-radius:4px;background:var(--surface-2);display:flex;overflow:hidden;min-width:100px}
+.meter span{display:block;height:100%}.m-o{background:var(--ok)}.m-c{background:var(--bug)}.m-n{background:var(--unclear)}.m-s{background:var(--skip)}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.8rem;border:1px solid var(--border)}
+.pill.o{background:var(--ok-soft);color:var(--ok)}.pill.c{background:var(--bug-soft);color:var(--bug)}.pill.n{background:var(--unclear-soft);color:var(--unclear)}.pill.s{background:var(--skip-soft);color:var(--skip)}
+.btn{font:inherit;font-size:.88rem;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--accent)}.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.res .btn[data-s="o"][aria-pressed="true"]{background:var(--ok-soft);color:var(--ok);outline-color:var(--ok)}
+.res .btn[data-s="c"][aria-pressed="true"]{background:var(--bug-soft);color:var(--bug);outline-color:var(--bug)}
+.res .btn[data-s="n"][aria-pressed="true"]{background:var(--unclear-soft);color:var(--unclear);outline-color:var(--unclear)}
+.res .btn[data-s="s"][aria-pressed="true"]{background:var(--skip-soft);color:var(--skip);outline-color:var(--skip)}
+.item{background:var(--surface);border:1px solid var(--border);border-left:5px solid var(--border);border-radius:10px;padding:14px 16px;margin:14px 0}
+.item.sec{border-left-color:var(--sec)}.item.st-o{border-left-color:var(--ok)}.item.st-c{border-left-color:var(--bug)}.item.st-n{border-left-color:var(--unclear)}.item.st-s{border-left-color:var(--skip)}
+.ihead{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}.iid{font-weight:700;font-family:ui-monospace,Menlo,monospace}.ititle{font-weight:650;font-size:1.05rem;flex:1 1 300px}
+.tag{font-size:.75rem;padding:1px 7px;border-radius:999px;background:var(--surface-2);color:var(--muted);white-space:nowrap}.tag.sec{background:var(--sec-soft);color:var(--sec)}.tag.p1{background:var(--accent-soft);color:var(--accent)}
+.blk{margin:10px 0 0}.blk-h{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--muted);margin-bottom:2px}
+.blk.do .blk-h{color:var(--accent)}.blk.ok .blk-h{color:var(--ok)}.blk.watch .blk-h{color:var(--unclear)}.blk.undo .blk-h{color:var(--bug)}
+.blk ol,.blk ul{margin:2px 0;padding-left:22px}.blk li{margin:3px 0}
+.cmd{position:relative;margin:6px 0}.cmd pre{margin:0;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:8px 70px 8px 10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cmd .copy{position:absolute;top:4px;right:4px;font-size:.78rem;padding:2px 8px}
+.cmd .lbl{font-size:.75rem;color:var(--muted)}
+.res{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)}
+textarea,input[type=text]{font:inherit;font-size:.92rem;width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)}
+textarea{min-height:56px;resize:vertical}textarea.out{font-family:ui-monospace,Menlo,monospace;font-size:.82rem;min-height:70px}
+.dry{font-size:.75rem}.dry.y{color:var(--ok)}.dry.no{color:var(--unclear)}
+.msg{font-size:.88rem;margin-top:6px}.msg.err{color:var(--bug)}.msg.info{color:var(--ok)}
+.chap{margin-top:28px;border-top:2px solid var(--border);padding-top:12px}
+@media (max-width:600px){.grid{grid-template-columns:1fr}.grid dt{margin-top:6px}}
+@media print{.bar,.res button,.copy,.no-print{display:none!important}.item{break-inside:avoid}}
+</style>
+</head>
+<body>
+<script type="application/json" id="plan">__PLAN_JSON__</script>
+
+<div class="bar no-print" role="region" aria-label="Průběh">
+  <div class="bar-in">
+    <b>Průběh</b><span id="prog" class="small"></span>
+    <div class="meter" id="meter" aria-hidden="true"></div>
+    <span id="counts"></span>
+    <span role="group" aria-label="Filtr">
+      <button type="button" class="btn" data-filter="all" aria-pressed="true">Vše</button>
+      <button type="button" class="btn" data-filter="todo" aria-pressed="false">Nevyzkoušené</button>
+      <button type="button" class="btn" data-filter="c" aria-pressed="false">Chyby</button>
+      <button type="button" class="btn" data-filter="n" aria-pressed="false">Nejasné</button>
+    </span>
+    <a class="btn" href="#end">Odeslat výsledky</a>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1 id="h-title"></h1>
+    <p id="h-lead" class="muted"></p>
+    <div class="card">
+      <dl class="grid" id="h-meta"></dl>
+      <h3><label for="tester">Kdo testuje</label></h3>
+      <input type="text" id="tester" placeholder="Jméno a příjmení" autocomplete="name">
+      <p class="small muted" id="persist-note">Výsledky se ukládají do adresy stránky (část za #). Adresu si můžeš uložit do záložek a pokračovat později; po obnovení stránky se stav vrátí.</p>
+    </div>
+  </header>
+
+  <section class="card" id="how">
+    <h2>Jak s tím pracovat</h2>
+    <ol>
+      <li>Projdi kapitolu <b>1. Příprava</b> odshora dolů. Každý krok označ <b>Hotovo</b>, nebo <b>Problém</b> s poznámkou.</li>
+      <li>Pak kapitolu <b>2. Testy</b>. U každého testu udělej kroky v části <b>Udělej</b>, porovnej s částí <b>Správně, když</b> a zvol <b>OK</b>, <b>Chyba</b>, <b>Nejasné</b> nebo <b>Přeskočeno</b>. Když to není OK, napiš, co jsi viděl, a vlož výstup.</li>
+      <li>Příkazy kopíruj tlačítkem <b>Kopírovat</b> a spouštěj v jednom terminálu, proměnné z přípravy se v něm drží.</li>
+      <li>Na konci <b>3. Úklid</b> a <b>Odeslat výsledky</b>. Opětovné kliknutí na zvolený výsledek ho zruší.</li>
+    </ol>
+  </section>
+
+  <section class="card" id="areas">
+    <h2>Co testujeme</h2>
+    <div class="tw"><table><thead><tr><th>Oblast</th><th>Co to dokazuje pro uživatele</th><th>Testy</th></tr></thead><tbody id="areas-body"></tbody></table></div>
+    <h3>Co záměrně netestujeme</h3><ul id="not-tested"></ul>
+    <h3>Známé vady, nehlásit znovu</h3><ul id="known"></ul>
+    <h3>Kdy test projde</h3><p id="pass-rule"></p>
+  </section>
+
+  <section class="chap" id="ch-prep"><h2>1. Příprava prostředí</h2><p class="muted small" id="prep-intro"></p><div id="prep"></div></section>
+  <section class="chap" id="ch-tests"><h2>2. Testy</h2><p class="muted small" id="tests-intro"></p><div id="tests"></div></section>
+  <section class="chap" id="ch-clean"><h2>3. Úklid</h2><div id="cleanup"></div></section>
+
+  <section class="chap" id="end">
+    <h2>4. Výsledky</h2>
+    <div class="card">
+      <p id="sum-text"></p>
+      <div id="sum-bugs"></div>
+      <h3>Odeslat výsledky do artefaktu</h3>
+      <div id="send-on" class="hidden">
+        <p class="small">Tlačítko otevře potvrzovací okno Agnes s textem výsledků. Uloží se až po stisku <b>Send</b> v tom okně (jako odpověď formuláře k tomuto artefaktu). Odeslat můžeš i víckrát, platí poslední.</p>
+        <div id="send-btns"></div>
+        <div id="send-msg" class="msg" role="status"></div>
+      </div>
+      <p id="send-off" class="small muted">Odesílání do artefaktu tu není dostupné (stránka je otevřená mimo Agnes, nebo artefakt nemá zapnuté odpovědi formuláře). Použij Stáhnout výsledky.</p>
+      <h3>Stáhnout výsledky</h3>
+      <p><button type="button" class="btn" id="btn-dl">Stáhnout výsledky (.md)</button> <button type="button" class="btn" id="btn-copy-report">Kopírovat celý report</button></p>
+      <textarea id="report" class="out hidden" readonly aria-label="Report"></textarea>
+      <h3>Zpráva pro Clauda</h3>
+      <p class="small muted">Po odeslání zkopíruj a vlož do chatu s Claudem.</p>
+      <div class="cmd"><pre id="claude-msg"></pre><button type="button" class="btn copy" data-copy="claude-msg">Kopírovat</button></div>
+      <p class="no-print"><button type="button" class="btn" id="btn-clear">Vymazat všechny výsledky</button>
+        <span id="clear-confirm" class="hidden"> Opravdu? <button type="button" class="btn" id="clear-yes">Ano, vymazat</button> <button type="button" class="btn" id="clear-no">Ne</button></span></p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var P = JSON.parse(document.getElementById("plan").textContent);
+  var M = P.meta || {};
+  var ST = { o: "OK", c: "Chyba", n: "Nejasné", s: "Přeskočeno" };
+  var ST_PREP = { o: "Hotovo", c: "Problém" };
+  var state = { v: 1, t: "", r: {}, x: {} };
+  var filter = "all";
+  var els = {};
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function inline(s) {
+    var out = esc(s);
+    out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
+    out = out.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+    out = out.replace(/\[([^\]]+)\]\((https:\/\/[^)\s"]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    return out;
+  }
+  function h(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function items() { return [].concat(P.prep || [], P.tests || [], P.cleanup || []); }
+  function kindOf(it) { return (P.tests || []).indexOf(it) >= 0 ? "test" : "prep"; }
+  function res(id) { return state.r[id] || ["", "", ""]; }
+  function setRes(id, i, v) {
+    var r = res(id).slice(); r[i] = v;
+    if (!r[0] && !r[1] && !r[2]) delete state.r[id]; else state.r[id] = r;
+    save();
+  }
+
+  var Codec = {
+    enc: function (o) { var b = new TextEncoder().encode(JSON.stringify(o)), s = ""; for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
+    dec: function (t) { var b = String(t).replace(/-/g, "+").replace(/_/g, "/"); while (b.length % 4) b += "="; var s = atob(b), u = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return JSON.parse(new TextDecoder().decode(u)); }
+  };
+  var ownHash = null, timer = null;
+  function load() {
+    try {
+      var m = String(location.hash || "").match(/^#s=([A-Za-z0-9_-]+)$/);
+      if (!m) return;
+      var o = Codec.dec(m[1]);
+      if (!o || typeof o !== "object") return;
+      state.t = typeof o.t === "string" ? o.t : "";
+      state.x = o.x && typeof o.x === "object" ? o.x : {};
+      Object.keys(o.r || {}).forEach(function (k) {
+        var v = o.r[k];
+        if (Array.isArray(v)) state.r[k] = [v[0] in ST ? v[0] : "", String(v[1] || ""), String(v[2] || "")];
+      });
+    } catch (e) { }
+  }
+  function save() { if (timer) clearTimeout(timer); timer = setTimeout(write, 300); refresh(); }
+  function write() {
+    timer = null;
+    var frag = "#";
+    try { if (Object.keys(state.r).length || state.t) frag = "#s=" + Codec.enc(state); } catch (e) { return note(false); }
+    ownHash = frag;
+    var ok = false;
+    try { history.replaceState(null, "", frag); ok = true; } catch (e) { try { location.replace(frag); ok = true; } catch (e2) { ok = false; } }
+    note(ok);
+  }
+  function note(ok) {
+    if (!ok) $("persist-note").textContent = "Pozor: výsledky se tu nedaří ukládat do adresy stránky. Po obnovení stránky se ztratí, průběžně používej Stáhnout výsledky.";
+  }
+
+  function copyText(text, btn) {
+    function done(ok) { var t = btn.textContent; btn.textContent = ok ? "Zkopírováno" : "Označeno, Cmd+C"; setTimeout(function () { btn.textContent = t; }, 1500); }
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select(); var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      ta.remove();
+      if (!ok) { var pre = btn.parentNode.querySelector("pre"); if (pre) { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); } }
+      done(ok);
+    }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); } catch (e) { fallback(); }
+  }
+  function cmdBlock(text, label) {
+    var w = h("div", "cmd");
+    if (label) w.appendChild(h("div", "lbl", esc(label)));
+    var pre = h("pre"); pre.textContent = text; w.appendChild(pre);
+    var b = h("button", "btn copy", "Kopírovat"); b.type = "button";
+    b.addEventListener("click", function () { copyText(text, b); });
+    w.appendChild(b);
+    return w;
+  }
+  function listBlock(cls, head, list, ordered) {
+    if (!list || !list.length) return null;
+    var b = h("div", "blk " + cls); b.appendChild(h("div", "blk-h", esc(head)));
+    var l = h(ordered ? "ol" : "ul");
+    list.forEach(function (x) {
+      var li = h("li");
+      if (typeof x === "string") li.innerHTML = inline(x);
+      else {
+        if (x.text) li.appendChild(h("div", "", inline(x.text)));
+        if (x.cmd) li.appendChild(cmdBlock(x.cmd, x.label));
+      }
+      l.appendChild(li);
+    });
+    b.appendChild(l);
+    return b;
+  }
+
+  function renderItem(it, host) {
+    var test = kindOf(it) === "test";
+    var labels = test ? ST : ST_PREP;
+    var card = h("article", "item" + (it.sec ? " sec" : "")); card.id = "i-" + it.id;
+    var head = h("div", "ihead");
+    head.appendChild(h("span", "iid", esc(it.id)));
+    head.appendChild(h("span", "ititle", inline(it.title)));
+    if (it.alias) head.appendChild(h("span", "tag", "dříve " + esc(it.alias)));
+    if (it.area) head.appendChild(h("span", "tag" + (it.sec ? " sec" : ""), esc(it.area)));
+    if (it.prio) head.appendChild(h("span", "tag" + (it.prio === "P1" ? " p1" : ""), esc(it.prio)));
+    if (it.optional) head.appendChild(h("span", "tag", "volitelné"));
+    if (it.min) head.appendChild(h("span", "tag", "~" + it.min + " min"));
+    card.appendChild(head);
+    if (it.why) card.appendChild(h("p", "muted small", inline(it.why)));
+    [["do", "Udělej", it["do"], true], ["ok", test ? "Správně, když" : "Uvidíš", it.see, false], ["watch", "Pozor / časté záměny", it.watch, false], ["undo", "Vrácení", it.undo, false]].forEach(function (b) {
+      var e = listBlock(b[0], b[1], b[2], b[3]); if (e) card.appendChild(e);
+    });
+    if (it.dry) card.appendChild(h("p", "dry " + (it.dry.indexOf("ano") === 0 ? "y" : "no"), "Nanečisto: " + inline(it.dry)));
+    var r = h("div", "res");
+    Object.keys(labels).forEach(function (k) {
+      var b = h("button", "btn", labels[k]); b.type = "button"; b.setAttribute("data-s", k); b.setAttribute("aria-pressed", "false");
+      b.addEventListener("click", function () { setRes(it.id, 0, res(it.id)[0] === k ? "" : k); paint(it.id); });
+      r.appendChild(b);
+    });
+    card.appendChild(r);
+    var ta = h("textarea"); ta.placeholder = test ? "Co jsi viděl (povinné u Chyba a Nejasné)" : "Poznámka (u Problém napiš, co se stalo)";
+    ta.setAttribute("aria-label", "Poznámka " + it.id);
+    ta.addEventListener("input", function () { setRes(it.id, 1, ta.value); });
+    card.appendChild(ta);
+    var out = null;
+    if (it.paste) {
+      out = h("textarea", "out"); out.placeholder = "Sem vlož výstup (" + (it.paste === true ? "terminál" : it.paste) + ")";
+      out.setAttribute("aria-label", "Výstup " + it.id);
+      out.addEventListener("input", function () { setRes(it.id, 2, out.value); });
+      card.appendChild(out);
+    }
+    host.appendChild(card);
+    els[it.id] = { card: card, ta: ta, out: out, btns: r.querySelectorAll("button") };
+  }
+  function paint(id) {
+    var e = els[id], r = res(id);
+    ["o", "c", "n", "s"].forEach(function (k) { e.card.classList.toggle("st-" + k, r[0] === k); });
+    for (var i = 0; i < e.btns.length; i++) e.btns[i].setAttribute("aria-pressed", e.btns[i].getAttribute("data-s") === r[0] ? "true" : "false");
+    if (e.ta.value !== r[1]) e.ta.value = r[1];
+    if (e.out && e.out.value !== r[2]) e.out.value = r[2];
+  }
+
+  function counts(list) {
+    var c = { o: 0, c: 0, n: 0, s: 0, x: 0 };
+    list.forEach(function (it) { var s = res(it.id)[0]; c[s || "x"]++; });
+    return c;
+  }
+  function refresh() {
+    var t = P.tests || [], c = counts(t), done = t.length - c.x;
+    $("prog").textContent = done + " / " + t.length + " testů";
+    var m = $("meter"); m.innerHTML = "";
+    ["o", "c", "n", "s"].forEach(function (k) { var s = h("span", "m-" + k); s.style.width = (t.length ? c[k] / t.length * 100 : 0) + "%"; m.appendChild(s); });
+    $("counts").innerHTML = ["o", "c", "n", "s"].map(function (k) { return '<span class="pill ' + k + '">' + ST[k] + " " + c[k] + "</span>"; }).join(" ");
+    var pc = counts(P.prep || []);
+    $("prep-intro").textContent = (P.prep_intro ? P.prep_intro + " " : "") + "Hotovo " + ((P.prep || []).length - pc.x) + " z " + (P.prep || []).length + ".";
+    items().forEach(function (it) {
+      var s = res(it.id)[0];
+      var vis = filter === "all" || (filter === "todo" ? !s : s === filter);
+      els[it.id].card.classList.toggle("hidden", !vis);
+    });
+    $("sum-text").innerHTML = "Testy: <b>" + done + " / " + t.length + "</b> hotovo · OK " + c.o + " · Chyba " + c.c + " · Nejasné " + c.n + " · Přeskočeno " + c.s + " · Nevyzkoušeno " + c.x + ". Příprava: " + ((P.prep || []).length - pc.x) + " / " + (P.prep || []).length + ".";
+    var bad = items().filter(function (it) { var s = res(it.id)[0]; return s === "c" || s === "n"; });
+    $("sum-bugs").innerHTML = bad.length ? "<ul>" + bad.map(function (it) { var r = res(it.id); return "<li><b>" + esc(it.id) + "</b> " + (r[0] === "c" ? "Chyba" : "Nejasné") + ": " + inline(it.title) + (r[1] ? " – " + esc(r[1]) : "") + "</li>"; }).join("") + "</ul>" : "";
+    $("claude-msg").textContent = claudeMsg(c);
+  }
+
+  function lineFor(it) {
+    var r = res(it.id), test = kindOf(it) === "test";
+    var label = r[0] ? (test ? ST[r[0]] : (ST_PREP[r[0]] || ST[r[0]])) : "Nevyzkoušeno";
+    var out = "- [" + label + "] " + it.id + (it.alias ? " (" + it.alias + ")" : "") + " " + it.title.replace(/[`*]/g, "");
+    if (r[1]) out += "\n  - Poznámka: " + r[1].replace(/\s*\n+\s*/g, " / ");
+    if (r[2]) out += "\n\n  ```text\n" + r[2].replace(/```/g, "'''").replace(/^/gm, "  ") + "\n  ```\n";
+    return out;
+  }
+  function report(subset, part) {
+    var t = P.tests || [], c = counts(t), now = new Date();
+    var L = ["# Výsledky E2E: " + P.title + (part ? " (část " + part + ")" : ""), "",
+      "- Artefakt: " + (M.artifact_id || "") + ", plán " + (M.plan_version || ""),
+      "- Feature: " + (M.feature || "") + (M.linear_id ? " (" + M.linear_id + ")" : "") + ", PRD " + (M.prd_id || ""),
+      "- Prostředí: " + (M.env_url || "") + (M.build ? ", build " + M.build : ""),
+      "- Tester: " + (state.t || "(neuvedeno)"),
+      "- Čas: " + now.toISOString().slice(0, 16).replace("T", " ") + " UTC",
+      "- Souhrn testů: OK " + c.o + ", Chyba " + c.c + ", Nejasné " + c.n + ", Přeskočeno " + c.s + ", Nevyzkoušeno " + c.x + " z " + t.length, ""];
+    [["Příprava", P.prep], ["Testy", P.tests], ["Úklid", P.cleanup]].forEach(function (g) {
+      var list = (g[1] || []).filter(function (it) { return !subset || subset.indexOf(it) >= 0; });
+      if (!list.length) return;
+      L.push("## " + g[0], "");
+      list.forEach(function (it) { L.push(lineFor(it)); });
+      L.push("");
+    });
+    return L.join("\n");
+  }
+  function claudeMsg(c) {
+    var bad = items().filter(function (it) { var s = res(it.id)[0]; return s === "c" || s === "n"; }).map(function (it) { return it.id; });
+    return "Tady jsou moje výsledky E2E pro „" + P.title + "“ (artefakt " + M.artifact_id + ", plán " + M.plan_version + "). " +
+      "Odeslal jsem je přes formulář; přečti je: " + (M.results_cmd || ("agnes artifact comments " + M.artifact_id + " --origin form")) +
+      " (celé znění: agnes artifact comments " + M.artifact_id + " --thread <ID>). " +
+      "Souhrn: OK " + c.o + ", Chyba " + c.c + ", Nejasné " + c.n + ", Přeskočeno " + c.s + ", Nevyzkoušeno " + c.x + "." +
+      (bad.length ? " K řešení: " + bad.join(", ") + "." : "") +
+      " Zapiš verdikt a nálezy do sekce Převzetí v PRD " + (M.prd_id || "") + ".";
+  }
+
+  var formOn = false, parts = 1;
+  function chunks(n) {
+    var all = items(), size = Math.ceil(all.length / n), out = [];
+    for (var i = 0; i < n; i++) out.push(all.slice(i * size, (i + 1) * size));
+    return out.filter(function (x) { return x.length; });
+  }
+  function renderSend(msg, kind) {
+    var host = $("send-btns"); host.innerHTML = "";
+    var cs = chunks(parts);
+    cs.forEach(function (ch, i) {
+      var key = (i + 1) + "/" + cs.length;
+      var b = h("button", "btn primary", cs.length === 1 ? "Odeslat výsledky" : "Odeslat část " + key + " (" + esc(ch[0].id) + "–" + esc(ch[ch.length - 1].id) + ")");
+      b.type = "button";
+      b.addEventListener("click", function () { send(cs.length === 1 ? null : ch, cs.length === 1 ? "" : key); });
+      host.appendChild(b); host.appendChild(document.createTextNode(" "));
+      if (state.x[key]) host.appendChild(h("span", "small muted", "odesláno k uložení " + esc(state.x[key]) + " "));
+    });
+    $("send-msg").className = "msg" + (kind ? " " + kind : "");
+    $("send-msg").textContent = msg || "";
+  }
+  function send(subset, key) {
+    if (!formOn) return;
+    var body = report(subset, key);
+    var title = "E2E " + (M.plan_version || "") + " · " + (state.t || "tester") + (key ? " · část " + key : "");
+    var p;
+    try { p = window.Agnes.respond({ title: title, body: body }); } catch (e) { p = Promise.reject(e); }
+    Promise.resolve(p).then(function (r) {
+      if (r && r.opened) {
+        var d = new Date(); state.x[key || "1/1"] = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); save();
+        renderSend("Otevřelo se okno Agnes. Uloží se až po stisku Send v něm.", "info");
+      }
+    }, function (err) {
+      var code = err && err.code ? String(err.code) : "";
+      if (code === "too_large" && parts < 6) { parts++; renderSend("Výsledky se nevejdou do jedné odpovědi. Pošli je po částech, každou svým tlačítkem.", "err"); return; }
+      var map = { popup_blocked: "Prohlížeč zablokoval okno. Povol vyskakovací okna pro tuto stránku a zkus to znovu.", not_enabled: "Odpovědi formuláře nejsou na artefaktu zapnuté. Použij Stáhnout výsledky.", invalid_body: "Text výsledků je prázdný.", too_large: "Ani po částech se výsledky nevejdou. Zkrať vložené výstupy, nebo použij Stáhnout výsledky." };
+      renderSend(map[code] || "Odeslání se nepodařilo" + (code ? " (" + code + ")" : "") + ". Použij Stáhnout výsledky.", "err");
+    });
+  }
+  function initForm() {
+    var v = false;
+    try { v = window.Agnes && typeof window.Agnes.formResponses === "function" ? window.Agnes.formResponses() : false; } catch (e) { v = false; }
+    Promise.resolve(v).then(function (on) { formOn = on === true; $("send-on").classList.toggle("hidden", !formOn); $("send-off").classList.toggle("hidden", formOn); if (formOn) renderSend(); }, function () { });
+  }
+
+  function download(name, text) {
+    try {
+      var url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+      var a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function header() {
+    document.title = P.title;
+    $("h-title").textContent = P.title;
+    $("h-lead").innerHTML = inline(P.lead || "");
+    var rows = [
+      ["Feature", inline(M.feature || "") + (M.linear_url ? ' · <a href="' + esc(M.linear_url) + '" target="_blank" rel="noopener noreferrer">' + esc(M.linear_id) + "</a>" : "")],
+      ["PRD", M.prd_url ? '<a href="' + esc(M.prd_url) + '" target="_blank" rel="noopener noreferrer">' + esc(M.prd_title || M.prd_id) + "</a>" : ""],
+      ["Prostředí", inline(M.env_url || "") + (M.build ? " · build <code>" + esc(M.build) + "</code>" : "")],
+      ["Schvaluje", inline(M.approver || "")],
+      ["Plán", inline((M.plan_version || "") + (M.written ? " · napsáno " + M.written : ""))],
+      ["Odhad", inline(M.duration || "")],
+      ["Výsledky čte Claude", "<code>" + esc(M.results_cmd || "") + "</code>"]
+    ];
+    $("h-meta").innerHTML = rows.filter(function (r) { return r[1]; }).map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>"; }).join("");
+    $("areas-body").innerHTML = (P.areas || []).map(function (a) { return "<tr><td>" + inline(a.area) + "</td><td>" + inline(a.proves) + "</td><td>" + inline(a.tests) + "</td></tr>"; }).join("");
+    $("not-tested").innerHTML = (P.not_tested || []).map(function (x) { return "<li>" + inline(x) + "</li>"; }).join("") || "<li>nic</li>";
+    $("known").innerHTML = (P.known || []).map(function (x) { return "<li>" + inline(x) + "</li>"; }).join("") || "<li>žádné</li>";
+    $("pass-rule").innerHTML = inline(P.pass_rule || "");
+    $("tests-intro").innerHTML = inline(P.tests_intro || "");
+  }
+
+  function wire() {
+    var tester = $("tester"); tester.value = state.t;
+    tester.addEventListener("input", function () { state.t = tester.value; save(); });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-filter]"), function (b) {
+      b.addEventListener("click", function () {
+        filter = b.getAttribute("data-filter");
+        Array.prototype.forEach.call(document.querySelectorAll("[data-filter]"), function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        refresh();
+      });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
+      b.addEventListener("click", function () { copyText($(b.getAttribute("data-copy")).textContent, b); });
+    });
+    $("btn-dl").addEventListener("click", function () {
+      var text = report(null, ""), ok = download("e2e-vysledky-" + (M.artifact_id || "plan") + "-" + new Date().toISOString().slice(0, 10) + ".md", text);
+      var ta = $("report"); ta.value = text; ta.classList.toggle("hidden", ok);
+    });
+    $("btn-copy-report").addEventListener("click", function () { var text = report(null, ""); $("report").value = text; $("report").classList.remove("hidden"); copyText(text, this); });
+    $("btn-clear").addEventListener("click", function () { $("clear-confirm").classList.remove("hidden"); });
+    $("clear-no").addEventListener("click", function () { $("clear-confirm").classList.add("hidden"); });
+    $("clear-yes").addEventListener("click", function () { state.r = {}; state.x = {}; items().forEach(function (it) { paint(it.id); }); $("clear-confirm").classList.add("hidden"); save(); if (formOn) renderSend(); });
+    window.addEventListener("hashchange", function () {
+      var cur = String(location.hash || "");
+      if (cur === ownHash || (ownHash === "#" && !cur)) return;
+      state = { v: 1, t: "", r: {}, x: {} }; load(); tester.value = state.t; items().forEach(function (it) { paint(it.id); }); refresh();
+    });
+  }
+
+  load();
+  header();
+  (P.prep || []).forEach(function (it) { renderItem(it, $("prep")); });
+  (P.tests || []).forEach(function (it) { renderItem(it, $("tests")); });
+  (P.cleanup || []).forEach(function (it) { renderItem(it, $("cleanup")); });
+  items().forEach(function (it) { paint(it.id); });
+  wire();
+  refresh();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initForm); else initForm();
+})();
+</script>
+</body>
+</html>

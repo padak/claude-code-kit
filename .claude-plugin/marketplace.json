@@ -70,6 +70,18 @@
       ]
     },
     {
+      "name": "product-e2e",
+      "source": "./plugins/product-e2e",
+      "description": "Hands-on E2E acceptance page as an Agnes Artifact for a /product-proposal PRD: preparation with copyable commands, test cards with expected results and OK / Bug / Unclear / Skipped answers, cleanup, results sent back as form responses that Claude reads with the agnes CLI.",
+      "version": "1.0.0",
+      "keywords": [
+        "product",
+        "e2e",
+        "acceptance",
+        "agnes"
+      ]
+    },
+    {
       "name": "product-proposal",
       "source": "./plugins/product-proposal",
       "description": "Bilingual (CZ/EN) living PRD published as an Agnes Artifact, the single entry point of a feature through its life: status now, continue here, current behaviour, one slice table with a generated timeline and log, acceptance and feedback, a decision register with meeting-brief cards and forms, the full product design, agentic retro, GPT Astra second opinion, linked to a Linear feature.",

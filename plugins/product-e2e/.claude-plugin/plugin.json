@@ -1,0 +1,18 @@
+{
+  "name": "product-e2e",
+  "version": "1.0.0",
+  "description": "Hands-on E2E acceptance page published as an Agnes Artifact, the satellite of a /product-proposal PRD: header with PRD link and progress, what we test and what not, environment preparation with copyable commands, test cards (do this, correct when, watch out, OK / Bug / Unclear / Skipped with notes and pasted output), cleanup, and results sent back as form responses that Claude reads with the agnes CLI.",
+  "author": {
+    "name": "Petr Simecek",
+    "email": "petr@keboola.com"
+  },
+  "homepage": "https://github.com/padak/claude-code-kit",
+  "repository": "https://github.com/padak/claude-code-kit",
+  "keywords": [
+    "product",
+    "e2e",
+    "acceptance",
+    "agnes",
+    "artifacts"
+  ]
+}
