@@ -1,6 +1,6 @@
 ---
 name: remote-test
-description: Use when a pytest suite, or a large part of it, needs to run for a branch or PR of Agnes (keboola/agnes-the-ai-analyst) or kbagent (keboola/cli), or when the user asks to test "na serveru", "na rtx", "doma", "na windows", "na test stroji" or "remote" - running test suites locally overloads the laptop.
+description: Use when a pytest suite, or a large part of it, needs to run for a branch or PR of Agnes (keboola/agnes-the-ai-analyst), kbagent (keboola/cli) or the CRM API (keboola/crm), or when the user asks to test "na serveru", "na rtx", "doma", "na windows", "na test stroji" or "remote" - running test suites locally overloads the laptop.
 ---
 
 # Remote test box
@@ -11,12 +11,21 @@ The box clones from GitHub itself; nothing is copied from the laptop.
 ## Projects
 
 The project is detected from the current checkout's `origin` URL;
-`REMOTE_TEST_PROJECT=agnes|kbagent` overrides it.
+`REMOTE_TEST_PROJECT=agnes|kbagent|crm` overrides it.
 
 | Project | Repo | Python | Default args (no path given) |
 |---|---|---|---|
 | `agnes` | keboola/agnes-the-ai-analyst | 3.13 | `tests/ connectors/` + `--broad-local`, `TESTING=1` |
 | `kbagent` | keboola/cli | 3.12 (CI's PR interpreter) | `tests/` + `-m "not integration"` unless you pass `-m` |
+| `crm` | keboola/crm, API suite in `api/` (paths are relative to `api/`) | 3.12 | `app/ tests/ --ignore=tests/e2e`, `--dist loadfile` |
+
+**CRM database.** When the box user has a working Docker (rootless, per user),
+each CRM run starts its own throwaway MySQL 8.0 container on a random local
+port, creates one database per worker plus the migration-test database exactly
+as CI does, and removes the container when the run ends (`== database:` line).
+Without Docker the suite falls back to in-memory SQLite, which can pass tests
+that fail on MySQL in CI. The web (`web/`) and CLI (`cli/`) suites and the
+E2E tests are not covered.
 
 ## Hosts
 
@@ -125,7 +134,27 @@ echo '<user>  *  <free cpu range, e.g. 48-57>' | sudo tee -a /etc/remote-test.co
 ```
 
 Pick a range no other line uses (`cat /etc/remote-test.conf`). The user is
-not added to `sudo` or any other group.
+not added to `sudo` or any other group, and never to `docker` (that group is
+root on the box).
+
+For CRM with MySQL the user also needs rootless Docker, pinned to their range.
+Once per box (Ubuntu 24.04), as admin: `apt-get install uidmap slirp4netns
+dbus-user-session` and an AppArmor profile `/etc/apparmor.d/usr.bin.rootlesskit`
+that gives `/usr/bin/rootlesskit` the `userns` permission (see Docker's rootless
+docs), loaded with `apparmor_parser -r`. So that containers can be pinned
+to the user's CPUs (runc resets a container's CPU affinity), delegate the
+cpuset cgroup to user sessions in `/etc/systemd/system/user@.service.d/delegate.conf`:
+`[Service]` / `Delegate=cpu cpuset io memory pids`, then `systemctl daemon-reload`
+and restart `user@<uid>.service` of each Docker user. Per user:
+
+```bash
+sudo loginctl enable-linger <user>
+sudo -u <user> -i env XDG_RUNTIME_DIR=/run/user/<uid> DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/<uid>/bus bash -c '
+  dockerd-rootless-setuptool.sh install
+  mkdir -p ~/.config/systemd/user/docker.service.d
+  printf "[Service]\nCPUAffinity=<their cpu range>\n" > ~/.config/systemd/user/docker.service.d/cpus.conf
+  systemctl --user daemon-reload && systemctl --user restart docker.service'
+```
 
 The new user then needs, on their laptop: this plugin, `gh` signed in with
 read access to the repos they test, and an SSH alias:

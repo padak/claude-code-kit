@@ -1,7 +1,7 @@
 {
   "name": "remote-test",
-  "version": "1.0.0",
-  "description": "Run a project's pytest suite for a GitHub branch or PR on a remote Linux test box over SSH instead of the laptop. Each box user gets its own CPU range from /etc/remote-test.conf on the box.",
+  "version": "1.1.0",
+  "description": "Run a project's pytest suite (Agnes, kbagent, CRM API) for a GitHub branch or PR on a remote Linux test box over SSH instead of the laptop. Each box user gets its own CPU range from /etc/remote-test.conf on the box; CRM runs get a throwaway MySQL in the user's rootless Docker.",
   "author": {
     "name": "Petr Simecek",
     "email": "petr@keboola.com"

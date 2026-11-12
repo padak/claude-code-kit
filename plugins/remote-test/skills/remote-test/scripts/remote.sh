@@ -46,13 +46,21 @@ case "$PROJECT" in
         REPO_URL="https://github.com/keboola/agnes-the-ai-analyst.git"
         PY=3.13
         DEFAULT_ARGS=(tests/ connectors/)
-        NEEDS_NODE=1 ;;
+        SUBDIR=. DIST=worksteal NEEDS_NODE=1 ;;
     kbagent)
         NAME=kbagent
         REPO_URL="https://github.com/keboola/cli.git"
         PY=3.12  # CI's PR interpreter
         DEFAULT_ARGS=(tests/)
-        NEEDS_NODE=0 ;;
+        SUBDIR=. DIST=worksteal NEEDS_NODE=0 ;;
+    crm)
+        NAME=crm
+        REPO_URL="https://github.com/keboola/crm.git"
+        PY=3.12
+        DEFAULT_ARGS=(app/ tests/ --ignore=tests/e2e)
+        # The API suite lives in api/; loadfile keeps each test file on one
+        # worker, which the migration test's own database relies on (as in CI).
+        SUBDIR=api DIST=loadfile NEEDS_NODE=0 ;;
     *) echo "unknown project $PROJECT"; exit 2 ;;
 esac
 
@@ -114,6 +122,7 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
     git fetch -q --deepen 200 origin "+refs/heads/main:refs/remotes/origin/main" "$SRC"
 done
 git clean -qfdx -e .venv
+cd "$SUBDIR"
 
 # The checkout may be someone else's PR: its install scripts and tests must not
 # see the user's GitHub token, so drop it before running any of its code.
@@ -128,6 +137,9 @@ if [ ! -x .venv/bin/python ] || [ "$(cat .venv/.lockhash 2>/dev/null)" != "$HASH
     if [ "$PROJECT" = agnes ]; then
         uv venv -q --python "$PY" .venv
         UV_LINK_MODE=copy INSTALL_PYTHON=.venv/bin/python sh scripts/ci/install-from-lock.sh dev server extraction >"$RUNS/install.log" 2>&1 \
+            || { echo "install failed, see $RUNS/install.log"; tail -n 20 "$RUNS/install.log"; exit 1; }
+    elif [ "$PROJECT" = crm ]; then
+        UV_LINK_MODE=copy UV_PYTHON="$PY" uv sync -q >"$RUNS/install.log" 2>&1 \
             || { echo "install failed, see $RUNS/install.log"; tail -n 20 "$RUNS/install.log"; exit 1; }
     else
         UV_LINK_MODE=copy UV_PYTHON="$PY" uv sync -q --extra server >"$RUNS/install.log" 2>&1 \
@@ -144,7 +156,9 @@ done
 [ "$HAS_PATH" = 1 ] || set -- "${DEFAULT_ARGS[@]}" "$@"
 
 EXTRA=()
-if [ "$PROJECT" = agnes ]; then
+if [ "$PROJECT" = crm ]; then
+    :
+elif [ "$PROJECT" = agnes ]; then
     # The repo refuses broad local runs unless told this is deliberate; this box
     # exists for exactly that. Older branches lack the flag, so pass it only when known.
     grep -q -- "--broad-local" conftest.py tests/conftest.py 2>/dev/null && EXTRA=(--broad-local)
@@ -171,9 +185,48 @@ if [ -n "${RT_CPUS:-}" ]; then
 fi
 echo "== workers: $WORKERS${RT_CPUS:+ on CPUs $RT_CPUS}"
 
+# CRM tests run against MySQL 8.0 as in CI when the user has a working Docker
+# (rootless, per user), else against the suite's in-memory SQLite fallback.
+# Each run gets its own throwaway server on a random local port.
+if [ "$PROJECT" = crm ]; then
+    if docker info >/dev/null 2>&1; then
+        # runc resets a container's CPU affinity, so pinning needs the cpuset
+        # cgroup delegated to the user (see SKILL.md, 'Adding a user').
+        DB_PIN=()
+        if [ -n "${RT_CPUS:-}" ]; then
+            if [ "$(docker info --format '{{.CPUSet}}')" = true ]; then
+                DB_PIN=(--cpuset-cpus "$RT_CPUS")
+            else
+                echo "== warning: cpuset not delegated to $(id -un), MySQL is not pinned to CPUs $RT_CPUS"
+            fi
+        fi
+        DB_CID="$(docker run -d --rm "${DB_PIN[@]}" -e MYSQL_ROOT_PASSWORD=rootpass -e MYSQL_DATABASE=crm_test \
+            -e MYSQL_USER=crm_test -e MYSQL_PASSWORD=crm_test -p 127.0.0.1::3306 mysql:8.0 2>"$RUNS/mysql.log")" \
+            || { echo "MySQL container failed to start, see $RUNS/mysql.log"; exit 1; }
+        trap 'docker rm -f "$DB_CID" >/dev/null 2>&1 || true' EXIT
+        DB_PORT="$(docker port "$DB_CID" 3306/tcp | head -n 1 | sed 's/.*://')"
+        sql() { docker exec "$DB_CID" mysql -h 127.0.0.1 -uroot -prootpass -e "$1" 2>/dev/null; }
+        for _ in $(seq 1 90); do sql "SELECT 1" >/dev/null && break; sleep 2; done
+        sql "SELECT 1" >/dev/null || { echo "MySQL did not become ready"; docker logs "$DB_CID" 2>&1 | tail -n 20; exit 1; }
+        N="$WORKERS"; [[ "$N" =~ ^[0-9]+$ ]] || N="$(nproc)"
+        INIT="SET GLOBAL innodb_flush_log_at_trx_commit = 0; SET GLOBAL sync_binlog = 0;"
+        for w in $(seq 0 $(( N - 1 ))) migrations; do
+            DB="crm_test_gw$w"; [ "$w" = migrations ] && DB=crm_test_migrations
+            INIT="$INIT CREATE DATABASE \`$DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; GRANT ALL ON \`$DB\`.* TO 'crm_test'@'%';"
+        done
+        sql "$INIT" || { echo "creating the test databases failed"; exit 1; }
+        export TEST_DATABASE_URL="mysql+asyncmy://crm_test:crm_test@127.0.0.1:$DB_PORT/crm_test"
+        export DATABASE_URL="$TEST_DATABASE_URL"
+        export TEST_MIGRATION_DATABASE_URL="mysql+pymysql://crm_test:crm_test@127.0.0.1:$DB_PORT/crm_test_migrations"
+        echo "== database: MySQL 8.0 in Docker, port $DB_PORT, $N worker databases"
+    else
+        echo "== database: SQLite (no working Docker for $(id -un), MySQL-only tests may differ from CI)"
+    fi
+fi
+
 START=$(date +%s)
 set +e
-TESTING=1 "${PIN[@]}" nice -n 10 .venv/bin/python -m pytest "$@" -n "$WORKERS" --dist "${RT_DIST:-worksteal}" -q --tb=short -rfE -p no:cacheprovider "${EXTRA[@]}" >"$LOG" 2>&1
+TESTING=1 "${PIN[@]}" nice -n 10 .venv/bin/python -m pytest "$@" -n "$WORKERS" --dist "${RT_DIST:-$DIST}" -q --tb=short -rfE -p no:cacheprovider "${EXTRA[@]}" >"$LOG" 2>&1
 RC=$?
 set -e
 
