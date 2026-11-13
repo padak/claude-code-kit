@@ -85,7 +85,7 @@
       "name": "product-proposal",
       "source": "./plugins/product-proposal",
       "description": "Bilingual (CZ/EN) living PRD published as an Agnes Artifact, the single entry point of a feature through its life: status now, continue here, current behaviour, one slice table with a generated timeline and log, acceptance and feedback, a decision register with meeting-brief cards and forms, the full product design, agentic retro, GPT Astra second opinion, linked to a Linear feature.",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "keywords": [
         "product",
         "prd",
