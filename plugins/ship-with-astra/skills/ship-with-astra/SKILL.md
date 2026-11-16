@@ -10,6 +10,12 @@ no code in chat, PR states exactly as `gh` reports them.
 
 ## 1. Design (short)
 
+- For a feature or an architecture question, run two independent designers first, in
+  parallel, on a goal-only brief (problem, real user cases, goals, platform constraints,
+  freedom for a new architecture, "one idea the owner has not thought of"), WITHOUT
+  your own solution: Fable as a sub-agent and GPT Astra via codex in designer mode.
+  Compare their results before writing your design. Astra handed a finished design
+  only critiques it and returns risks, never a better idea.
 - Ground it in evidence first: reproduce the problem, read the code paths involved.
 - Write a self-contained brief to the session scratchpad (`brief1.md`): context,
   what exists, the incident or goal with measured facts, the proposed design as
@@ -60,6 +66,24 @@ codex exec -m gpt-6-astra -c model_reasoning_effort="medium" -s read-only \
   - No `Co-Authored-By` trailer, no AI attribution anywhere.
   - Repo rules (Agnes: no code comments, changelog fragment, PG-only Alembic migration,
     runtime config, user docs page updated when user-visible).
+  - Sibling paths: before writing a new publish, read or edit path, list every existing
+    guard on the same objects (Agnes artifacts: workflows, final/trashed, pinned head,
+    set_head, public links and share ids, asset delivery, pages, transfer import/export,
+    GC, code-review binding, agent principals and content grants) and give each a test.
+    Devin finds these when the builder only checks its own design.
+  - Agnes pre-handback checklist (each item came back from Devin or CI before):
+    new REST lists use the `data`/`has_more`/`next_cursor` envelope; Postgres-only
+    features raise `RequiresPostgresBackend` (typed 501); no comments in code AND in
+    YAML/config examples; server-only CLI reads registered in command-ux.md; MCP tool
+    titles start with an accepted verb (TITLE_OVERRIDES); CLI help summary one line,
+    80 chars, ends with a period; a suite-cost exception file for every new test file;
+    every tool argument visible on the approval card; read-only tools in
+    `_READ_ONLY_FOUNDATION_MCP_TOOLS`; pinned trusted scripts re-hashed when a served
+    static file changes; new Pydantic model names unique app-wide (a clash silently
+    splits OpenAPI schemas into -Input/-Output); OpenAPI snapshot and
+    `web/src/api/schema.d.ts` regenerated from THIS checkout (PYTHONPATH set to the
+    worktree when the venv is shared); migration ids fit varchar(32); data-migration PK
+    map, switch sweep and user-docs page count updated.
 - Read the diff yourself as a hostile reviewer (races, retries after partial success,
   limits, timeouts, auth edge cases, secrets in messages) and fix what you find.
 
@@ -75,9 +99,18 @@ and the branch. It returns a checklist:
 - Every claimed defect proven: a script that fails, or a concrete input -> wrong output.
   Unproven claims are not findings.
 
+### 4b. The repository's own review
+
+In the Agnes repo also run `/agnes-review` (scope-gated rule, RBAC, parity and
+architecture reviewers; read-only, nothing posted) on the branch in parallel with
+steps 4 and 5. It judges by `REVIEW.md` and the repo rules, which is what Devin uses;
+a design-focused review misses rule violations. Skipping it is how Devin ends up
+returning findings after the PR opens.
+
 ## 5. Astra review of the branch (before the PR)
 
-Run it in parallel with step 4. Pass the risk list, not a bare `codex exec review`
+Run it in parallel with step 4. Give Astra `REVIEW.md` as its rubric next to the
+risk list. Pass the risk list, not a bare `codex exec review`
 (which cannot take a prompt together with `--base`). Write `$S/pr-review.md`:
 "Review `git diff origin/main...HEAD` for bugs. For each risk below, say whether the
 diff handles it, with file:line; then list other defects, each with a concrete failing
