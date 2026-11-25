@@ -33,8 +33,12 @@ so always pass the effort explicitly), `gpt-5.5` (previous frontier),
 
 Also on agy (`agy models` lists the live catalog): `gemini-3.7-flash`,
 `gemini-3.6-flash` (older gens) and the non-Google `claude-opus-4-6-thinking`,
-`claude-sonnet-4-6`, `gpt-oss-120b-medium`. Those are a cheap cross-check, not
-a different-vendor opinion. `--model gemini-3.8-flash --effort high` resolves
+`claude-sonnet-4-6`, `gpt-oss-120b-medium`. Those are not a different-vendor
+opinion, and on a Gemini Enterprise subscription they are billed pay-as-you-go
+on top of the seat. As of agy 1.5.17 the catalog also lists the Gemini 4 family
+(`gemini-4-neon-*`, `gemini-4-carbon-*`, `gemini-4-argon-*`,
+`gemini-4-hydrogen-*`); which of them you get depends on your plan.
+`--model gemini-3.8-flash --effort high` resolves
 to `gemini-3.8-flash-high`; the full slug works too. Pro exists only as
 `gemini-3.1-pro-high` / `-low`. An unknown slug fails immediately and prints
 the valid list.
@@ -145,12 +149,28 @@ agy -p "Analyze [topic]. Provide structured assessment." --output-format json \
 python3 -c "import json; print(json.dumps(json.load(open('$OUT/result.json'))['structured_output'], indent=2))"
 ```
 
-Print mode is consultation-only by default: any tool that needs the `command`
-permission (that includes `ls` and `cat` of the cwd) is auto-denied and the
-run ends with `jetski: no output produced`. Put the code **in the prompt**
-(`"$(cat file.py)"`). If agy must explore a repo, run from the project root
-with `--dangerously-skip-permissions`; that also allows writes, so prefer a
-throwaway worktree. Do **not** use `--sandbox` for repo work: it switches the
+Print mode is **not** read-only by default (tested on agy 1.5.17): shell
+commands (`command` permission, including `ls` and `cat`) are auto-denied, but
+the file tools are not, so agy **reads and writes files** on any path it is
+asked to. Make every run read-only with `--settings` (this run only, nothing
+saved):
+
+```bash
+RO='{"agentMode":"","permissions":{"allow":["read_file(*)"],"deny":["write_file(*)","command(*)","mcp(*)","read_url(*)","execute_url(*)","download_url(*)","read_file(/proc)"]}}'
+agy -p "Review /abs/path/file.py for bugs" --settings "$RO" --output-format text > "$OUT/answer.md" < /dev/null
+```
+
+Deny wins over allow (`Deny > Ask > Allow`). A denied action does not fail the
+run: exit code stays 0 and the answer says the permission was denied. With
+`read_file(*)` agy can read secrets too (`.env`, `~/.ssh`, and environment
+variables via `/proc/self/environ`, hence the `/proc` rule). Deny rules
+match only exact paths or directories (no globs, no `regex:`), so list them:
+`"read_file(/repo/.env)"`, `"read_file(/home/me/.ssh)"`. Unknown action names
+(e.g. `search_web(*)`) are ignored with a warning; web search cannot be
+blocked. In this mode agy has no directory-listing or search tool, so give it
+absolute file paths, or put the code **in the prompt** (`"$(cat file.py)"`).
+Never use `--dangerously-skip-permissions` for a review: it also allows writes
+and commands. Do **not** use `--sandbox` for repo work: it switches the
 cwd to an empty `~/.gemini/antigravity-cli/scratch`. Fatal errors go to stderr
 with an `error:` prefix, a hit `--print-timeout` returns partial output with
 exit 0 plus a warning, and the log is `~/.gemini/antigravity-cli/cli.log`.
@@ -158,7 +178,11 @@ exit 0 plus a warning, and the log is `~/.gemini/antigravity-cli/cli.log`.
 ### Gemini CLI (legacy)
 
 Dead for personal Google OAuth (`IneligibleTierError ... migrate to
-Antigravity`). It only runs with `GEMINI_API_KEY`, and headless runs also need
+Antigravity`). With a Workspace account and a Gemini Code Assist licence,
+"Sign in with Google" plus `GOOGLE_CLOUD_PROJECT` still works, but the Code
+Assist Standard tier rejected `gemini-4-argon` in our test. With Vertex AI auth
+(`/about` shows `vertex-ai`) every call is billed per token on the project.
+Otherwise it runs with `GEMINI_API_KEY`. Headless runs also need
 `--skip-trust` (or `GEMINI_CLI_TRUST_WORKSPACE=true`). Use `agy` instead.
 
 ### Claude Code (Anthropic)
@@ -287,5 +311,5 @@ claude --version || echo "Claude Code CLI not installed"
 
 **Authentication:**
 - **Codex:** `codex login` or `OPENAI_API_KEY`; `codex doctor` checks auth and config
-- **Antigravity:** run `agy` once interactively and sign in with Google (Antigravity OAuth, no API key); `agy update` upgrades
+- **Antigravity:** run `agy` once interactively and sign in with Google (Antigravity OAuth, no API key); `agy update` upgrades. On a company **Gemini Enterprise** subscription choose **Use a Google Cloud project -> Continue with Google Cloud -> Subscription** (not Pay As You Go) and the project + location your admin gave the licences to. The choice is saved under `gcp` in `~/.gemini/antigravity-cli/settings.json`.
 - **Claude Code:** `claude login` or `ANTHROPIC_API_KEY`
